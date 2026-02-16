@@ -1,3 +1,74 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import "tailwindcss";
+
+/* Professional Global Styles */
+@layer base {
+  body {
+    @apply bg-gray-50;
+    @apply text-gray-900;
+    @apply antialiased;
+  }
+
+  h1 {
+    @apply font-semibold text-gray-900 tracking-tight;
+  }
+  
+  h2, h3 {
+    @apply font-semibold text-gray-800;
+  }
+  
+  h4, h5, h6 {
+    @apply font-medium text-gray-800;
+  }
+}
+
+@layer components {
+  /* Professional card style */
+  .card {
+    @apply bg-white border border-gray-200 rounded-lg shadow-sm;
+  }
+
+  /* Card hover effect - subtle */
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-md hover:border-gray-300;
+  }
+
+  /* Professional button styles */
+  .btn-primary {
+    @apply bg-blue-600 text-white px-4 py-2 rounded-md font-medium;
+    @apply hover:bg-blue-700 transition-colors duration-150;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-md font-medium;
+    @apply hover:bg-gray-200 transition-colors duration-150;
+    @apply focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+  }
+
+  /* Clean navbar style */
+  .navbar {
+    @apply bg-white border-b border-gray-200 shadow-sm;
+  }
+
+  /* Professional stat card */
+  .stat-card {
+    @apply bg-white border border-gray-200 rounded-lg p-6;
+    @apply hover:shadow-md transition-shadow duration-200;
+  }
+
+  /* Action card style */
+  .action-card {
+    @apply bg-white border-2 border-gray-200 rounded-lg p-8;
+    @apply hover:border-blue-400 hover:shadow-lg transition-all duration-200;
+    @apply cursor-pointer;
+  }
+
+  /* Input field styling */
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    @apply transition-colors duration-150;
+  }
+}

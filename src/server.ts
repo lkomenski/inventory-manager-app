@@ -13,6 +13,31 @@ const app = express();
 const angularApp = new AngularNodeAppEngine();
 
 /**
+ * Set Content Security Policy headers
+ * Note: 'unsafe-eval' is needed for development mode (HMR, source maps)
+ * In production, remove 'unsafe-eval' and ensure AOT compilation is used
+ */
+app.use((req, res, next) => {
+  const isDevelopment = process.env['NODE_ENV'] !== 'production';
+  
+  const cspDirectives = [
+    "default-src 'self'",
+    `script-src 'self' ${isDevelopment ? "'unsafe-eval' 'unsafe-inline'" : "'unsafe-eval'"}`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https:",
+    "font-src 'self' data:",
+    "connect-src 'self' https://api.restful-api.dev",
+    "worker-src 'self' blob:",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'"
+  ].join('; ');
+  
+  res.setHeader('Content-Security-Policy', cspDirectives);
+  next();
+});
+
+/**
  * Example Express Rest API endpoints can be defined here.
  * Uncomment and define endpoints as necessary.
  *

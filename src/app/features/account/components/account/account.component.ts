@@ -1,0 +1,219 @@
+import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-account',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  template: `
+    <div class="min-h-screen py-12 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <div class="max-w-md mx-auto">
+          <!-- Logo/Header -->
+          <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+            </div>
+            <h1 class="text-4xl font-semibold text-gray-900 mb-2">My Account</h1>
+            <p class="text-gray-600">Manage your inventory account</p>
+          </div>
+
+          <!-- Account Status Card -->
+          @if (!isLoggedIn()) {
+            <!-- Login Form -->
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+              <h2 class="text-2xl font-semibold text-gray-900 mb-6">Login</h2>
+              
+              <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+                <!-- Email Field -->
+                <div class="mb-5">
+                  <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Email <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    id="email"
+                    type="email" 
+                    formControlName="email"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    [class.border-red-500]="isLoginFieldInvalid('email')"
+                    placeholder="Enter your email">
+                  
+                  @if (isLoginFieldInvalid('email')) {
+                    <p class="mt-2 text-red-600 text-sm">Valid email is required</p>
+                  }
+                </div>
+
+                <!-- Password Field -->
+                <div class="mb-6">
+                  <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Password <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    id="password"
+                    type="password" 
+                    formControlName="password"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    [class.border-red-500]="isLoginFieldInvalid('password')"
+                    placeholder="Enter your password">
+                  
+                  @if (isLoginFieldInvalid('password')) {
+                    <p class="mt-2 text-red-600 text-sm">Password is required</p>
+                  }
+                </div>
+
+                <button 
+                  type="submit"
+                  [disabled]="!loginForm.valid"
+                  class="w-full bg-blue-600 text-white px-6 py-2.5 rounded-md font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-blue-700">
+                  Login
+                </button>
+              </form>
+
+              <div class="mt-6 text-sm text-gray-600 bg-blue-50 border border-blue-100 p-3 rounded-md">
+                <p>Demo credentials: any email and password</p>
+              </div>
+            </div>
+          } @else {
+            <!-- Account Dashboard -->
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+              <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                  </svg>
+                </div>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-1">Welcome back!</h2>
+                <p class="text-gray-600">{{ userEmail() }}</p>
+              </div>
+
+              <!-- Account Stats -->
+              <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-5 text-center">
+                  <div class="text-2xl font-semibold text-blue-700 mb-1">Active</div>
+                  <div class="text-gray-600 text-sm">Status</div>
+                </div>
+                <div class="bg-green-50 border border-green-100 rounded-lg p-5 text-center">
+                  <svg class="w-8 h-8 mx-auto text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <div class="text-gray-600 text-sm mt-1">Verified</div>
+                </div>
+              </div>
+
+              <!-- Account Actions -->
+              <div class="space-y-2 mb-6">
+                <a routerLink="/objects" 
+                   class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md transition-colors text-center font-medium">
+                  View My Inventory
+                </a>
+                <a routerLink="/objects/create" 
+                   class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
+                  Add New Item
+                </a>
+                <a routerLink="/" 
+                   class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
+                  Go to Dashboard
+                </a>
+              </div>
+
+              <!-- Account Info -->
+              <div class="border-t border-gray-200 pt-6">
+                <h3 class="font-semibold text-gray-900 mb-4">Account Information</h3>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
+                    <span class="text-gray-600 text-sm">Email:</span>
+                    <span class="font-medium text-gray-900 text-sm">{{ userEmail() }}</span>
+                  </div>
+                  <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
+                    <span class="text-gray-600 text-sm">Member Since:</span>
+                    <span class="font-medium text-gray-900 text-sm">{{ loginDate() }}</span>
+                  </div>
+                  <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
+                    <span class="text-gray-600 text-sm">Account Type:</span>
+                    <span class="font-medium text-gray-900 text-sm">Standard</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Logout Button -->
+              <button 
+                (click)="onLogout()"
+                class="w-full mt-6 bg-red-600 text-white px-6 py-2.5 rounded-md font-medium hover:bg-red-700 transition-colors">
+                Logout
+              </button>
+            </div>
+          }
+
+          <!-- Back to Home -->
+          <div class="text-center mt-6">
+            <a routerLink="/" class="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+              ← Back to Home
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+})
+export class AccountComponent {
+  loginForm: FormGroup;
+  isLoggedIn = signal(false);
+  userEmail = signal('');
+  loginDate = signal('');
+
+  constructor(private fb: FormBuilder) {
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required]]
+    });
+
+    // Check if already logged in
+    const savedEmail = localStorage.getItem('userEmail');
+    const savedDate = localStorage.getItem('loginDate');
+    if (savedEmail) {
+      this.isLoggedIn.set(true);
+      this.userEmail.set(savedEmail);
+      this.loginDate.set(savedDate || new Date().toLocaleDateString());
+    }
+  }
+
+  isLoginFieldInvalid(fieldName: string): boolean {
+    const field = this.loginForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  onLogin(): void {
+    if (this.loginForm.invalid) {
+      Object.keys(this.loginForm.controls).forEach(key => {
+        this.loginForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    const email = this.loginForm.value.email;
+    const date = new Date().toLocaleDateString();
+    
+    // Save to localStorage (simple demo)
+    localStorage.setItem('userEmail', email);
+    localStorage.setItem('loginDate', date);
+    
+    this.userEmail.set(email);
+    this.loginDate.set(date);
+    this.isLoggedIn.set(true);
+    
+    // Reset form
+    this.loginForm.reset();
+  }
+
+  onLogout(): void {
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('loginDate');
+    this.isLoggedIn.set(false);
+    this.userEmail.set('');
+    this.loginDate.set('');
+  }
+}
