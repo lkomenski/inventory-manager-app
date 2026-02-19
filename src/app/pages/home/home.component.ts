@@ -13,8 +13,10 @@ export class HomeComponent implements OnInit {
   objectCount = signal(0);
   loading = signal(false);
   error = signal<string | null>(null);
+  apiConnected = signal(true);
+  lastUpdated = signal<Date | null>(null);
 
-  constructor(private objectsService: ObjectsService) {}
+  constructor(public objectsService: ObjectsService) {}
 
   ngOnInit(): void {
     this.loadStats();
@@ -25,10 +27,15 @@ export class HomeComponent implements OnInit {
     this.objectsService.getObjects().subscribe({
       next: (objects) => {
         this.objectCount.set(objects.length);
+        this.apiConnected.set(true);
+        this.lastUpdated.set(new Date());
         this.loading.set(false);
+        this.error.set(null);
       },
       error: (err) => {
-        this.error.set('Unable to load stats');
+        this.apiConnected.set(false);
+        const errorMsg = err.message || 'Unable to load stats';
+        this.error.set(errorMsg);
         this.loading.set(false);
       }
     });

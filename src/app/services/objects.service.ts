@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap, finalize } from 'rxjs/operators';
+import { catchError, tap, finalize, map } from 'rxjs/operators';
 import { ApiObject, DeleteResponse, APIRequest } from '../models/object.model';
 import { environment } from '../../environments/environment.local';
 
@@ -18,6 +18,10 @@ export class ObjectsService {
   
   // Error state signal
   public error = signal<string | null>(null);
+  
+  // Rate limit state signals
+  public rateLimitRemaining = signal<number | null>(null);
+  public rateLimitTotal = signal<number | null>(null);
 
   constructor(private readonly http: HttpClient) {
     // console.log('ObjectsService initialized');
@@ -44,12 +48,20 @@ export class ObjectsService {
     this.loading.set(true);
     this.error.set(null);
     
-    return this.http.get<ApiObject[]>(this.apiUrl, { headers: this.getHeaders() }).pipe(
-      tap((objects) => {
-        // console.log('GET /objects - Success! Retrieved', objects.length, 'objects');
-        // console.table(objects);
+    return this.http.get<ApiObject[]>(this.apiUrl, { headers: this.getHeaders(), observe: 'response' }).pipe(
+      tap((response) => {
+        // console.log('GET /objects - Success! Retrieved', response.body?.length, 'objects');
+        // console.table(response.body);
+        
+        // Extract rate limit information from headers if available
+        const remaining = response.headers.get('X-RateLimit-Remaining');
+        const limit = response.headers.get('X-RateLimit-Limit');
+        if (remaining) this.rateLimitRemaining.set(parseInt(remaining, 10));
+        if (limit) this.rateLimitTotal.set(parseInt(limit, 10));
+        
         this.loading.set(false);
       }),
+      map(response => response.body || []),
       catchError(this.handleError.bind(this)),
       finalize(() => this.loading.set(false))
     );
@@ -201,6 +213,10 @@ export class ObjectsService {
         // API returned a specific error message
         if (error.error.error.includes('reserved id')) {
           errorMessage = 'This is a demo object (ID 1-13) and cannot be edited. Please create a new object to test editing.';
+        } else if (error.error.error.includes('daily request limit') || error.error.error.includes('rate limit')) {
+          errorMessage = 'Daily API request limit reached. Please try again tomorrow.';
+          // Set rate limit to 0 when limit is reached (actual limit may vary by account)
+          this.rateLimitRemaining.set(0);
         } else {
           errorMessage = error.error.error;
         }
@@ -217,6 +233,11 @@ export class ObjectsService {
             break;
           case 405:
             errorMessage = 'This operation is not allowed. The object may be read-only or a demo object (ID 1-13).';
+            break;
+          case 429:
+            errorMessage = 'Daily API request limit reached. Please try again tomorrow.';
+            // Set rate limit to 0 when limit is reached (actual limit may vary by account)
+            this.rateLimitRemaining.set(0);
             break;
           case 500:
             errorMessage = 'Server error. Please try again later';
