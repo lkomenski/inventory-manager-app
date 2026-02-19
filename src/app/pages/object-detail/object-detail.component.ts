@@ -22,24 +22,24 @@ export class ObjectDetailComponent implements OnInit {
     private router: Router,
     private objectsService: ObjectsService
   ) {
-    console.log('📝 Object Detail Component initialized');
+    // console.log('Object Detail Component initialized');
   }
 
   ngOnInit(): void {
-    console.log('🚀 Object Detail Component: ngOnInit called');
+    // console.log('Object Detail Component: ngOnInit called');
     const id = this.route.snapshot.paramMap.get('id');
-    console.log('🆔 Object ID from route:', id);
+    // console.log('Object ID from route:', id);
     if (id) {
       this.loadObject(id);
     } else {
-      console.error('❌ No object ID provided in route');
+      // console.error('No object ID provided in route');
       this.error.set('No object ID provided');
     }
   }
 
   loadObject(id?: string): void {
     const objectId = id || this.route.snapshot.paramMap.get('id');
-    console.log('📥 Loading object with ID:', objectId);
+    // console.log('Loading object with ID:', objectId);
     if (!objectId) return;
 
     // DEBUGGING BREAKPOINT: Set a breakpoint here to debug object loading
@@ -48,13 +48,13 @@ export class ObjectDetailComponent implements OnInit {
     
     this.objectsService.getObject(objectId).subscribe({
       next: (data) => {
-        console.log('✅ Object loaded successfully');
-        console.log('📦 Object data:', data);
+        // console.log('Object loaded successfully');
+        // console.log('Object data:', data);
         this.object.set(data);
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('❌ Failed to load object:', err);
+        // console.error('Failed to load object:', err);
         this.error.set(err.message);
         this.loading.set(false);
       }
@@ -78,18 +78,18 @@ export class ObjectDetailComponent implements OnInit {
   }
 
   confirmDelete(): void {
-    console.log('🛡️ Delete confirmation requested');
+    // console.log('Delete confirmation requested');
     this.showDeleteModal.set(true);
   }
 
   cancelDelete(): void {
-    console.log('❌ Delete cancelled');
+    // console.log('Delete cancelled');
     this.showDeleteModal.set(false);
   }
 
   deleteObject(): void {
     const obj = this.object();
-    console.log('🗑️ Deleting object:', obj?.id);
+    // console.log('Deleting object:', obj?.id);
     if (!obj?.id) return;
 
     // DEBUGGING BREAKPOINT: Set a breakpoint here to debug delete operation
@@ -97,11 +97,11 @@ export class ObjectDetailComponent implements OnInit {
     
     this.objectsService.deleteObject(obj.id).subscribe({
       next: () => {
-        console.log('✅ Object deleted successfully, navigating to list');
+        // console.log('Object deleted successfully, navigating to list');
         this.router.navigate(['/objects']);
       },
       error: (err) => {
-        console.error('❌ Failed to delete object:', err);
+        // console.error('Failed to delete object:', err);
         this.error.set(err.message);
         this.deleting.set(false);
         this.showDeleteModal.set(false);

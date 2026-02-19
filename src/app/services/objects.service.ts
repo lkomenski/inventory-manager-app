@@ -20,16 +20,16 @@ export class ObjectsService {
   public error = signal<string | null>(null);
 
   constructor(private readonly http: HttpClient) {
-    console.log('🔧 ObjectsService initialized');
-    console.log('📡 API URL:', this.apiUrl);
-    console.log('🔑 API Key configured:', this.apiKey ? 'Yes' : 'No');
+    // console.log('ObjectsService initialized');
+    // console.log('API URL:', this.apiUrl);
+    // console.log('API Key configured:', this.apiKey ? 'Yes' : 'No');
   }
 
   /**
    * Get HTTP headers with API key
    */
   private getHeaders(): HttpHeaders {
-    console.log('🔐 Setting up request headers with API key');
+    // console.log('Setting up request headers with API key');
     return new HttpHeaders({
       'x-api-key': this.apiKey,
       'Content-Type': 'application/json'
@@ -40,14 +40,14 @@ export class ObjectsService {
    * GET /objects - Load all objects
    */
   getObjects(): Observable<ApiObject[]> {
-    console.log('📋 GET /objects - Fetching all objects');
+    // console.log('GET /objects - Fetching all objects');
     this.loading.set(true);
     this.error.set(null);
     
     return this.http.get<ApiObject[]>(this.apiUrl, { headers: this.getHeaders() }).pipe(
       tap((objects) => {
-        console.log('✅ GET /objects - Success! Retrieved', objects.length, 'objects');
-        console.table(objects);
+        // console.log('GET /objects - Success! Retrieved', objects.length, 'objects');
+        // console.table(objects);
         this.loading.set(false);
       }),
       catchError(this.handleError.bind(this)),
@@ -59,18 +59,18 @@ export class ObjectsService {
    * GET /objects?id=x&id=y&id=z - Load objects by multiple IDs
    */
   getObjectsByIds(ids: string[]): Observable<ApiObject[]> {
-    console.log('🔍 GET /objects (by IDs) - Fetching objects:', ids);
+    // console.log('GET /objects (by IDs) - Fetching objects:', ids);
     this.loading.set(true);
     this.error.set(null);
     
     const queryParams = ids.map(id => `id=${id}`).join('&');
     const url = `${this.apiUrl}?${queryParams}`;
-    console.log('🌐 Request URL:', url);
+    // console.log('Request URL:', url);
     
     return this.http.get<ApiObject[]>(url, { headers: this.getHeaders() }).pipe(
       tap((objects) => {
-        console.log('✅ GET /objects (by IDs) - Success! Retrieved', objects.length, 'objects');
-        console.log('📦 Objects:', objects);
+        // console.log('GET /objects (by IDs) - Success! Retrieved', objects.length, 'objects');
+        // console.log('Objects:', objects);
         this.loading.set(false);
       }),
       catchError(this.handleError.bind(this)),
@@ -82,14 +82,14 @@ export class ObjectsService {
    * GET /objects/{id} - Load single object by id
    */
   getObject(id: string): Observable<ApiObject> {
-    console.log('🎯 GET /objects/' + id + ' - Fetching single object');
+    // console.log('GET /objects/' + id + ' - Fetching single object');
     this.loading.set(true);
     this.error.set(null);
     
     return this.http.get<ApiObject>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() }).pipe(
       tap((object) => {
-        console.log('✅ GET /objects/' + id + ' - Success!');
-        console.log('📦 Object:', object);
+        // console.log('GET /objects/' + id + ' - Success!');
+        // console.log('Object:', object);
         this.loading.set(false);
       }),
       catchError(this.handleError.bind(this)),
@@ -101,16 +101,16 @@ export class ObjectsService {
    * POST /objects - Create a new object
    */
   createObject(object: APIRequest): Observable<ApiObject> {
-    console.log('➕ POST /objects - Creating new object');
-    console.log('📤 Request payload:', object);
+    // console.log('POST /objects - Creating new object');
+    // console.log('Request payload:', object);
     this.loading.set(true);
     this.error.set(null);
     
     return this.http.post<ApiObject>(this.apiUrl, object, { headers: this.getHeaders() }).pipe(
       tap((createdObject) => {
-        console.log('✅ POST /objects - Success! Object created');
-        console.log('📦 Created object:', createdObject);
-        console.log('🆔 New object ID:', createdObject.id);
+        // console.log('POST /objects - Success! Object created');
+        // console.log('Created object:', createdObject);
+        // console.log('New object ID:', createdObject.id);
         this.loading.set(false);
       }),
       catchError(this.handleError.bind(this)),
@@ -122,15 +122,15 @@ export class ObjectsService {
    * PUT /objects/{id} - Update object (full replacement)
    */
   updateObject(id: string, object: APIRequest): Observable<ApiObject> {
-    console.log('✏️ PUT /objects/' + id + ' - Updating object (full replacement)');
-    console.log('📤 Request payload:', object);
+    // console.log('PUT /objects/' + id + ' - Updating object (full replacement)');
+    // console.log('Request payload:', object);
     this.loading.set(true);
     this.error.set(null);
     
     return this.http.put<ApiObject>(`${this.apiUrl}/${id}`, object, { headers: this.getHeaders() }).pipe(
       tap((updatedObject) => {
-        console.log('✅ PUT /objects/' + id + ' - Success! Object updated');
-        console.log('📦 Updated object:', updatedObject);
+        // console.log('PUT /objects/' + id + ' - Success! Object updated');
+        // console.log('Updated object:', updatedObject);
         this.loading.set(false);
       }),
       catchError(this.handleError.bind(this)),
@@ -142,15 +142,15 @@ export class ObjectsService {
    * PATCH /objects/{id} - Update object (partial update)
    */
   patchObject(id: string, partial: Partial<ApiObject>): Observable<ApiObject> {
-    console.log('🔧 PATCH /objects/' + id + ' - Updating object (partial)');
-    console.log('📤 Request payload (partial):', partial);
+    // console.log('PATCH /objects/' + id + ' - Updating object (partial)');
+    // console.log('Request payload (partial):', partial);
     this.loading.set(true);
     this.error.set(null);
     
     return this.http.patch<ApiObject>(`${this.apiUrl}/${id}`, partial, { headers: this.getHeaders() }).pipe(
       tap((updatedObject) => {
-        console.log('✅ PATCH /objects/' + id + ' - Success! Object updated');
-        console.log('📦 Updated object:', updatedObject);
+        // console.log('PATCH /objects/' + id + ' - Success! Object updated');
+        // console.log('Updated object:', updatedObject);
         this.loading.set(false);
       }),
       catchError(this.handleError.bind(this)),
@@ -162,14 +162,14 @@ export class ObjectsService {
    * DELETE /objects/{id} - Delete an object
    */
   deleteObject(id: string): Observable<DeleteResponse> {
-    console.log('🗑️ DELETE /objects/' + id + ' - Deleting object');
+    // console.log('DELETE /objects/' + id + ' - Deleting object');
     this.loading.set(true);
     this.error.set(null);
     
     return this.http.delete<DeleteResponse>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() }).pipe(
       tap((response) => {
-        console.log('✅ DELETE /objects/' + id + ' - Success! Object deleted');
-        console.log('📦 Delete response:', response);
+        // console.log('DELETE /objects/' + id + ' - Success! Object deleted');
+        // console.log('Delete response:', response);
         this.loading.set(false);
       }),
       catchError(this.handleError.bind(this)),
@@ -181,13 +181,13 @@ export class ObjectsService {
    * Handle HTTP errors and provide user-friendly messages
    */
   private handleError(error: HttpErrorResponse) {
-    console.group('❌ HTTP Error occurred');
-    console.error('📊 Error details:', {
-      status: error.status,
-      statusText: error.statusText,
-      url: error.url,
-      message: error.message
-    });
+    // console.group('HTTP Error occurred');
+    // console.error('Error details:', {
+    //   status: error.status,
+    //   statusText: error.statusText,
+    //   url: error.url,
+    //   message: error.message
+    // });
     
     // DEBUGGING BREAKPOINT: Set a breakpoint on the next line to inspect error details
     let errorMessage = 'An unknown error occurred';
@@ -231,8 +231,8 @@ export class ObjectsService {
     this.error.set(errorMessage);
     this.loading.set(false);
     
-    console.error('🚨 Final error message:', errorMessage);
-    console.groupEnd();
+    // console.error('Final error message:', errorMessage);
+    // console.groupEnd();
     
     return throwError(() => new Error(errorMessage));
   }
@@ -241,7 +241,7 @@ export class ObjectsService {
    * Clear error state
    */
   clearError(): void {
-    console.log('🧹 Clearing error state');
+    // console.log('Clearing error state');
     this.error.set(null);
   }
 }
