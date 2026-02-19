@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ObjectsService } from '../../services/objects.service';
 import { ApiObject, APIRequest } from '../../models/object.model';
 import { DynamicObjectFormComponent, FormSubmitData, FormConfig } from '../../components';
+import { AccountComponent } from '../account/account.component';
 
 @Component({
   selector: 'app-object-edit',
@@ -95,6 +96,10 @@ export class EditObjectComponent implements OnInit {
         // console.log('Object updated successfully:', updated);
         this.success.set(true);
         this.submitting.set(false);
+        
+        // Log activity
+        AccountComponent.logActivity('Updated item', formData.name, '✏️');
+        
         // Navigate to the detail page after a short delay
         setTimeout(() => {
           // console.log('Navigating to object detail page');

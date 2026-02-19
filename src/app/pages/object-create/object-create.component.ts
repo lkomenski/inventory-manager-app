@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { ObjectsService } from '../../services/objects.service';
 import { APIRequest } from '../../models/object.model';
 import { DynamicObjectFormComponent, FormSubmitData, FormConfig } from '../../components';
+import { AccountComponent } from '../account/account.component';
 
 @Component({
   selector: 'app-object-create',
@@ -49,6 +50,10 @@ export class CreateObjectComponent {
         // console.log('New object ID:', created.id);
         this.success.set(true);
         this.submitting.set(false);
+        
+        // Log activity
+        AccountComponent.logActivity('Created item', formData.name, '✨');
+        
         // Navigate to the detail page after a short delay
         setTimeout(() => {
           // console.log('Navigating to object detail page');

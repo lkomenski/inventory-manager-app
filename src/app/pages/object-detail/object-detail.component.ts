@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ObjectsService } from '../../services/objects.service';
 import { ApiObject } from '../../models/object.model';
+import { AccountComponent } from '../account/account.component';
 
 @Component({
   selector: 'app-object-detail',
@@ -95,9 +96,15 @@ export class ObjectDetailComponent implements OnInit {
     // DEBUGGING BREAKPOINT: Set a breakpoint here to debug delete operation
     this.deleting.set(true);
     
+    const itemName = obj.name; // Capture name before deletion
+    
     this.objectsService.deleteObject(obj.id).subscribe({
       next: () => {
         // console.log('Object deleted successfully, navigating to list');
+        
+        // Log activity
+        AccountComponent.logActivity('Deleted item', itemName, '🗑️');
+        
         this.router.navigate(['/objects']);
       },
       error: (err) => {
