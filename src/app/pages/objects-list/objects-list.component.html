@@ -1,8 +1,11 @@
 <main class="min-h-screen py-12 bg-gray-50">
-  <div class="container mx-auto px-4">
+  <div class="container mx-auto px-4 max-w-4xl">
     <!-- Header -->
     <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-      <h1 class="text-4xl font-semibold text-gray-900">Inventory List</h1>
+      <div>
+        <h1 class="text-4xl font-semibold text-gray-900 mb-2">Inventory List</h1>
+        <p class="text-gray-600">Click on any item to view details</p>
+      </div>
       <a routerLink="/objects/create" 
          class="bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-sm flex items-center gap-2">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12,95 +15,44 @@
       </a>
     </header>
 
-    <!-- Search and Controls -->
-    @if (!objectsService.loading() && !objectsService.error()) {
-      <section class="mb-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
-        <div class="flex flex-col lg:flex-row gap-4">
-          <!-- Search Box -->
-          <div class="flex-1">
-            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search Items</label>
-            <div class="relative">
-              <input
-                type="text"
-                id="search"
-                [(ngModel)]="query"
-                (input)="onSearchChange()"
-                placeholder="Search by name..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-              </div>
-              @if (query) {
-                <button
-                  (click)="clearSearch()"
-                  class="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                  </svg>
-                </button>
-              }
-            </div>
-          </div>
-
-          <!-- Sort and Page Size Controls -->
-          <div class="flex flex-col sm:flex-row gap-3">
-            <div class="min-w-0">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
-              <select 
-                [(ngModel)]="sortDirection"
-                (change)="onSortChange()"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="asc">Name A to Z</option>
-                <option value="desc">Name Z to A</option>
-              </select>
-            </div>
-
-            <div class="min-w-0">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Items per page</label>
-              <select 
-                [(ngModel)]="pageSize"
-                (change)="onPageSizeChange()"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option [value]="5">5 items</option>
-                <option [value]="10">10 items</option>
-                <option [value]="20">20 items</option>
-                <option [value]="50">50 items</option>
-              </select>
-            </div>
-          </div>
+    <!-- Search Box -->
+    <div class="mb-6">
+      <div class="relative">
+        <input
+          type="text"
+          [(ngModel)]="query"
+          placeholder="Search by name..."
+          class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+        />
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
         </div>
-
-        <!-- Results Summary -->
-        @if (FilteredObjects.length !== objects.length) {
-          <div class="mt-4 text-sm text-gray-600">
-            Showing {{ PaginatedObjects.length }} of {{ FilteredObjects.length }} filtered results 
-            ({{ objects.length }} total items)
-          </div>
-        } @else {
-          <div class="mt-4 text-sm text-gray-600">
-            Showing {{ PaginatedObjects.length }} of {{ objects.length }} items
-          </div>
+        @if (query) {
+          <button
+            (click)="query = ''"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center"
+          >
+            <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
         }
-      </section>
-    }
+      </div>
+    </div>
 
     <!-- Loading State -->
     @if (objectsService.loading()) {
       <div class="text-center py-20">
         <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600"></div>
-        <p class="text-gray-600 mt-4 font-medium">Loading objects...</p>
+        <p class="text-gray-600 mt-4 font-medium">Loading items...</p>
       </div>
     }
 
     <!-- Error State -->
     @if (objectsService.error()) {
-      <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-6">
         <div class="flex items-start">
           <svg class="w-6 h-6 text-red-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
@@ -140,146 +92,42 @@
         </svg>
         <h2 class="text-2xl font-semibold text-gray-900 mb-2">No Results Found</h2>
         <p class="text-gray-600 mb-6">No items match your search for "<strong>{{ query }}</strong>"</p>
-        <button (click)="clearSearch()" 
+        <button (click)="query = ''" 
                 class="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium">
           Clear Search
         </button>
       </section>
     }
 
-    <!-- Objects Table -->
-    @if (!objectsService.loading() && !objectsService.error() && PaginatedObjects.length > 0) {
-      <section class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead class="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">ID</th>
-                <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Name</th>
-                <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Color</th>
-                <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Price</th>
-                <th class="text-right py-3 px-4 font-semibold text-sm text-gray-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              @for (object of PaginatedObjects; track object.id) {
-                <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="py-3 px-4 text-sm text-gray-600">{{ object.id }}</td>
-                  <td class="py-3 px-4 text-sm font-medium text-gray-900">{{ object.name }}</td>
-                  <td class="py-3 px-4 text-sm text-gray-700">
-                    @if (object.data['color']) {
-                      <span class="inline-flex items-center">
-                        <span class="w-5 h-5 rounded-full mr-2 border border-gray-300" 
-                              [style.background-color]="object.data['color']"></span>
-                        <span>{{ object.data['color'] }}</span>
-                      </span>
-                    } @else {
-                      <span class="text-gray-400">N/A</span>
-                    }
-                  </td>
-                  <td class="py-3 px-4 text-sm font-medium text-gray-900">
-                    @if (object.data['price']) {
-                      <span class="text-green-700">${{ object.data['price'] }}</span>
-                    } @else {
-                      <span class="text-gray-400">N/A</span>
-                    }
-                  </td>
-                  <td class="py-3 px-4">
-                    <div class="flex justify-end gap-2">
-                      <a [routerLink]="['/objects', object.id]" 
-                         class="bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium">
-                        View
-                      </a>
-                      <a [routerLink]="['/objects', object.id, 'edit']" 
-                         class="bg-gray-600 text-white px-3 py-1.5 rounded-md hover:bg-gray-700 transition-colors text-sm font-medium">
-                        Edit
-                      </a>
-                      <button (click)="confirmDelete(object)" 
-                              class="bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
-                              [disabled]="deleting">
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Pagination -->
-      @if (TotalPages > 1) {
-        <nav class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div class="text-sm text-gray-600">
-            Page {{ currentPage }} of {{ TotalPages }} 
-            ({{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, FilteredObjects.length) }} 
-            of {{ FilteredObjects.length }} items)
-          </div>
-          
-          <div class="flex gap-2">
-            <button 
-              (click)="goToPage(1)"
-              [disabled]="currentPage === 1"
-              class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-              First
-            </button>
-            <button 
-              (click)="goToPage(currentPage - 1)"
-              [disabled]="currentPage === 1"
-              class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-              Previous
-            </button>
-            
-            @for (page of getVisiblePages(); track page) {
-              <button 
-                (click)="goToPage(page)"
-                [class.bg-blue-600]="page === currentPage"
-                [class.text-white]="page === currentPage"
-                [class.border-blue-600]="page === currentPage"
-                class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm">
-                {{ page }}
-              </button>
+    <!-- Items List -->
+    @if (!objectsService.loading() && !objectsService.error() && FilteredObjects.length > 0) {
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div class="p-4 bg-gray-50 border-b border-gray-200">
+          <p class="text-sm text-gray-600">
+            @if (query) {
+              Showing {{ FilteredObjects.length }} of {{ objects.length }} items
+            } @else {
+              {{ objects.length }} {{ objects.length === 1 ? 'item' : 'items' }} total
             }
-            
-            <button 
-              (click)="goToPage(currentPage + 1)"
-              [disabled]="currentPage === TotalPages"
-              class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-              Next
-            </button>
-            <button 
-              (click)="goToPage(TotalPages)"
-              [disabled]="currentPage === TotalPages"
-              class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-              Last
-            </button>
-          </div>
-        </nav>
-      }
-    }
-
-    <!-- Delete Confirmation Modal -->
-    @if (showDeleteModal) {
-      <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-          <h3 class="text-xl font-semibold text-gray-900 mb-3">Confirm Delete</h3>
-          <p class="text-gray-600 mb-6">
-            Are you sure you want to delete <strong class="text-gray-900">"{{ objectToDelete?.name }}"</strong>? This action cannot be undone.
           </p>
-          <div class="flex justify-end gap-3">
-            <button (click)="cancelDelete()" 
-                    class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium"
-                    [disabled]="deleting">
-              Cancel
-            </button>
-            <button (click)="deleteObject()" 
-                    class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors font-medium"
-                    [disabled]="deleting">
-              {{ deleting ? 'Deleting...' : 'Delete' }}
-            </button>
-          </div>
         </div>
+        <ul class="divide-y divide-gray-200">
+          @for (item of FilteredObjects; track item.id) {
+            <li>
+              <a [routerLink]="['/objects', item.id]" 
+                 class="block px-6 py-4 hover:bg-gray-50 transition-colors group">
+                <div class="flex items-center justify-between">
+                  <span class="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                    {{ item.name }}
+                  </span>
+                  <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/>
+                  </svg>
+                </div>
+              </a>
+            </li>
+          }
+        </ul>
       </div>
     }
   </div>

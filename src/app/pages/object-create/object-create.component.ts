@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ObjectsService } from '../../services/objects.service';
+import { APIRequest } from '../../models/object.model';
 import { DynamicObjectFormComponent, FormSubmitData, FormConfig } from '../../components';
 
 @Component({
@@ -31,7 +32,7 @@ export class CreateObjectComponent {
     this.error.set(null);
     this.success.set(false);
 
-    const newObject = {
+    const newObject: APIRequest = {
       name: formData.name,
       data: {
         color: formData.color,

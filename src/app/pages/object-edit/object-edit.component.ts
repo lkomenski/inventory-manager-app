@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ObjectsService } from '../../services/objects.service';
-import { ApiObject } from '../../models/object.model';
+import { ApiObject, APIRequest } from '../../models/object.model';
 import { DynamicObjectFormComponent, FormSubmitData, FormConfig } from '../../components';
 
 @Component({
@@ -69,7 +69,7 @@ export class EditObjectComponent implements OnInit {
     this.error.set(null);
     this.success.set(false);
 
-    const updatedObject = {
+    const updatedObject: APIRequest = {
       name: formData.name,
       data: {
         color: formData.color,
@@ -77,8 +77,8 @@ export class EditObjectComponent implements OnInit {
       }
     };
 
-    // Using PATCH for partial update (API doesn't support PUT)
-    this.objectsService.patchObject(this.objectId(), updatedObject).subscribe({
+    // Using PUT for full replacement
+    this.objectsService.updateObject(this.objectId(), updatedObject).subscribe({
       next: (updated) => {
         this.success.set(true);
         this.submitting.set(false);

@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap, finalize } from 'rxjs/operators';
-import { ApiObject, DeleteResponse } from '../models/object.model';
+import { ApiObject, DeleteResponse, APIRequest } from '../models/object.model';
 import { environment } from '../../environments/environment.local';
 
 @Injectable({
@@ -79,7 +79,7 @@ export class ObjectsService {
   /**
    * POST /objects - Create a new object
    */
-  createObject(object: Omit<ApiObject, 'id'>): Observable<ApiObject> {
+  createObject(object: APIRequest): Observable<ApiObject> {
     this.loading.set(true);
     this.error.set(null);
     
@@ -93,7 +93,7 @@ export class ObjectsService {
   /**
    * PUT /objects/{id} - Update object (full replacement)
    */
-  updateObject(id: string, object: Omit<ApiObject, 'id'>): Observable<ApiObject> {
+  updateObject(id: string, object: APIRequest): Observable<ApiObject> {
     this.loading.set(true);
     this.error.set(null);
     
