@@ -1,5 +1,6 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ObjectsService } from '../../services/objects.service';
 import { ApiObject } from '../../models/object.model';
@@ -7,7 +8,7 @@ import { ApiObject } from '../../models/object.model';
 @Component({
   selector: 'app-objects-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <div class="min-h-screen py-12 bg-gray-50">
       <div class="container mx-auto px-4">
@@ -22,6 +23,85 @@ import { ApiObject } from '../../models/object.model';
             Add New Item
           </a>
         </div>
+
+        <!-- Search and Controls -->
+        @if (!loading() && !error()) {
+          <div class="mb-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+            <div class="flex flex-col lg:flex-row gap-4">
+              <!-- Search Box -->
+              <div class="flex-1">
+                <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search Items</label>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="search"
+                    [(ngModel)]="searchTerm"
+                    (input)="onSearchChange()"
+                    placeholder="Search by name..."
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </div>
+                  @if (searchTerm()) {
+                    <button
+                      (click)="clearSearch()"
+                      class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Sort Controls -->
+              <div class="flex flex-col sm:flex-row gap-3">
+                <div class="min-w-0">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                  <select 
+                    [(ngModel)]="sortDirection"
+                    (change)="onSortChange()"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="asc">Name A to Z</option>
+                    <option value="desc">Name Z to A</option>
+                  </select>
+                </div>
+
+                <!-- Page Size -->
+                <div class="min-w-0">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Items per page</label>
+                  <select 
+                    [(ngModel)]="pageSize"
+                    (change)="onPageSizeChange()"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="5">5 items</option>
+                    <option value="10">10 items</option>
+                    <option value="20">20 items</option>
+                    <option value="50">50 items</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Results Summary -->
+            @if (filteredObjects().length !== objects().length) {
+              <div class="mt-4 text-sm text-gray-600">
+                Showing {{ paginatedObjects().length }} of {{ filteredObjects().length }} filtered results 
+                ({{ objects().length }} total items)
+              </div>
+            } @else {
+              <div class="mt-4 text-sm text-gray-600">
+                Showing {{ paginatedObjects().length }} of {{ objects().length }} items
+              </div>
+            }
+          </div>
+        }
 
         <!-- Loading State -->
         @if (loading()) {
@@ -65,8 +145,23 @@ import { ApiObject } from '../../models/object.model';
           </div>
         }
 
+        <!-- No Results State -->
+        @if (!loading() && !error() && objects().length > 0 && filteredObjects().length === 0) {
+          <div class="text-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <h2 class="text-2xl font-semibold text-gray-900 mb-2">No Results Found</h2>
+            <p class="text-gray-600 mb-6">No items match your search for "<strong>{{ searchTerm() }}</strong>"</p>
+            <button (click)="clearSearch()" 
+                    class="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium">
+              Clear Search
+            </button>
+          </div>
+        }
+
         <!-- Objects Table -->
-        @if (!loading() && !error() && objects().length > 0) {
+        @if (!loading() && !error() && paginatedObjects().length > 0) {
           <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full">
@@ -80,7 +175,7 @@ import { ApiObject } from '../../models/object.model';
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  @for (object of objects(); track object.id) {
+                  @for (object of paginatedObjects(); track object.id) {
                     <tr class="hover:bg-gray-50 transition-colors">
                       <td class="py-3 px-4 text-sm text-gray-600">{{ object.id }}</td>
                       <td class="py-3 px-4 text-sm font-medium text-gray-900">{{ object.name }}</td>
@@ -126,12 +221,58 @@ import { ApiObject } from '../../models/object.model';
             </div>
           </div>
 
-          <!-- Item Count -->
-          <div class="mt-6 text-center">
-            <span class="inline-block bg-white border border-gray-200 px-4 py-2 rounded-md font-medium text-sm text-gray-700 shadow-sm">
-              Showing {{ objects().length }} item(s)
-            </span>
-          </div>
+          <!-- Pagination -->
+          @if (totalPages() > 1) {
+            <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <!-- Page Info -->
+              <div class="text-sm text-gray-600">
+                Page {{ currentPage() }} of {{ totalPages() }} 
+                ({{ (currentPage() - 1) * pageSize() + 1 }}-{{ Math.min(currentPage() * pageSize(), filteredObjects().length) }} 
+                of {{ filteredObjects().length }} items)
+              </div>
+              
+              <!-- Pagination Controls -->
+              <div class="flex gap-2">
+                <button 
+                  (click)="goToPage(1)"
+                  [disabled]="currentPage() === 1"
+                  class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                  First
+                </button>
+                <button 
+                  (click)="goToPage(currentPage() - 1)"
+                  [disabled]="currentPage() === 1"
+                  class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                  Previous
+                </button>
+                
+                <!-- Page Numbers -->
+                @for (page of getVisiblePages(); track page) {
+                  <button 
+                    (click)="goToPage(page)"
+                    [class.bg-blue-600]="page === currentPage()"
+                    [class.text-white]="page === currentPage()"
+                    [class.border-blue-600]="page === currentPage()"
+                    class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm">
+                    {{ page }}
+                  </button>
+                }
+                
+                <button 
+                  (click)="goToPage(currentPage() + 1)"
+                  [disabled]="currentPage() === totalPages()"
+                  class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                  Next
+                </button>
+                <button 
+                  (click)="goToPage(totalPages())"
+                  [disabled]="currentPage() === totalPages()"
+                  class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                  Last
+                </button>
+              </div>
+            </div>
+          }
         }
 
         <!-- Delete Confirmation Modal -->
@@ -169,7 +310,62 @@ export class ObjectsListComponent implements OnInit {
   objectToDelete = signal<ApiObject | null>(null);
   deleting = signal(false);
 
-  constructor(private objectsService: ObjectsService) {}
+  // Search and filter state
+  searchTerm = signal<string>('');
+  
+  // Sorting state
+  sortDirection = signal<'asc' | 'desc'>('asc');
+  
+  // Pagination state
+  currentPage = signal<number>(1);
+  pageSize = signal<number>(10);
+
+  // Computed properties for filtering, sorting, and pagination
+  filteredObjects = computed(() => {
+    const search = this.searchTerm().toLowerCase().trim();
+    const allObjects = this.objects();
+    
+    if (!search) {
+      return allObjects;
+    }
+    
+    return allObjects.filter((obj: ApiObject) => 
+      obj.name.toLowerCase().includes(search)
+    );
+  });
+
+  sortedObjects = computed(() => {
+    const filtered = [...this.filteredObjects()];
+    const direction = this.sortDirection();
+    
+    return filtered.sort((a, b) => {
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
+      
+      if (direction === 'asc') {
+        return nameA.localeCompare(nameB);
+      } else {
+        return nameB.localeCompare(nameA);
+      }
+    });
+  });
+
+  totalPages = computed(() => {
+    const total = this.filteredObjects().length;
+    const size = this.pageSize();
+    return Math.ceil(total / size);
+  });
+
+  paginatedObjects = computed(() => {
+    const sorted = this.sortedObjects();
+    const page = this.currentPage();
+    const size = this.pageSize();
+    const startIndex = (page - 1) * size;
+    
+    return sorted.slice(startIndex, startIndex + size);
+  });
+
+  constructor(private readonly objectsService: ObjectsService) {}
 
   ngOnInit(): void {
     this.loadObjects();
@@ -180,17 +376,63 @@ export class ObjectsListComponent implements OnInit {
     this.error.set(null);
     
     this.objectsService.getObjects().subscribe({
-      next: (data) => {
+      next: (data: ApiObject[]) => {
         this.objects.set(data);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.error.set(err.message);
         this.loading.set(false);
       }
     });
   }
 
+  // Search methods
+  onSearchChange(): void {
+    // Reset to first page when search changes
+    this.currentPage.set(1);
+  }
+
+  clearSearch(): void {
+    this.searchTerm.set('');
+    this.currentPage.set(1);
+  }
+
+  // Sorting methods
+  onSortChange(): void {
+    // Reset to first page when sort changes
+    this.currentPage.set(1);
+  }
+
+  // Pagination methods
+  onPageSizeChange(): void {
+    // Reset to first page when page size changes
+    this.currentPage.set(1);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  getVisiblePages(): number[] {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: number[] = [];
+    
+    // Show up to 5 page numbers around current page
+    const start = Math.max(1, current - 2);
+    const end = Math.min(total, current + 2);
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  }
+
+  // Delete methods
   confirmDelete(object: ApiObject): void {
     this.objectToDelete.set(object);
     this.showDeleteModal.set(true);
@@ -210,16 +452,24 @@ export class ObjectsListComponent implements OnInit {
     this.objectsService.deleteObject(object.id).subscribe({
       next: () => {
         // Remove from local list
-        this.objects.update(list => list.filter(o => o.id !== object.id));
+        this.objects.update((list: ApiObject[]) => list.filter((o: ApiObject) => o.id !== object.id));
         this.showDeleteModal.set(false);
         this.objectToDelete.set(null);
         this.deleting.set(false);
+        
+        // Check if current page is now empty and adjust if needed
+        if (this.paginatedObjects().length === 0 && this.currentPage() > 1) {
+          this.currentPage.set(this.currentPage() - 1);
+        }
       },
-      error: (err) => {
+      error: (err: any) => {
         this.error.set(err.message);
         this.deleting.set(false);
         this.showDeleteModal.set(false);
       }
     });
   }
+
+  // Utility method to expose Math for template
+  Math = Math;
 }
