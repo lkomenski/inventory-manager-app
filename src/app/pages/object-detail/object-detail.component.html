@@ -72,21 +72,21 @@
             <h2 id="additional-data-heading" class="text-xl font-semibold text-gray-900 mb-4">Additional Data</h2>
             @if (object()!.data) {
               <div class="bg-gray-50 border border-gray-200 p-6 rounded-lg">
-                @if (object()!.data!.color) {
+                @if (object()!.data['color']) {
                   <div class="mb-4">
                     <div class="text-xs text-gray-600 mb-2 font-medium uppercase">Color</div>
                     <div class="flex items-center">
                       <span class="w-8 h-8 rounded-md border-2 border-gray-300 mr-3" 
-                            [style.background-color]="object()!.data!.color"></span>
-                      <span class="font-semibold text-gray-900">{{ object()!.data!.color }}</span>
+                            [style.background-color]="object()!.data['color']"></span>
+                      <span class="font-semibold text-gray-900">{{ object()!.data['color'] }}</span>
                     </div>
                   </div>
                 }
-                @if (object()!.data!.price) {
+                @if (object()!.data['price']) {
                   <div class="mb-4">
                     <div class="text-xs text-gray-600 mb-2 font-medium uppercase">Price</div>
                     <div class="font-semibold text-green-700 text-2xl">
-                      ${{ object()!.data!.price }}
+                      ${{ object()!.data['price'] }}
                     </div>
                   </div>
                 }

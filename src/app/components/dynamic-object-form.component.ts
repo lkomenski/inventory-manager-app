@@ -58,8 +58,8 @@ export class DynamicObjectFormComponent implements OnInit {
       const data = this.config.initialData;
       this.objectForm.patchValue({
         name: data.name || '',
-        color: data.data?.color || '#000000',
-        price: data.data?.price || 0
+        color: data.data['color'] as string || '#000000',
+        price: data.data['price'] as number || 0
       });
     }
   }
