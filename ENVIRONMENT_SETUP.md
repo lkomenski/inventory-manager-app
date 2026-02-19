@@ -5,23 +5,21 @@ This project uses environment files to manage sensitive configuration like API k
 
 ## Quick Setup
 
-1. **Copy the example environment file:**
+1. **Copy the environment template file:**
    ```bash
-   cp src/environments/environment.local.example.ts src/environments/environment.local.ts
+   cp src/environments/environment.ts src/environments/environment.local.ts
    ```
 
 2. **Update with your actual values:**
    Edit `src/environments/environment.local.ts` and replace `YOUR_API_KEY_HERE` with your actual API key.
 
 3. **Verify gitignore:**
-   The file `environment.local.ts` should be gitignored and never committed.
+   The file `environment.local.ts` is gitignored and will never be committed to version control.
 
 ## File Structure
 
-- `environment.ts` - Template with placeholder values (committed to git)
-- `environment.local.ts` - Your actual configuration (gitignored) 
-- `environment.local.example.ts` - Example file showing structure (committed to git)
-- `environment.prod.ts` - Production template (committed to git)
+- `environment.ts` - Template with placeholder values (committed to git) - users copy this to create their own config
+- `environment.local.ts` - Your actual configuration with real API key (gitignored - never committed)
 
 ## Current Configuration
 

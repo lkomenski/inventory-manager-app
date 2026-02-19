@@ -82,14 +82,28 @@ Before you begin, ensure you have the following installed:
    npm install
    \`\`\`
 
-3. **Start the development server**
+3. **Configure environment** (Important!)
+   
+   The application requires environment configuration for API access. See [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md) for detailed instructions.
+   
+   Quick setup:
+   \`\`\`bash
+   # Copy the environment template file
+   cp src/environments/environment.ts src/environments/environment.local.ts
+   
+   # Edit src/environments/environment.local.ts and replace YOUR_API_KEY_HERE with your actual API key
+   \`\`\`
+   
+   **Note**: The `environment.local.ts` file is gitignored and should never be committed to version control.
+
+4. **Start the development server**
    \`\`\`bash
    npm start
    # or
    ng serve
    \`\`\`
 
-4. **Open in browser**
+5. **Open in browser**
    Navigate to \`http://localhost:4200/\`
 
 The application will automatically reload when you make changes to the source code.
@@ -100,23 +114,19 @@ The application will automatically reload when you make changes to the source co
 inventory-manager-app/
 ├── src/
 │   ├── app/
-│   │   ├── features/                    # Feature modules
-│   │   │   ├── account/                 # Account feature
-│   │   │   │   └── components/
-│   │   │   │       └── account/         # Login/Account page
-│   │   │   ├── home/                    # Home feature
-│   │   │   │   └── components/
-│   │   │   │       └── home/            # Dashboard/Home page
-│   │   │   └── objects/                 # Objects feature
-│   │   │       ├── components/
-│   │   │       │   ├── objects-list/    # List of all items
-│   │   │       │   ├── object-detail/   # Single item details
-│   │   │       │   ├── create-object/   # Create new item form
-│   │   │       │   └── edit-object/     # Edit item form
-│   │   │       ├── models/
-│   │   │       │   └── object.model.ts  # TypeScript interfaces
-│   │   │       └── services/
-│   │   │           └── objects.service.ts # API service with HTTP methods
+│   │   ├── pages/                       # Page components
+│   │   │   ├── account/                 # Login/Account page
+│   │   │   ├── home/                    # Dashboard/Home page
+│   │   │   ├── objects-list/            # List of all items
+│   │   │   ├── object-detail/           # Single item details
+│   │   │   ├── object-create/           # Create new item form
+│   │   │   └── object-edit/             # Edit item form
+│   │   ├── components/                  # Reusable components
+│   │   │   └── dynamic-object-form.component.ts  # Dynamic form component
+│   │   ├── models/
+│   │   │   └── object.model.ts          # TypeScript interfaces
+│   │   ├── services/
+│   │   │   └── objects.service.ts       # API service with HTTP methods
 │   │   ├── shared/                      # Shared components
 │   │   │   └── components/
 │   │   │       ├── navbar/              # Navigation component
@@ -128,6 +138,9 @@ inventory-manager-app/
 │   │   ├── app.config.server.ts         # Server configuration
 │   │   ├── app.ts                       # Root component
 │   │   └── app.html                     # Root template
+│   ├── environments/                    # Environment configuration
+│   │   ├── environment.ts               # Development environment template
+│   │   └── environment.local.ts         # Local environment (gitignored)
 │   ├── server.ts                        # Express server for SSR & CSP
 │   ├── main.ts                          # Client bootstrap
 │   ├── main.server.ts                   # Server bootstrap
@@ -136,6 +149,7 @@ inventory-manager-app/
 ├── proxy.conf.js                        # Proxy configuration for development
 ├── angular.json                         # Angular CLI configuration
 ├── tsconfig.json                        # TypeScript configuration
+├── ENVIRONMENT_SETUP.md                 # Environment configuration guide
 └── package.json                         # Dependencies & scripts
 ```
 
@@ -236,6 +250,13 @@ ng build
 The build artifacts will be stored in the `dist/` directory.
 
 ## Troubleshooting
+
+### Environment Configuration Errors
+If you get import errors related to `environment.local`:
+1. Make sure `environment.local.ts` exists in `src/environments/`
+2. Copy from the template file if needed: `cp src/environments/environment.ts src/environments/environment.local.ts`
+3. Edit `environment.local.ts` and replace `YOUR_API_KEY_HERE` with your actual API key
+4. Verify it exports an `environment` object with `apiUrl` and `apiKey` properties (see [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md))
 
 ### CORS Issues
 If you encounter CORS errors, ensure the development server is running from the project root directory (not the `src/` folder) so the proxy configuration loads correctly.
