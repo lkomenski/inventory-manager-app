@@ -71,10 +71,7 @@ export class EditObjectComponent implements OnInit {
 
     const updatedObject: APIRequest = {
       name: formData.name,
-      data: {
-        color: formData.color,
-        price: formData.price
-      }
+      data: formData.data
     };
 
     // Using PUT for full replacement

@@ -44,12 +44,6 @@
     <!-- Object Details -->
     @if (object() && !loading()) {
       <article class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <!-- Header -->
-        <header class="bg-gray-900 text-white p-8">
-          <h1 class="text-3xl font-semibold mb-2">{{ object()!.name }}</h1>
-          <p class="text-gray-300">ID: {{ object()!.id }}</p>
-        </header>
-
         <!-- Content -->
         <div class="p-8">
           <!-- Main Info Section -->
@@ -70,7 +64,7 @@
           <!-- Data Section -->
           <section class="mb-8" aria-labelledby="additional-data-heading">
             <h2 id="additional-data-heading" class="text-xl font-semibold text-gray-900 mb-4">Additional Data</h2>
-            @if (object()!.data) {
+            @if (object()!.data && getDataKeys().length > 0) {
               <div class="bg-gray-50 border border-gray-200 p-6 rounded-lg">
                 @if (object()!.data['color']) {
                   <div class="mb-4">
@@ -78,7 +72,7 @@
                     <div class="flex items-center">
                       <span class="w-8 h-8 rounded-md border-2 border-gray-300 mr-3" 
                             [style.background-color]="object()!.data['color']"></span>
-                      <span class="font-semibold text-gray-900">{{ object()!.data['color'] }}</span>
+                      <span class="font-semibold text-gray-900">{{ formatValue(object()!.data['color']) }}</span>
                     </div>
                   </div>
                 }
@@ -86,7 +80,11 @@
                   <div class="mb-4">
                     <div class="text-xs text-gray-600 mb-2 font-medium uppercase">Price</div>
                     <div class="font-semibold text-green-700 text-2xl">
-                      ${{ object()!.data['price'] }}
+                      @if (object()!.data['price'] !== null && object()!.data['price'] !== undefined && object()!.data['price'] !== '') {
+                        ${{ object()!.data['price'] }}
+                      } @else {
+                        N/A
+                      }
                     </div>
                   </div>
                 }
@@ -96,14 +94,14 @@
                   @if (key !== 'color' && key !== 'price') {
                     <div class="mb-4">
                       <div class="text-xs text-gray-600 mb-2 font-medium uppercase">{{ key }}</div>
-                      <div class="font-semibold text-gray-900">{{ object()!.data![key] }}</div>
+                      <div class="font-semibold text-gray-900">{{ formatValue(object()!.data![key]) }}</div>
                     </div>
                   }
                 }
               </div>
             } @else {
               <div class="bg-gray-50 border border-gray-200 p-6 rounded-lg text-center text-gray-500">
-                No additional data available
+                N/A
               </div>
             }
           </section>

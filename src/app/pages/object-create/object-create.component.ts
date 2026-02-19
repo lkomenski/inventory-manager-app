@@ -34,10 +34,7 @@ export class CreateObjectComponent {
 
     const newObject: APIRequest = {
       name: formData.name,
-      data: {
-        color: formData.color,
-        price: formData.price
-      }
+      data: formData.data
     };
 
     this.objectsService.createObject(newObject).subscribe({

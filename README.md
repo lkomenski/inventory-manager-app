@@ -31,9 +31,11 @@ This project was created as a final project demonstrating:
 ### Core Functionality
 - **List View**: Display all inventory items in a responsive table
 - **Detail View**: View complete information about a single item
-- **Create**: Add new items with validated forms (name, color, price)
-- **Edit**: Update existing items (uses PATCH for partial updates)
+- **Create**: Add new items with validated forms (name, color, price, and unlimited custom fields)
+- **Edit**: Update existing items (uses PATCH for partial updates, preserves all custom fields)
 - **Delete**: Remove items with confirmation modal
+- **Smart Field Suggestions**: Dropdown dynamically populated from all API field names with auto-type detection
+- **Dynamic Fields**: Add unlimited custom data properties with flexible types
 - **Loading States**: Visual feedback during API calls
 - **Error Handling**: Context-aware error messages (e.g., detecting reserved IDs)
 - **Responsive Design**: Mobile-friendly interface
@@ -41,8 +43,9 @@ This project was created as a final project demonstrating:
 
 ### Form Validation
 - Name field: Required, minimum 3 characters
-- Color field: Required, color picker with hex value
-- Price field: Required, must be >= 0
+- Color field: Optional, color picker with hex value
+- Price field: Optional, must be >= 0 if provided
+- Custom fields: Optional, select from dynamically loaded field names from API with auto-type detection, or add your own
 - Real-time validation feedback
 - Submit button disabled until form is valid
 
@@ -263,12 +266,19 @@ CSP warnings in development mode are normal and expected (related to HMR and dev
 
 ### Creating an Item
 1. Click "Add New Item" from the home page or navigation
-2. Fill in the required fields:
-   - Name (min 3 characters)
-   - Color (use color picker or enter hex value)
-   - Price (must be >= 0)
-3. Click "Create Item" when form is valid
-4. You'll be redirected to the item details page
+2. Fill in the form fields:
+   - **Name** (required, min 3 characters)
+   - **Color** (optional, use color picker or enter hex value)
+   - **Price** (optional, must be >= 0 if provided)
+   - **Additional Data Fields** (optional, click "Add Field" to add properties)
+3. For custom fields:
+   - **Select from dropdown**: Choose from common field names automatically loaded from existing API objects (year, capacity, CPU model, etc.) - type is auto-detected from actual API data
+   - **Custom field names**: Select "✏️ Custom field name..." to enter your own field name
+   - **Switch between modes**: Use the "📋 List" button to switch back to dropdown
+   - Enter the value for each field
+   - Remove fields you don't need with the trash icon
+4. Click "Create Item" when form is valid
+5. You'll be redirected to the item details page
 
 ### Editing an Item
 1. Navigate to an item's detail page
@@ -302,6 +312,7 @@ CSP warnings in development mode are normal and expected (related to HMR and dev
 - Smart error messages with context-aware guidance
 - Detection of reserved/read-only objects with helpful instructions
 - Form validation with helpful messages
+- Dynamic custom fields with field name suggestions automatically loaded from API with auto-type detection
 - Confirmation modals for destructive actions
 - Responsive mobile-friendly design
 - Intuitive navigation

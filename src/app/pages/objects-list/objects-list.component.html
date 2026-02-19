@@ -21,6 +21,7 @@
         <input
           type="text"
           [(ngModel)]="query"
+          (ngModelChange)="onSearchChange()"
           placeholder="Search by name..."
           class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
         />
@@ -31,7 +32,7 @@
         </div>
         @if (query) {
           <button
-            (click)="query = ''"
+            (click)="query = ''; onSearchChange()"
             class="absolute inset-y-0 right-0 pr-3 flex items-center"
           >
             <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,6 +42,43 @@
         }
       </div>
     </div>
+
+    <!-- Sorting Controls -->
+    @if (!objectsService.loading() && !objectsService.error() && objects.length > 0) {
+      <div class="mb-4 flex flex-wrap items-center gap-3">
+        <span class="text-sm font-medium text-gray-700">Sort by name:</span>
+        <div class="flex gap-2">
+          <button
+            (click)="sortAZ()"
+            [class]="sortOrder === 'asc' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-300'"
+            class="px-4 py-2 rounded-md hover:bg-blue-700 hover:text-white transition-colors font-medium text-sm flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/>
+            </svg>
+            A → Z
+          </button>
+          <button
+            (click)="sortZA()"
+            [class]="sortOrder === 'desc' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-300'"
+            class="px-4 py-2 rounded-md hover:bg-blue-700 hover:text-white transition-colors font-medium text-sm flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"/>
+            </svg>
+            Z → A
+          </button>
+          @if (sortOrder !== 'none') {
+            <button
+              (click)="clearSort()"
+              class="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors font-medium text-sm"
+            >
+              Clear
+            </button>
+          }
+        </div>
+      </div>
+    }
 
     <!-- Loading State -->
     @if (objectsService.loading()) {
@@ -85,14 +123,14 @@
     }
 
     <!-- No Results State -->
-    @if (!objectsService.loading() && !objectsService.error() && objects.length > 0 && FilteredObjects.length === 0) {
+    @if (!objectsService.loading() && !objectsService.error() && objects.length > 0 && filteredItems.length === 0) {
       <section class="text-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm">
         <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
         <h2 class="text-2xl font-semibold text-gray-900 mb-2">No Results Found</h2>
         <p class="text-gray-600 mb-6">No items match your search for "<strong>{{ query }}</strong>"</p>
-        <button (click)="query = ''" 
+        <button (click)="query = ''; onSearchChange()" 
                 class="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium">
           Clear Search
         </button>
@@ -100,19 +138,23 @@
     }
 
     <!-- Items List -->
-    @if (!objectsService.loading() && !objectsService.error() && FilteredObjects.length > 0) {
+    @if (!objectsService.loading() && !objectsService.error() && filteredItems.length > 0) {
       <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         <div class="p-4 bg-gray-50 border-b border-gray-200">
           <p class="text-sm text-gray-600">
             @if (query) {
-              Showing {{ FilteredObjects.length }} of {{ objects.length }} items
+              Showing {{ filteredItems.length }} of {{ objects.length }} items
             } @else {
               {{ objects.length }} {{ objects.length === 1 ? 'item' : 'items' }} total
+            }
+            @if (totalPages > 1) {
+              <span class="mx-2">•</span>
+              Page {{ page }} of {{ totalPages }}
             }
           </p>
         </div>
         <ul class="divide-y divide-gray-200">
-          @for (item of FilteredObjects; track item.id) {
+          @for (item of pagedItems; track item.id) {
             <li>
               <a [routerLink]="['/objects', item.id]" 
                  class="block px-6 py-4 hover:bg-gray-50 transition-colors group">
@@ -128,6 +170,41 @@
             </li>
           }
         </ul>
+        
+        <!-- Pagination Controls -->
+        @if (totalPages > 1) {
+          <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+            <button
+              (click)="page = page - 1"
+              [disabled]="page === 1"
+              [class.opacity-50]="page === 1"
+              [class.cursor-not-allowed]="page === 1"
+              class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:hover:bg-white"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+              Previous
+            </button>
+            
+            <span class="text-sm text-gray-600 font-medium">
+              Page {{ page }} of {{ totalPages }}
+            </span>
+            
+            <button
+              (click)="page = page + 1"
+              [disabled]="page >= (filteredItems.length / pageSize)"
+              [class.opacity-50]="page >= (filteredItems.length / pageSize)"
+              [class.cursor-not-allowed]="page >= (filteredItems.length / pageSize)"
+              class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:hover:bg-white"
+            >
+              Next
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        }
       </div>
     }
   </div>

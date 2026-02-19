@@ -14,6 +14,11 @@ import { ApiObject } from '../../models/object.model';
 export class ObjectsListComponent implements OnInit {
   objects: ApiObject[] = [];
   query: string = '';
+  sortOrder: 'asc' | 'desc' | 'none' = 'none';
+  
+  // Pagination properties
+  page = 1;
+  pageSize = 5;
 
   constructor(public objectsService: ObjectsService) {}
 
@@ -21,11 +26,50 @@ export class ObjectsListComponent implements OnInit {
     this.loadObjects();
   }
 
-  get FilteredObjects(): ApiObject[] {
-    if (!this.query) {
-      return this.objects;
+  get filteredItems(): ApiObject[] {
+    let result = this.objects;
+    
+    // Apply search filter
+    if (this.query) {
+      result = result.filter(obj => obj.name.toLowerCase().includes(this.query.toLowerCase().trim()));
     }
-    return this.objects.filter(obj => obj.name.toLowerCase().includes(this.query.toLowerCase().trim()));
+    
+    // Apply sorting
+    if (this.sortOrder === 'asc') {
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (this.sortOrder === 'desc') {
+      result = [...result].sort((a, b) => b.name.localeCompare(a.name));
+    }
+    
+    return result;
+  }
+  
+  get pagedItems(): ApiObject[] {
+    const start = (this.page - 1) * this.pageSize;
+    return this.filteredItems.slice(start, start + this.pageSize);
+  }
+  
+  get totalPages(): number {
+    return Math.ceil(this.filteredItems.length / this.pageSize);
+  }
+  
+  sortAZ(): void {
+    this.sortOrder = 'asc';
+    this.page = 1; // Reset to first page
+  }
+  
+  sortZA(): void {
+    this.sortOrder = 'desc';
+    this.page = 1; // Reset to first page
+  }
+  
+  clearSort(): void {
+    this.sortOrder = 'none';
+    this.page = 1; // Reset to first page
+  }
+  
+  onSearchChange(): void {
+    this.page = 1; // Reset to first page when search changes
   }
 
   loadObjects(): void {

@@ -59,6 +59,13 @@ export class ObjectDetailComponent implements OnInit {
   formatJson(obj: any): string {
     return JSON.stringify(obj, null, 2);
   }
+  
+  formatValue(value: any): string {
+    if (value === null || value === undefined || value === '') {
+      return 'N/A';
+    }
+    return String(value);
+  }
 
   confirmDelete(): void {
     this.showDeleteModal.set(true);
