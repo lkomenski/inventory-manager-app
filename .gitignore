@@ -54,9 +54,12 @@ logs/
 *.log.*
 
 # Environment files (uncomment if you store secrets locally)
-# .env
-# .env.local
-# .env.*.local
+.env
+.env.local
+.env.*.local
+# Environment files with sensitive data
+src/environments/environment.local.ts
+src/environments/environment.prod.local.ts
 
 # Windows reserved device names (prevent git errors)
 nul

@@ -1,0 +1,123 @@
+<form [formGroup]="objectForm" (ngSubmit)="onSubmit()">
+  <!-- Name Field -->
+  <div class="mb-6">
+    <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
+      Item Name <span class="text-red-500">*</span>
+    </label>
+    <input 
+      id="name"
+      type="text" 
+      formControlName="name"
+      class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+      [class.border-red-500]="isFieldInvalid('name')"
+      placeholder="Enter item name">
+    
+    <!-- Validation Messages -->
+    @if (getFieldError('name')) {
+      <p class="mt-2 text-red-600 text-sm">
+        {{ getFieldError('name') }}
+      </p>
+    }
+  </div>
+
+  <!-- Color Field -->
+  <div class="mb-6">
+    <label for="color" class="block text-sm font-semibold text-gray-700 mb-2">
+      Color <span class="text-red-500">*</span>
+    </label>
+    <div class="flex gap-3">
+      <input 
+        id="color"
+        type="color" 
+        formControlName="color"
+        class="h-11 w-20 border border-gray-300 rounded-md cursor-pointer"
+        [class.border-red-500]="isFieldInvalid('color')">
+      <input 
+        type="text" 
+        formControlName="color"
+        class="flex-1 px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+        [class.border-red-500]="isFieldInvalid('color')"
+        placeholder="#000000">
+    </div>
+    
+    @if (getFieldError('color')) {
+      <p class="mt-2 text-red-600 text-sm">
+        {{ getFieldError('color') }}
+      </p>
+    }
+  </div>
+
+  <!-- Price Field -->
+  <div class="mb-6">
+    <label for="price" class="block text-sm font-semibold text-gray-700 mb-2">
+      Price <span class="text-red-500">*</span>
+    </label>
+    <div class="relative">
+      <span class="absolute left-4 top-2.5 text-gray-600 font-medium">$</span>
+      <input 
+        id="price"
+        type="number" 
+        formControlName="price"
+        step="0.01"
+        min="0"
+        class="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+        [class.border-red-500]="isFieldInvalid('price')"
+        placeholder="0.00">
+    </div>
+    
+    @if (getFieldError('price')) {
+      <p class="mt-2 text-red-600 text-sm">
+        {{ getFieldError('price') }}
+      </p>
+    }
+  </div>
+
+  <!-- Error Message -->
+  @if (error()) {
+    <div class="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+      <p class="text-red-700 text-sm">
+        {{ error() }}
+      </p>
+    </div>
+  }
+
+  <!-- Success Message -->
+  @if (success()) {
+    <div class="mb-6 bg-green-50 border border-green-200 rounded-md p-4">
+      <p class="text-green-700 text-sm">
+        @if (isCreateMode) {
+          Item created successfully!
+        } @else {
+          Item updated successfully!
+        }
+      </p>
+    </div>
+  }
+
+  <!-- Action Buttons -->
+  <div class="flex flex-col sm:flex-row gap-3">
+    <button 
+      type="submit"
+      [disabled]="!objectForm.valid || submitting()"
+      class="flex-1 bg-blue-600 text-white px-6 py-2.5 rounded-md font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-blue-700"
+      [class.bg-green-600]="isEditMode"
+      [class.hover:bg-green-700]="isEditMode">
+      {{ submitButtonText }}
+    </button>
+    <button 
+      type="button"
+      (click)="onCancel()"
+      class="flex-1 bg-gray-100 text-gray-700 px-6 py-2.5 rounded-md font-medium hover:bg-gray-200 transition-colors">
+      {{ cancelButtonText }}
+    </button>
+  </div>
+
+  <!-- Form Status Info -->
+  <div class="mt-4 text-sm text-gray-600 text-center">
+    @if (!objectForm.valid) {
+      <p>Please fill in all required fields to {{ isCreateMode ? 'create' : 'update' }} the item</p>
+    } @else if (isEditMode && objectForm.dirty) {
+      <p>You have unsaved changes</p>
+    }
+  </div>
+</form>

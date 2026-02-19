@@ -3,14 +3,15 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap, finalize } from 'rxjs/operators';
 import { ApiObject, DeleteResponse } from '../models/object.model';
+import { environment } from '../../environments/environment.local';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ObjectsService {
   // Using the proxy to avoid CORS issues during development
-  private readonly apiUrl = '/api/objects';
-  private readonly apiKey = '9c5eb9ce-f88f-4074-9db0-fcb1a173e215';
+  private readonly apiUrl = environment.apiUrl;
+  private readonly apiKey = environment.apiKey;
   
   // Loading state signal
   public loading = signal(false);
@@ -18,7 +19,7 @@ export class ObjectsService {
   // Error state signal
   public error = signal<string | null>(null);
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Get HTTP headers with API key

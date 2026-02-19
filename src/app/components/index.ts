@@ -1,0 +1,1 @@
+export * from './dynamic-object-form.component';

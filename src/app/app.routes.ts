@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './features/home/components/home/home.component';
-import { ObjectsListComponent } from './features/objects/components/objects-list/objects-list.component';
-import { ObjectDetailComponent } from './features/objects/components/object-detail/object-detail.component';
-import { CreateObjectComponent } from './features/objects/components/create-object/create-object.component';
-import { EditObjectComponent } from './features/objects/components/edit-object/edit-object.component';
-import { AccountComponent } from './features/account/components/account/account.component';
+import { HomeComponent } from './pages/home/home.component';
+import { ObjectsListComponent } from './pages/objects-list/objects-list.component';
+import { ObjectDetailComponent } from './pages/object-detail/object-detail.component';
+import { CreateObjectComponent } from './pages/object-create/object-create.component';
+import { EditObjectComponent } from './pages/object-edit/object-edit.component';
+import { AccountComponent } from './pages/account/account.component';
 import { NotFoundComponent } from './shared/components/not-found/not-found.component';
 
 export const routes: Routes = [
