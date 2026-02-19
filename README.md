@@ -30,6 +30,7 @@ This project was created as a final project demonstrating:
 
 ### Core Functionality
 - **List View**: Display all inventory items in a responsive table
+- **Filtered List**: Filter by specific object IDs using query parameters (e.g., `/objects?id=1&id=2&id=3`)
 - **Detail View**: View complete information about a single item
 - **Create**: Add new items with validated forms (name, color, price, and unlimited custom fields)
 - **Edit**: Update existing items (uses PATCH for partial updates, preserves all custom fields)
@@ -150,6 +151,7 @@ inventory-manager-app/
 ├── angular.json                         # Angular CLI configuration
 ├── tsconfig.json                        # TypeScript configuration
 ├── ENVIRONMENT_SETUP.md                 # Environment configuration guide
+├── TESTING.md                           # Comprehensive testing guide with test cases
 └── package.json                         # Dependencies & scripts
 ```
 
@@ -173,6 +175,7 @@ The proxy is automatically used when running `npm start` or `ng serve`.
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
 | GET | `/objects` | Retrieve all objects |
+| GET | `/objects?id=x&id=y&id=z` | Retrieve specific objects by IDs (multiple) |
 | GET | `/objects/{id}` | Retrieve single object |
 | POST | `/objects` | Create new object |
 | PUT | `/objects/{id}` | Update object (full replacement) |
@@ -238,6 +241,22 @@ Run unit tests with:
 npm test
 \`\`\`
 
+### Manual Testing & Debugging
+
+This application includes comprehensive debugging features and test cases. See [TESTING.md](TESTING.md) for:
+
+- **Console Logging**: Extensive logs with emoji indicators for easy tracking of all operations
+- **Breakpoint Locations**: Strategic debugging points marked in the code
+- **Test Cases**: Complete test scenarios for all features (list, create, edit, delete, validation, etc.)
+- **Browser DevTools Guide**: How to use Chrome/Firefox DevTools for debugging
+- **API Integration Tests**: Verify proxy and API communication
+
+**Quick Debugging Tips**:
+- Open browser console (F12) to see detailed operation logs
+- All API calls are logged with request/response data
+- Form submissions show payload details
+- Errors display in grouped console logs for easy debugging
+
 ## Building for Production
 
 Create a production build:
@@ -284,6 +303,18 @@ CSP warnings in development mode are normal and expected (related to HMR and dev
 3. Click "View" to see detailed information
 4. Click "Edit" to modify an item
 5. Click "Delete" to remove an item (with confirmation)
+
+### Filtering by Specific IDs
+You can view specific objects by adding query parameters to the URL:
+1. Navigate to `/objects?id=1&id=2&id=3` (replace with actual IDs)
+2. A blue banner will show "Filtered View" with the IDs
+3. Only the requested objects will be displayed
+4. Click "View All" to return to the full list
+
+**Examples**:
+- View single object: `/objects?id=5`
+- View multiple objects: `/objects?id=1&id=2&id=7&id=13`
+- This matches the API's query parameter functionality
 
 ### Creating an Item
 1. Click "Add New Item" from the home page or navigation

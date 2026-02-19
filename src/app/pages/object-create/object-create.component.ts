@@ -25,9 +25,13 @@ export class CreateObjectComponent {
   constructor(
     private router: Router,
     private objectsService: ObjectsService
-  ) {}
+  ) {
+    console.log('➕ Create Object Component initialized');
+  }
 
   onFormSubmit(formData: FormSubmitData): void {
+    console.log('📤 Form submitted with data:', formData);
+    // DEBUGGING BREAKPOINT: Set a breakpoint here to inspect form data
     this.submitting.set(true);
     this.error.set(null);
     this.success.set(false);
@@ -36,17 +40,23 @@ export class CreateObjectComponent {
       name: formData.name,
       data: formData.data
     };
+    
+    console.log('📦 Creating object:', newObject);
 
     this.objectsService.createObject(newObject).subscribe({
       next: (created) => {
+        console.log('✅ Object created successfully:', created);
+        console.log('🆔 New object ID:', created.id);
         this.success.set(true);
         this.submitting.set(false);
         // Navigate to the detail page after a short delay
         setTimeout(() => {
+          console.log('🧭 Navigating to object detail page');
           this.router.navigate(['/objects', created.id]);
         }, 1000);
       },
       error: (err) => {
+        console.error('❌ Failed to create object:', err);
         this.error.set(err.message);
         this.submitting.set(false);
       }
@@ -54,6 +64,7 @@ export class CreateObjectComponent {
   }
 
   onFormCancel(): void {
+    console.log('❌ Form cancelled, navigating back to list');
     this.router.navigate(['/objects']);
   }
 }
