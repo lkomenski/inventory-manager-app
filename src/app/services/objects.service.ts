@@ -5,35 +5,33 @@ import { catchError, tap, finalize, map } from 'rxjs/operators';
 import { ApiObject, DeleteResponse, APIRequest } from '../models/object.model';
 import { environment } from '../../environments/environment.local';
 
+/**
+ * Objects Service
+ * 
+ * Manages all HTTP communication with the inventory API.
+ * Provides CRUD operations for inventory objects with:
+ * - Loading and error state management
+ * - Rate limit tracking
+ * - Comprehensive error handling
+ * - API key authentication
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class ObjectsService {
-  // Using the proxy to avoid CORS issues during development
   private readonly apiUrl = environment.apiUrl;
   private readonly apiKey = environment.apiKey;
   
-  // Loading state signal
+  // Global state signals accessible by components
   public loading = signal(false);
-  
-  // Error state signal
   public error = signal<string | null>(null);
-  
-  // Rate limit state signals
   public rateLimitRemaining = signal<number | null>(null);
   public rateLimitTotal = signal<number | null>(null);
 
-  constructor(private readonly http: HttpClient) {
-    // console.log('ObjectsService initialized');
-    // console.log('API URL:', this.apiUrl);
-    // console.log('API Key configured:', this.apiKey ? 'Yes' : 'No');
-  }
+  constructor(private readonly http: HttpClient) {}
 
-  /**
-   * Get HTTP headers with API key
-   */
+  /** Configure HTTP headers with API key authentication */
   private getHeaders(): HttpHeaders {
-    // console.log('Setting up request headers with API key');
     return new HttpHeaders({
       'x-api-key': this.apiKey,
       'Content-Type': 'application/json'

@@ -3,13 +3,27 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
+/** Activity log entry tracking user actions */
 interface ActivityLogEntry {
-  action: string;
-  itemName?: string;
-  timestamp: string;
-  icon: string;
+  action: string;      // Description of the action (e.g., "Logged in", "Created item")
+  itemName?: string;   // Name of item affected (if applicable)
+  timestamp: string;   // When the action occurred
+  icon: string;        // Emoji icon to display
 }
 
+/**
+ * Account Component
+ * 
+ * Demo account management page with features:
+ * - Login/logout functionality
+ * - Password visibility toggle
+ * - "Remember me" option (extends session from 1 day to 30 days)
+ * - Real-time session duration timer
+ * - Activity log tracking recent actions
+ * 
+ * Note: This is a demo implementation using localStorage.
+ * In production, use proper authentication with backend API.
+ */
 @Component({
   selector: 'app-account',
   standalone: true,
@@ -20,80 +34,91 @@ export class AccountComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
   isLoggedIn = signal(false);
   userEmail = signal('');
-  loginDate = signal('');
-  loginTimestamp = signal<number>(0);
-  sessionDuration = signal('');
-  showPassword = signal(false);
-  rememberMe = signal(false);
-  activityLog = signal<ActivityLogEntry[]>([]);
+  loginDate = signal('');  
+  loginTimestamp = signal<number>(0);  
+  sessionDuration = signal('');  
+  showPassword = signal(false);  
+  rememberMe = signal(false);  
+  activityLog = signal<ActivityLogEntry[]>([]);  
   
-  private timerInterval?: number;
+  private timerInterval?: number;  // SetInterval ID for session timer
 
   constructor(private fb: FormBuilder) {
+    // Initialize login form with validators
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],
       rememberMe: [false]
     });
 
-    // Check if already logged in
+    // Check localStorage for existing session
     const savedEmail = localStorage.getItem('userEmail');
     const savedDate = localStorage.getItem('loginDate');
     const savedTimestamp = localStorage.getItem('loginTimestamp');
     const savedRememberMe = localStorage.getItem('rememberMe');
     
     if (savedEmail) {
-      // Check if session is still valid
+      // Verify session hasn't expired
       const isRemembered = savedRememberMe === 'true';
       const sessionAge = Date.now() - parseInt(savedTimestamp || '0', 10);
-      const maxAge = isRemembered ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 days if remembered, 1 day otherwise
+      const maxAge = isRemembered 
+        ? 30 * 24 * 60 * 60 * 1000  // 30 days if "Remember me" was checked
+        : 24 * 60 * 60 * 1000;       // 1 day for normal session
       
       if (sessionAge < maxAge) {
+        // Session still valid - restore login state
         this.isLoggedIn.set(true);
         this.userEmail.set(savedEmail);
         this.loginDate.set(savedDate || new Date().toLocaleDateString());
         this.loginTimestamp.set(parseInt(savedTimestamp || '0', 10));
         this.rememberMe.set(isRemembered);
       } else {
-        // Session expired, clear data
+        // Session expired - clear old data
         this.clearSessionData();
       }
     }
     
-    // Load activity log
+    // Load activity log from localStorage
     this.loadActivityLog();
   }
   
   ngOnInit(): void {
-    // Start session timer if logged in
+    // Start real-time session timer if user is logged in
     if (this.isLoggedIn()) {
       this.startSessionTimer();
     }
     
-    // Listen for storage events from other components
+    // Listen for changes to activity log from other browser tabs/windows
     window.addEventListener('storage', this.handleStorageChange.bind(this));
   }
   
   ngOnDestroy(): void {
+    // Clean up timer and event listener when component is destroyed
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
     window.removeEventListener('storage', this.handleStorageChange.bind(this));
   }
   
+  /** Handle storage events from other tabs/windows */
   private handleStorageChange(event: StorageEvent): void {
     if (event.key === 'activityLog') {
-      this.loadActivityLog();
+      this.loadActivityLog();  // Reload activity log when it changes
     }
   }
   
+  /** Start interval timer that updates session duration every second */
   private startSessionTimer(): void {
-    this.updateSessionDuration();
+    this.updateSessionDuration();  // Initial update
     this.timerInterval = window.setInterval(() => {
       this.updateSessionDuration();
-    }, 1000);
+    }, 1000);  // Update every 1 second
   }
   
+  /**
+   * Calculate and format session duration in human-readable format
+   * Examples: "5s", "2m 15s", "1h 30m 45s", "2d 5h 20m"
+   */
   private updateSessionDuration(): void {
     const elapsed = Date.now() - this.loginTimestamp();
     const seconds = Math.floor(elapsed / 1000);
@@ -101,6 +126,7 @@ export class AccountComponent implements OnInit, OnDestroy {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
     
+    // Format based on duration length for readability
     if (days > 0) {
       this.sessionDuration.set(`${days}d ${hours % 24}h ${minutes % 60}m`);
     } else if (hours > 0) {
@@ -112,6 +138,7 @@ export class AccountComponent implements OnInit, OnDestroy {
     }
   }
   
+  /** Load activity log from localStorage and keep only last 10 entries */
   private loadActivityLog(): void {
     const stored = localStorage.getItem('activityLog');
     if (stored) {
@@ -125,17 +152,22 @@ export class AccountComponent implements OnInit, OnDestroy {
     }
   }
   
+  /** Toggle password visibility between hidden and visible */
   togglePasswordVisibility(): void {
     this.showPassword.set(!this.showPassword());
   }
 
+  /** Check if a form field is invalid and has been touched by user */
   isLoginFieldInvalid(fieldName: string): boolean {
     const field = this.loginForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
 
+  /** Handle login form submission */
   onLogin(): void {
+    // Validate form before processing
     if (this.loginForm.invalid) {
+      // Mark all fields as touched to show validation errors
       Object.keys(this.loginForm.controls).forEach(key => {
         this.loginForm.get(key)?.markAsTouched();
       });
@@ -147,7 +179,7 @@ export class AccountComponent implements OnInit, OnDestroy {
     const date = new Date().toLocaleDateString();
     const timestamp = Date.now();
     
-    // Save to localStorage (simple demo)
+    // Save session data to localStorage
     localStorage.setItem('userEmail', email);
     localStorage.setItem('loginDate', date);
     localStorage.setItem('loginTimestamp', timestamp.toString());

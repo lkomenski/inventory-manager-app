@@ -3,6 +3,15 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ObjectsService } from '../../services/objects.service';
 
+/**
+ * Home Page Component
+ * 
+ * Displays dashboard with inventory statistics including:
+ * - Total item count
+ * - API connection status
+ * - Rate limit information 
+ * - Last update timestamp
+ */
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -10,6 +19,7 @@ import { ObjectsService } from '../../services/objects.service';
   templateUrl: './home.component.html'
 })
 export class HomeComponent implements OnInit {
+  // Dashboard statistics
   objectCount = signal(0);
   loading = signal(false);
   error = signal<string | null>(null);
@@ -22,6 +32,10 @@ export class HomeComponent implements OnInit {
     this.loadStats();
   }
 
+  /**
+   * Load dashboard statistics from API
+   * Fetches all objects to count them and verify API connectivity
+   */
   private loadStats(): void {
     this.loading.set(true);
     this.objectsService.getObjects().subscribe({

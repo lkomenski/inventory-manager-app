@@ -5,6 +5,16 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ObjectsService } from '../../services/objects.service';
 import { ApiObject } from '../../models/object.model';
 
+/**
+ * Objects List Component
+ * 
+ * Displays a paginated, searchable, and sortable list of inventory items.
+ * Features:
+ * - Search/filter by item name (case-insensitive)
+ * - Sort by name (A-Z or Z-A)
+ * - Pagination (5 items per page)
+ * - Support for filtering by specific IDs via query params
+ */
 @Component({
   selector: 'app-objects-list',
   standalone: true,
@@ -12,15 +22,15 @@ import { ApiObject } from '../../models/object.model';
   templateUrl: './objects-list.component.html'
 })
 export class ObjectsListComponent implements OnInit {
-  objects: ApiObject[] = [];
-  query: string = '';
-  sortOrder: 'asc' | 'desc' | 'none' = 'none';
+  objects: ApiObject[] = [];  
+  query: string = '';  
+  sortOrder: 'asc' | 'desc' | 'none' = 'none';  
   
-  // Pagination properties
-  page = 1;
-  pageSize = 5;
+  // Pagination configuration
+  page = 1;  
+  pageSize = 5;  
   
-  // Track if we're filtering by IDs
+  // Track if we're filtering by specific IDs from URL query params
   filteringByIds = false;
   filteredIds: string[] = [];
 
@@ -32,20 +42,18 @@ export class ObjectsListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // console.log('Objects List Component: ngOnInit called');
-    
-    // Check for ID query parameters
+    // Subscribe to URL query parameters to check if we should filter by specific IDs
+    // Example: /objects?id=1&id=2&id=3 will only load objects with those IDs
     this.route.queryParamMap.subscribe(params => {
       const ids = params.getAll('id');
-      // console.log('Parsed IDs from URL:', ids);
       
       if (ids && ids.length > 0) {
-        // console.log('Query parameters detected - Loading specific IDs:', ids);
+        // URL has ID filters - load only those specific objects
         this.filteringByIds = true;
         this.filteredIds = ids;
         this.loadObjectsByIds(ids);
       } else {
-        // console.log('No query parameters - Loading all objects');
+        // No filters - load all objects
         this.filteringByIds = false;
         this.filteredIds = [];
         this.loadObjects();
@@ -53,62 +61,75 @@ export class ObjectsListComponent implements OnInit {
     });
   }
 
+  /**
+   * Computed property that returns filtered and sorted items
+   * This is the data pipeline: objects -> filter by search -> sort -> return
+   */
   get filteredItems(): ApiObject[] {
-    // console.log('Filtering items - Query:', this.query, 'Sort:', this.sortOrder);
     let result = this.objects;
     
-    // Apply search filter
+    // Step 1: Apply search filter if user entered a query
+    // Filters by name, case-insensitive (e.g., "iPhone" matches "Apple iPhone 13")
     if (this.query) {
-      result = result.filter(obj => obj.name.toLowerCase().includes(this.query.toLowerCase().trim()));
+      result = result.filter(obj => 
+        obj.name.toLowerCase().includes(this.query.toLowerCase().trim())
+      );
     }
     
-    // Apply sorting
+    // Step 2: Apply sorting if user selected a sort order
     if (this.sortOrder === 'asc') {
+      // Sort A to Z using locale-aware comparison
       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     } else if (this.sortOrder === 'desc') {
+      // Sort Z to A
       result = [...result].sort((a, b) => b.name.localeCompare(a.name));
     }
     
     return result;
   }
   
+  /**
+   * Returns only the items for the current page
+   * Uses array.slice() to extract the relevant subset
+   * Example: Page 2 with pageSize 5 shows items 5-9
+   */
   get pagedItems(): ApiObject[] {
-    const start = (this.page - 1) * this.pageSize;
-    const paged = this.filteredItems.slice(start, start + this.pageSize);
-    // console.log('Pagination - Page:', this.page, 'Items:', paged.length, 'Total:', this.filteredItems.length);
-    return paged;
+    const start = (this.page - 1) * this.pageSize;  // Calculate starting index
+    return this.filteredItems.slice(start, start + this.pageSize);
   }
   
+  /**
+   * Calculates total number of pages based on filtered items
+   */
   get totalPages(): number {
     return Math.ceil(this.filteredItems.length / this.pageSize);
   }
   
+  /** Sort items alphabetically A→Z and reset to first page */
   sortAZ(): void {
-    // console.log('⬆️ Sorting A-Z');
     this.sortOrder = 'asc';
-    this.page = 1; // Reset to first page
+    this.page = 1; 
   }
   
+  /** Sort items reverse alphabetically Z→A and reset to first page */
   sortZA(): void {
-    // console.log('⬇️ Sorting Z-A');
     this.sortOrder = 'desc';
-    this.page = 1; // Reset to first page
+    this.page = 1;  
   }
   
+  /** Clear sorting and return to default order */
   clearSort(): void {
-    // console.log('Clearing sort');
     this.sortOrder = 'none';
-    this.page = 1; // Reset to first page
+    this.page = 1; 
   }
   
+  /** Called when search query changes - resets pagination to page 1 */
   onSearchChange(): void {
-    // console.log('Search changed to:', this.query);
-    this.page = 1; // Reset to first page when search changes
+    this.page = 1;  
   }
 
+  /** Load all objects from the API */
   loadObjects(): void {
-    // console.log('Loading objects from API...');
-    // DEBUGGING BREAKPOINT: Set a breakpoint here to debug API calls
     this.objectsService.getObjects().subscribe({
       next: (response) => {
         // console.log('Objects loaded successfully');
@@ -125,9 +146,8 @@ export class ObjectsListComponent implements OnInit {
     });
   }
   
+  /** Load specific objects by their IDs (used when URL has query params) */
   loadObjectsByIds(ids: string[]): void {
-    // console.log('Loading specific objects by IDs:', ids);
-    // DEBUGGING BREAKPOINT: Set a breakpoint here to debug filtered API calls
     this.objectsService.getObjectsByIds(ids).subscribe({
       next: (response) => {
         // console.log('Objects loaded successfully (filtered by IDs)');
