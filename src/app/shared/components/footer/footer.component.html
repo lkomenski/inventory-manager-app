@@ -1,0 +1,71 @@
+<footer class="bg-gray-900 text-gray-300 py-10 mt-auto border-t border-gray-800" role="contentinfo">
+  <div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- About Section -->
+      <section aria-labelledby="about-heading">
+        <h3 id="about-heading" class="text-lg font-semibold mb-3 flex items-center gap-2 text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+          </svg>
+          Inventory Manager
+        </h3>
+        <p class="text-sm">
+          A modern inventory management system built with Angular and powered by RESTful API.
+        </p>
+      </section>
+
+      <!-- Quick Links -->
+      <section aria-labelledby="links-heading">
+        <h3 id="links-heading" class="text-lg font-semibold mb-3 text-white">Quick Links</h3>
+        <nav role="navigation" aria-label="Footer navigation">
+          <ul class="space-y-2 text-sm" role="list">
+            <li>
+              <a routerLink="/" class="hover:text-white transition-colors">
+                Home
+              </a>
+            </li>
+            <li>
+              <a routerLink="/objects" class="hover:text-white transition-colors">
+                Inventory List
+              </a>
+            </li>
+            <li>
+              <a routerLink="/objects/create" class="hover:text-white transition-colors">
+                Add New Item
+              </a>
+            </li>
+            <li>
+              <a routerLink="/account" class="hover:text-white transition-colors">
+                My Account
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </section>
+
+      <!-- API Info -->
+      <section aria-labelledby="tech-heading">
+        <h3 id="tech-heading" class="text-lg font-semibold mb-3 text-white">Technology</h3>
+        <dl class="text-sm space-y-1.5">
+          <div>
+            <dt class="text-gray-400 inline">API:</dt>
+            <dd class="text-white inline ml-1">restful-api.dev</dd>
+          </div>
+          <div>
+            <dt class="text-gray-400 inline">Framework:</dt>
+            <dd class="text-white inline ml-1">Angular 21</dd>
+          </div>
+          <div>
+            <dt class="text-gray-400 inline">Styling:</dt>
+            <dd class="text-white inline ml-1">Tailwind CSS</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+
+    <!-- Copyright -->
+    <div class="border-t border-gray-800 mt-8 pt-6 text-center text-sm">
+      <p>&copy; 2026 Inventory Manager. Built for Academic Final Project.</p>
+    </div>
+  </div>
+</footer>

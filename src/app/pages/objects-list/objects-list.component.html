@@ -1,7 +1,7 @@
-<div class="min-h-screen py-12 bg-gray-50">
+<main class="min-h-screen py-12 bg-gray-50">
   <div class="container mx-auto px-4">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+    <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
       <h1 class="text-4xl font-semibold text-gray-900">Inventory List</h1>
       <a routerLink="/objects/create" 
          class="bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-sm flex items-center gap-2">
@@ -10,11 +10,12 @@
         </svg>
         Add New Item
       </a>
-    </div>
+    </header>
 
     <!-- Search and Controls -->
     @if (!loading() && !error()) {
-      <div class="mb-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+      <section class="mb-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6" aria-labelledby="search-heading">
+        <h2 id="search-heading" class="sr-only">Search and Filter Options</h2>
         <div class="flex flex-col lg:flex-row gap-4">
           <!-- Search Box -->
           <div class="flex-1">
@@ -79,31 +80,31 @@
 
         <!-- Results Summary -->
         @if (filteredObjects().length !== objects().length) {
-          <div class="mt-4 text-sm text-gray-600">
+          <div class="mt-4 text-sm text-gray-600" role="status" aria-live="polite">
             Showing {{ paginatedObjects().length }} of {{ filteredObjects().length }} filtered results 
             ({{ objects().length }} total items)
           </div>
         } @else {
-          <div class="mt-4 text-sm text-gray-600">
+          <div class="mt-4 text-sm text-gray-600" role="status">
             Showing {{ paginatedObjects().length }} of {{ objects().length }} items
           </div>
         }
-      </div>
+      </section>
     }
 
     <!-- Loading State -->
     @if (loading()) {
-      <div class="text-center py-20">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600"></div>
+      <div class="text-center py-20" role="status" aria-live="polite">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600" aria-hidden="true"></div>
         <p class="text-gray-600 mt-4 font-medium">Loading items...</p>
       </div>
     }
 
     <!-- Error State -->
     @if (error()) {
-      <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-8" role="alert" aria-live="assertive">
         <div class="flex items-start">
-          <svg class="w-6 h-6 text-red-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <svg class="w-6 h-6 text-red-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
           </svg>
           <div class="flex-grow">
@@ -120,73 +121,74 @@
 
     <!-- Empty State -->
     @if (!loading() && !error() && objects().length === 0) {
-      <div class="text-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm">
-        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <section class="text-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm" aria-labelledby="empty-state-heading">
+        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
         </svg>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-2">No Items Yet</h2>
+        <h2 id="empty-state-heading" class="text-2xl font-semibold text-gray-900 mb-2">No Items Yet</h2>
         <p class="text-gray-600 mb-6">Get started by adding your first item</p>
         <a routerLink="/objects/create" 
            class="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium">
           Add Your First Item
         </a>
-      </div>
+      </section>
     }
 
     <!-- No Results State -->
     @if (!loading() && !error() && objects().length > 0 && filteredObjects().length === 0) {
-      <div class="text-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm">
-        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <section class="text-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm" aria-labelledby="no-results-heading">
+        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-2">No Results Found</h2>
+        <h2 id="no-results-heading" class="text-2xl font-semibold text-gray-900 mb-2">No Results Found</h2>
         <p class="text-gray-600 mb-6">No items match your search for "<strong>{{ searchTerm() }}</strong>"</p>
         <button (click)="clearSearch()" 
                 class="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium">
           Clear Search
         </button>
-      </div>
+      </section>
     }
 
     <!-- Objects Table -->
     @if (!loading() && !error() && paginatedObjects().length > 0) {
-      <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      <section class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden" aria-labelledby="items-table-heading">
+        <h2 id="items-table-heading" class="sr-only">Inventory Items</h2>
         <div class="overflow-x-auto">
-          <table class="w-full">
+          <table class="w-full" role="table">
             <thead class="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">ID</th>
-                <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Name</th>
-                <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Color</th>
-                <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Price</th>
-                <th class="text-right py-3 px-4 font-semibold text-sm text-gray-700">Actions</th>
+              <tr role="row">
+                <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700" role="columnheader">ID</th>
+                <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700" role="columnheader">Name</th>
+                <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700" role="columnheader">Color</th>
+                <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700" role="columnheader">Price</th>
+                <th class="text-right py-3 px-4 font-semibold text-sm text-gray-700" role="columnheader">Actions</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               @for (object of paginatedObjects(); track object.id) {
-                <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="py-3 px-4 text-sm text-gray-600">{{ object.id }}</td>
-                  <td class="py-3 px-4 text-sm font-medium text-gray-900">{{ object.name }}</td>
-                  <td class="py-3 px-4 text-sm text-gray-700">
+                <tr class="hover:bg-gray-50 transition-colors" role="row">
+                  <td class="py-3 px-4 text-sm text-gray-600" role="cell">{{ object.id }}</td>
+                  <td class="py-3 px-4 text-sm font-medium text-gray-900" role="cell">{{ object.name }}</td>
+                  <td class="py-3 px-4 text-sm text-gray-700" role="cell">
                     @if (object.data?.color) {
                       <span class="inline-flex items-center">
                         <span class="w-5 h-5 rounded-full mr-2 border border-gray-300" 
-                              [style.background-color]="object.data!.color"></span>
+                              [style.background-color]="object.data!.color" aria-hidden="true"></span>
                         <span>{{ object.data!.color }}</span>
                       </span>
                     } @else {
                       <span class="text-gray-400">N/A</span>
                     }
                   </td>
-                  <td class="py-3 px-4 text-sm font-medium text-gray-900">
+                  <td class="py-3 px-4 text-sm font-medium text-gray-900" role="cell">
                     @if (object.data?.price) {
                       <span class="text-green-700">${{ object.data!.price }}</span>
                     } @else {
                       <span class="text-gray-400">N/A</span>
                     }
                   </td>
-                  <td class="py-3 px-4">
-                    <div class="flex justify-end gap-2">
+                  <td class="py-3 px-4" role="cell">
+                    <div class="flex justify-end gap-2" role="group" aria-label="Item actions">
                       <a [routerLink]="['/objects', object.id]" 
                          class="bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium">
                         View
@@ -197,7 +199,8 @@
                       </a>
                       <button (click)="confirmDelete(object)" 
                               class="bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
-                              [disabled]="deleting()">
+                              [disabled]="deleting()" 
+                              [attr.aria-label]="'Delete ' + object.name">
                         Delete
                       </button>
                     </div>
@@ -207,13 +210,13 @@
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
       <!-- Pagination -->
       @if (totalPages() > 1) {
-        <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <nav class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4" aria-label="Table pagination">
           <!-- Page Info -->
-          <div class="text-sm text-gray-600">
+          <div class="text-sm text-gray-600" role="status">
             Page {{ currentPage() }} of {{ totalPages() }} 
             ({{ (currentPage() - 1) * pageSize() + 1 }}-{{ Math.min(currentPage() * pageSize(), filteredObjects().length) }} 
             of {{ filteredObjects().length }} items)
@@ -259,15 +262,15 @@
               Last
             </button>
           </div>
-        </div>
+        </nav>
       }
     }
 
     <!-- Delete Confirmation Modal -->
     @if (showDeleteModal()) {
-      <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
         <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-          <h3 class="text-xl font-semibold text-gray-900 mb-3">Confirm Delete</h3>
+          <h3 id="delete-modal-title" class="text-xl font-semibold text-gray-900 mb-3">Confirm Delete</h3>
           <p class="text-gray-600 mb-6">
             Are you sure you want to delete <strong class="text-gray-900">"{{ objectToDelete()?.name }}"</strong>? This action cannot be undone.
           </p>
@@ -287,4 +290,4 @@
       </div>
     }
   </div>
-</div>
+</main>

@@ -1,21 +1,22 @@
-<div class="min-h-screen py-12 bg-gray-50">
+<main class="min-h-screen py-12 bg-gray-50">
   <div class="container mx-auto px-4">
     <!-- Back Button -->
-    <div class="mb-6">
+    <nav class="mb-6" aria-label="Breadcrumb">
       <a routerLink="/objects" 
          class="text-blue-600 hover:text-blue-700 flex items-center gap-2 font-medium transition-colors">
         ← Back to List
       </a>
-    </div>
+    </nav>
 
     <!-- Header -->
-    <div class="mb-8">
+    <header class="mb-8">
       <h1 class="text-4xl font-semibold text-gray-900 mb-2">Create New Item</h1>
       <p class="text-gray-600">Fill in the details to add a new item to your inventory</p>
-    </div>
+    </header>
 
     <!-- Form Card -->
-    <div class="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+    <section class="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-sm p-8" aria-labelledby="form-heading">
+      <h2 id="form-heading" class="sr-only">Item Creation Form</h2>
       <app-dynamic-object-form 
         [config]="formConfig"
         [submitting]="submitting"
@@ -24,6 +25,6 @@
         (formSubmit)="onFormSubmit($event)"
         (formCancel)="onFormCancel()">
       </app-dynamic-object-form>
-    </div>
+    </section>
   </div>
-</div>
+</main>
