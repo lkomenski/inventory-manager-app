@@ -30,10 +30,13 @@ This project was created as a final project demonstrating:
 
 ### Core Functionality
 - **List View**: Display all inventory items in a responsive table
+- **Filtered List**: Filter by specific object IDs using query parameters (e.g., `/objects?id=1&id=2&id=3`)
 - **Detail View**: View complete information about a single item
-- **Create**: Add new items with validated forms (name, color, price)
-- **Edit**: Update existing items (uses PATCH for partial updates)
+- **Create**: Add new items with validated forms (name, color, price, and unlimited custom fields)
+- **Edit**: Update existing items (uses PATCH for partial updates, preserves all custom fields)
 - **Delete**: Remove items with confirmation modal
+- **Smart Field Suggestions**: Dropdown dynamically populated from all API field names with auto-type detection
+- **Dynamic Fields**: Add unlimited custom data properties with flexible types
 - **Loading States**: Visual feedback during API calls
 - **Error Handling**: Context-aware error messages (e.g., detecting reserved IDs)
 - **Responsive Design**: Mobile-friendly interface
@@ -41,8 +44,9 @@ This project was created as a final project demonstrating:
 
 ### Form Validation
 - Name field: Required, minimum 3 characters
-- Color field: Required, color picker with hex value
-- Price field: Required, must be >= 0
+- Color field: Optional, color picker with hex value
+- Price field: Optional, must be >= 0 if provided
+- Custom fields: Optional, select from dynamically loaded field names from API with auto-type detection, or add your own
 - Real-time validation feedback
 - Submit button disabled until form is valid
 
@@ -79,14 +83,28 @@ Before you begin, ensure you have the following installed:
    npm install
    \`\`\`
 
-3. **Start the development server**
+3. **Configure environment** (Important!)
+   
+   The application requires environment configuration for API access. See [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md) for detailed instructions.
+   
+   Quick setup:
+   \`\`\`bash
+   # Copy the environment template file
+   cp src/environments/environment.ts src/environments/environment.local.ts
+   
+   # Edit src/environments/environment.local.ts and replace YOUR_API_KEY_HERE with your actual API key
+   \`\`\`
+   
+   **Note**: The `environment.local.ts` file is gitignored and should never be committed to version control.
+
+4. **Start the development server**
    \`\`\`bash
    npm start
    # or
    ng serve
    \`\`\`
 
-4. **Open in browser**
+5. **Open in browser**
    Navigate to \`http://localhost:4200/\`
 
 The application will automatically reload when you make changes to the source code.
@@ -97,23 +115,19 @@ The application will automatically reload when you make changes to the source co
 inventory-manager-app/
 ├── src/
 │   ├── app/
-│   │   ├── features/                    # Feature modules
-│   │   │   ├── account/                 # Account feature
-│   │   │   │   └── components/
-│   │   │   │       └── account/         # Login/Account page
-│   │   │   ├── home/                    # Home feature
-│   │   │   │   └── components/
-│   │   │   │       └── home/            # Dashboard/Home page
-│   │   │   └── objects/                 # Objects feature
-│   │   │       ├── components/
-│   │   │       │   ├── objects-list/    # List of all items
-│   │   │       │   ├── object-detail/   # Single item details
-│   │   │       │   ├── create-object/   # Create new item form
-│   │   │       │   └── edit-object/     # Edit item form
-│   │   │       ├── models/
-│   │   │       │   └── object.model.ts  # TypeScript interfaces
-│   │   │       └── services/
-│   │   │           └── objects.service.ts # API service with HTTP methods
+│   │   ├── pages/                       # Page components
+│   │   │   ├── account/                 # Login/Account page
+│   │   │   ├── home/                    # Dashboard/Home page
+│   │   │   ├── objects-list/            # List of all items
+│   │   │   ├── object-detail/           # Single item details
+│   │   │   ├── object-create/           # Create new item form
+│   │   │   └── object-edit/             # Edit item form
+│   │   ├── components/                  # Reusable components
+│   │   │   └── dynamic-object-form.component.ts  # Dynamic form component
+│   │   ├── models/
+│   │   │   └── object.model.ts          # TypeScript interfaces
+│   │   ├── services/
+│   │   │   └── objects.service.ts       # API service with HTTP methods
 │   │   ├── shared/                      # Shared components
 │   │   │   └── components/
 │   │   │       ├── navbar/              # Navigation component
@@ -125,6 +139,9 @@ inventory-manager-app/
 │   │   ├── app.config.server.ts         # Server configuration
 │   │   ├── app.ts                       # Root component
 │   │   └── app.html                     # Root template
+│   ├── environments/                    # Environment configuration
+│   │   ├── environment.ts               # Development environment template
+│   │   └── environment.local.ts         # Local environment (gitignored)
 │   ├── server.ts                        # Express server for SSR & CSP
 │   ├── main.ts                          # Client bootstrap
 │   ├── main.server.ts                   # Server bootstrap
@@ -133,6 +150,8 @@ inventory-manager-app/
 ├── proxy.conf.js                        # Proxy configuration for development
 ├── angular.json                         # Angular CLI configuration
 ├── tsconfig.json                        # TypeScript configuration
+├── ENVIRONMENT_SETUP.md                 # Environment configuration guide
+├── TESTING.md                           # Comprehensive testing guide with test cases
 └── package.json                         # Dependencies & scripts
 ```
 
@@ -156,6 +175,7 @@ The proxy is automatically used when running `npm start` or `ng serve`.
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
 | GET | `/objects` | Retrieve all objects |
+| GET | `/objects?id=x&id=y&id=z` | Retrieve specific objects by IDs (multiple) |
 | GET | `/objects/{id}` | Retrieve single object |
 | POST | `/objects` | Create new object |
 | PUT | `/objects/{id}` | Update object (full replacement) |
@@ -221,6 +241,22 @@ Run unit tests with:
 npm test
 \`\`\`
 
+### Manual Testing & Debugging
+
+This application includes comprehensive debugging features and test cases. See [TESTING.md](TESTING.md) for:
+
+- **Console Logging**: Extensive logs with emoji indicators for easy tracking of all operations
+- **Breakpoint Locations**: Strategic debugging points marked in the code
+- **Test Cases**: Complete test scenarios for all features (list, create, edit, delete, validation, etc.)
+- **Browser DevTools Guide**: How to use Chrome/Firefox DevTools for debugging
+- **API Integration Tests**: Verify proxy and API communication
+
+**Quick Debugging Tips**:
+- Open browser console (F12) to see detailed operation logs
+- All API calls are logged with request/response data
+- Form submissions show payload details
+- Errors display in grouped console logs for easy debugging
+
 ## Building for Production
 
 Create a production build:
@@ -233,6 +269,13 @@ ng build
 The build artifacts will be stored in the `dist/` directory.
 
 ## Troubleshooting
+
+### Environment Configuration Errors
+If you get import errors related to `environment.local`:
+1. Make sure `environment.local.ts` exists in `src/environments/`
+2. Copy from the template file if needed: `cp src/environments/environment.ts src/environments/environment.local.ts`
+3. Edit `environment.local.ts` and replace `YOUR_API_KEY_HERE` with your actual API key
+4. Verify it exports an `environment` object with `apiUrl` and `apiKey` properties (see [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md))
 
 ### CORS Issues
 If you encounter CORS errors, ensure the development server is running from the project root directory (not the `src/` folder) so the proxy configuration loads correctly.
@@ -261,14 +304,33 @@ CSP warnings in development mode are normal and expected (related to HMR and dev
 4. Click "Edit" to modify an item
 5. Click "Delete" to remove an item (with confirmation)
 
+### Filtering by Specific IDs
+You can view specific objects by adding query parameters to the URL:
+1. Navigate to `/objects?id=1&id=2&id=3` (replace with actual IDs)
+2. A blue banner will show "Filtered View" with the IDs
+3. Only the requested objects will be displayed
+4. Click "View All" to return to the full list
+
+**Examples**:
+- View single object: `/objects?id=5`
+- View multiple objects: `/objects?id=1&id=2&id=7&id=13`
+- This matches the API's query parameter functionality
+
 ### Creating an Item
 1. Click "Add New Item" from the home page or navigation
-2. Fill in the required fields:
-   - Name (min 3 characters)
-   - Color (use color picker or enter hex value)
-   - Price (must be >= 0)
-3. Click "Create Item" when form is valid
-4. You'll be redirected to the item details page
+2. Fill in the form fields:
+   - **Name** (required, min 3 characters)
+   - **Color** (optional, use color picker or enter hex value)
+   - **Price** (optional, must be >= 0 if provided)
+   - **Additional Data Fields** (optional, click "Add Field" to add properties)
+3. For custom fields:
+   - **Select from dropdown**: Choose from common field names automatically loaded from existing API objects (year, capacity, CPU model, etc.) - type is auto-detected from actual API data
+   - **Custom field names**: Select "✏️ Custom field name..." to enter your own field name
+   - **Switch between modes**: Use the "📋 List" button to switch back to dropdown
+   - Enter the value for each field
+   - Remove fields you don't need with the trash icon
+4. Click "Create Item" when form is valid
+5. You'll be redirected to the item details page
 
 ### Editing an Item
 1. Navigate to an item's detail page
@@ -302,6 +364,7 @@ CSP warnings in development mode are normal and expected (related to HMR and dev
 - Smart error messages with context-aware guidance
 - Detection of reserved/read-only objects with helpful instructions
 - Form validation with helpful messages
+- Dynamic custom fields with field name suggestions automatically loaded from API with auto-type detection
 - Confirmation modals for destructive actions
 - Responsive mobile-friendly design
 - Intuitive navigation
