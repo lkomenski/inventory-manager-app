@@ -3,7 +3,7 @@
     <div class="max-w-4xl mx-auto">
       <!-- Header -->
       <header class="text-center mb-8">
-        <div class="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div class="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4" aria-hidden="true">
           <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
           </svg>
@@ -13,12 +13,13 @@
       </header>
 
       <!-- Admin Info -->
-      <section class="bg-white border border-gray-200 rounded-lg shadow-sm p-8 mb-6">
-        <h2 class="text-2xl font-semibold text-gray-900 mb-6">Welcome, Administrator</h2>
-        
-        <div class="bg-red-50 border border-red-100 rounded-lg p-4 mb-6">
+      <section aria-labelledby="admin-heading" class="bg-white border border-gray-200 rounded-lg shadow-sm p-8 mb-6">
+        <h2 id="admin-heading" class="text-2xl font-semibold text-gray-900 mb-6">Welcome, Administrator</h2>
+
+        <!-- Admin account badge -->
+        <div class="bg-red-50 border border-red-100 rounded-lg p-4 mb-6" role="status">
           <div class="flex items-center gap-2 mb-2">
-            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-red-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <span class="font-semibold text-red-900">Admin Account</span>
@@ -29,34 +30,34 @@
         </div>
 
         <!-- System Stats -->
-        <div class="grid grid-cols-3 gap-4 mb-6">
+        <dl aria-label="System statistics" class="grid grid-cols-3 gap-4 mb-6">
           <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 text-center">
-            <div class="text-3xl font-semibold text-blue-700 mb-1">{{ adminStats().totalUsers }}</div>
-            <div class="text-gray-600 text-sm">Total Users</div>
+            <dd class="text-3xl font-semibold text-blue-700 mb-1">{{ adminStats().totalUsers }}</dd>
+            <dt class="text-gray-600 text-sm">Total Users</dt>
           </div>
           <div class="bg-green-50 border border-green-100 rounded-lg p-4 text-center">
-            <div class="text-lg font-semibold text-green-700 mb-1">{{ adminStats().systemStatus }}</div>
-            <div class="text-gray-600 text-sm">System Status</div>
+            <dd class="text-lg font-semibold text-green-700 mb-1">{{ adminStats().systemStatus }}</dd>
+            <dt class="text-gray-600 text-sm">System Status</dt>
           </div>
           <div class="bg-purple-50 border border-purple-100 rounded-lg p-4 text-center">
-            <div class="text-sm font-semibold text-purple-700 mb-1">{{ adminStats().lastBackup }}</div>
-            <div class="text-gray-600 text-sm">Last Backup</div>
+            <dd class="text-sm font-semibold text-purple-700 mb-1">{{ adminStats().lastBackup }}</dd>
+            <dt class="text-gray-600 text-sm">Last Backup</dt>
           </div>
-        </div>
+        </dl>
 
         <!-- Admin Actions -->
         <div class="border-t border-gray-200 pt-6">
-          <h3 class="font-semibold text-gray-900 mb-4">Admin Actions</h3>
-          <div class="grid grid-cols-2 gap-3">
-            <a routerLink="/objects" 
+          <h3 class="font-semibold text-gray-900 mb-4" id="admin-actions-heading">Admin Actions</h3>
+          <nav aria-labelledby="admin-actions-heading" class="grid grid-cols-2 gap-3">
+            <a routerLink="/objects"
                class="block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors text-center font-medium text-sm">
               View All Inventory
             </a>
-            <a routerLink="/" 
+            <a routerLink="/"
                class="block bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md transition-colors text-center font-medium text-sm">
               Return to Home
             </a>
-          </div>
+          </nav>
         </div>
       </section>
 

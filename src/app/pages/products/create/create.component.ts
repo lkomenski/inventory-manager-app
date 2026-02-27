@@ -6,11 +6,19 @@ import { APIRequest } from '../../../models/object.model';
 import { DynamicObjectFormComponent, FormSubmitData, FormConfig, INVENTORY_OBJECT_FIELDS } from '../../../forms';
 
 /**
- * Create Product Component
- * 
- * Form page for creating new inventory items.
- * Uses DynamicObjectFormComponent for the actual form UI.
- * On success, navigates to the newly created item's detail page.
+ * CreateProductComponent
+ *
+ * Form page for adding a new inventory item.
+ *
+ * On a successful POST the component waits one second (so the success
+ * state is briefly visible to the user) then navigates to the new
+ * item's detail page using the id returned by the API.
+ *
+ * Design note — why DynamicObjectFormComponent:
+ *   Field definitions and validators are declared once in INVENTORY_OBJECT_FIELDS
+ *   (inventory-form-config.ts). This component only needs to map the submitted
+ *   values onto an APIRequest shape and handle the result — no FormBuilder
+ *   boilerplate required here.
  */
 @Component({
   selector: 'app-create-product',
@@ -19,12 +27,22 @@ import { DynamicObjectFormComponent, FormSubmitData, FormConfig, INVENTORY_OBJEC
   templateUrl: './create.component.html'
 })
 export class CreateProductComponent {
+  /** Field definitions for the inventory form, sourced from inventory-form-config.ts. */
   inventoryFields = INVENTORY_OBJECT_FIELDS;
-  
-  submitting = signal(false);  
-  error = signal<string | null>(null);  
-  success = signal(false);  
 
+  /** True while the create API call is in flight — disables the submit button. */
+  submitting = signal(false);
+
+  /** Holds an API error message if the create call fails; null otherwise. */
+  error = signal<string | null>(null);
+
+  /** Set to true for one second after a successful create, triggering the success state in the form. */
+  success = signal(false);
+
+  /**
+   * FormConfig passed to DynamicObjectFormComponent.
+   * create mode with customised button labels for this page.
+   */
   formConfig: FormConfig = {
     mode: 'create',
     submitButtonText: 'Create Item',
@@ -34,56 +52,47 @@ export class CreateProductComponent {
   constructor(
     private router: Router,
     private objectsService: ObjectsService
-  ) {
-    // console.log('Create Object Component initialized');
-  }
+  ) {}
 
   /**
-   * Handle form submission from DynamicObjectFormComponent
-   * Creates new object via API and navigates to its detail page
+   * Called by DynamicObjectFormComponent's (formSubmit) output once all
+   * validators pass. Maps form values onto an APIRequest and POSTs via
+   * ObjectsService. On success, briefly shows a success state then
+   * navigates to the new item's detail page.
    */
   onFormSubmit(formData: FormSubmitData): void {
-    // console.log('Form submitted with data:', formData);
-    // DEBUGGING BREAKPOINT: Set a breakpoint here to inspect form data
     this.submitting.set(true);
     this.error.set(null);
     this.success.set(false);
+
     const newObject: APIRequest = {
       name: formData['name'] as string,
       data: {
         color: formData['color'],
         price: formData['price'],
-        // Include any custom fields if present
         ...((formData['data'] as any) || {})
       }
     };
-    
-    // console.log('Creating object:', newObject);
 
     this.objectsService.createObject(newObject).subscribe({
       next: (created) => {
-        // console.log('Product created successfully:', created);
-        // console.log('New product ID:', created.id);
         this.success.set(true);
         this.submitting.set(false);
-        
-        // Navigate to the detail page after a short delay
+
+        // Brief pause so the user sees the success confirmation before navigating.
         setTimeout(() => {
-          // console.log('Navigating to product detail page');
           this.router.navigate(['/products', created.id]);
         }, 1000);
       },
       error: (err) => {
-        // console.error('Failed to create product:', err);
         this.error.set(err.message);
         this.submitting.set(false);
       }
     });
   }
 
-  /** Navigate back to products list */
+  /** Navigates back to the inventory list without saving. */
   onFormCancel(): void {
-    // console.log('Form cancelled, navigating back to list');
     this.router.navigate(['/products']);
   }
 }

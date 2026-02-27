@@ -5,13 +5,15 @@ import { AuthService } from '../services/auth-service';
 /**
  * auth.guard.ts
  *
- * CanActivate guard that protects routes for logged-in users only.
- * If the user is not logged in, they're redirected to /auth/login.
+ * CanActivate guard that restricts access to authenticated users.
+ * Reads the current login state from AuthService and redirects
+ * unauthenticated visitors to /auth/login, preserving the intended
+ * destination in a returnUrl query parameter for post-login redirect.
  *
  * Usage:
  *   {
- *     path: 'products',
- *     component: ProductListComponent,
+ *     path: 'account',
+ *     component: AccountComponent,
  *     canActivate: [authGuard]
  *   }
  */
@@ -20,10 +22,11 @@ export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
 
   if (authService.isLoggedIn()) {
-    return true; // Allow navigation
+    return true;
   }
 
-  // Not logged in – redirect to login page and save the original URL
+  // Redirect to login and pass the original URL so the user can be sent
+  // back after a successful login.
   router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
   return false;
 };

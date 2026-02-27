@@ -13,37 +13,40 @@
       </header>
 
       <!-- Dashboard Content -->
-      <section class="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+      <section aria-labelledby="dashboard-heading" class="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
         <!-- Welcome Section -->
         <div class="text-center mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-1">Welcome back!</h2>
+          <h2 id="dashboard-heading" class="text-2xl font-semibold text-gray-900 mb-1">Welcome back!</h2>
           <p class="text-gray-600">{{ userEmail() }}</p>
         </div>
 
         <!-- Account Stats -->
-        <div class="grid grid-cols-2 gap-4 mb-6">
+        <dl aria-label="Account status" class="grid grid-cols-2 gap-4 mb-6">
           <div class="bg-blue-50 border border-blue-100 rounded-lg p-5 text-center">
-            <div class="text-2xl font-semibold text-blue-700 mb-1">Active</div>
-            <div class="text-gray-600 text-sm">Status</div>
+            <dd class="text-2xl font-semibold text-blue-700 mb-1">Active</dd>
+            <dt class="text-gray-600 text-sm">Status</dt>
           </div>
           <div class="bg-green-50 border border-green-100 rounded-lg p-5 text-center">
-            <svg class="w-8 h-8 mx-auto text-green-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-            </svg>
-            <div class="text-gray-600 text-sm mt-1">Verified</div>
+            <dd>
+              <svg class="w-8 h-8 mx-auto text-green-600" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span class="sr-only">Yes</span>
+            </dd>
+            <dt class="text-gray-600 text-sm mt-1">Verified</dt>
           </div>
-        </div>
+        </dl>
 
         <!-- Session Timer -->
         <div class="mb-6 bg-purple-50 border border-purple-100 rounded-lg p-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-purple-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              <span class="text-sm font-medium text-gray-700">Session Duration</span>
+              <span class="text-sm font-medium text-gray-700" id="session-label">Session Duration</span>
             </div>
-            <div class="text-lg font-semibold text-purple-700">{{ sessionDuration() }}</div>
+            <output aria-labelledby="session-label" class="text-lg font-semibold text-purple-700">{{ sessionDuration() }}</output>
           </div>
           @if (rememberMe()) {
             <p class="text-xs text-purple-600 mt-2">Session will persist for extended period</p>
@@ -51,76 +54,73 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="space-y-2 mb-6">
-          <a routerLink="/products" 
+        <nav aria-label="Quick actions" class="space-y-2 mb-6">
+          <a routerLink="/products"
              class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md transition-colors text-center font-medium">
             View My Inventory
           </a>
-          <a routerLink="/products/create" 
+          <a routerLink="/products/create"
              class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
             Add New Item
           </a>
-          <a routerLink="/" 
+          <a routerLink="/"
              class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
             Go to Home
           </a>
-        </div>
+        </nav>
 
         <!-- Account Information -->
         <div class="border-t border-gray-200 pt-6 mb-6">
-          <h3 class="font-semibold text-gray-900 mb-4">Account Information</h3>
-          <div class="space-y-3">
+          <h3 class="font-semibold text-gray-900 mb-4" id="account-info-heading">Account Information</h3>
+          <dl aria-labelledby="account-info-heading" class="space-y-3">
             <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-              <span class="text-gray-600 text-sm">Email:</span>
-              <span class="font-medium text-gray-900 text-sm">{{ userEmail() }}</span>
+              <dt class="text-gray-600 text-sm">Email</dt>
+              <dd class="font-medium text-gray-900 text-sm">{{ userEmail() }}</dd>
             </div>
             <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-              <span class="text-gray-600 text-sm">Member Since:</span>
-              <span class="font-medium text-gray-900 text-sm">{{ loginDate() }}</span>
+              <dt class="text-gray-600 text-sm">Member Since</dt>
+              <dd class="font-medium text-gray-900 text-sm">{{ loginDate() }}</dd>
             </div>
             <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-              <span class="text-gray-600 text-sm">Account Type:</span>
-              <span class="font-medium text-gray-900 text-sm">Standard</span>
+              <dt class="text-gray-600 text-sm">Account Type</dt>
+              <dd class="font-medium text-gray-900 text-sm">Standard</dd>
             </div>
-          </div>
+          </dl>
         </div>
 
         <!-- Activity Log -->
         <div class="border-t border-gray-200 pt-6 mb-6">
-          <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2" id="activity-heading">
+            <svg class="w-5 h-5 text-gray-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
             </svg>
             Recent Activity
           </h3>
           @if (activityLog().length > 0) {
-            <div class="space-y-2 max-h-64 overflow-y-auto">
+            <ul aria-labelledby="activity-heading" class="space-y-2 max-h-64 overflow-y-auto">
               @for (entry of activityLog(); track $index) {
-                <div class="bg-gray-50 border border-gray-200 p-3 rounded-md hover:bg-gray-100 transition-colors">
-                  <div class="flex items-start gap-3">
-                    <div class="flex-grow min-w-0">
-                      <p class="text-sm font-medium text-gray-900">
-                        {{ entry.action }}
-                        @if (entry.itemName) {
-                          <span class="text-blue-600">"{{ entry.itemName }}"</span>
-                        }
-                      </p>
-                      <p class="text-xs text-gray-500 mt-0.5">{{ entry.timestamp }}</p>
-                    </div>
-                  </div>
-                </div>
+                <li class="bg-gray-50 border border-gray-200 p-3 rounded-md hover:bg-gray-100 transition-colors">
+                  <p class="text-sm font-medium text-gray-900">
+                    {{ entry.action }}
+                    @if (entry.itemName) {
+                      <span class="text-blue-600">"{{ entry.itemName }}"</span>
+                    }
+                  </p>
+                  <time class="text-xs text-gray-500 mt-0.5 block">{{ entry.timestamp }}</time>
+                </li>
               }
-            </div>
+            </ul>
           } @else {
-            <div class="bg-gray-50 border border-gray-200 p-4 rounded-md text-center">
-              <p class="text-sm text-gray-500">No recent activity</p>
-            </div>
+            <p class="bg-gray-50 border border-gray-200 p-4 rounded-md text-center text-sm text-gray-500">
+              No recent activity
+            </p>
           }
         </div>
 
-        <!-- Logout Button -->
-        <button 
+        <!-- Logout -->
+        <button
           (click)="onLogout()"
+          type="button"
           class="w-full mt-6 bg-red-600 text-white px-6 py-2.5 rounded-md font-medium hover:bg-red-700 transition-colors">
           Logout
         </button>

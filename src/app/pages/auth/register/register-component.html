@@ -1,11 +1,15 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full space-y-8">
-    <div>
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+<main class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+
+  <section class="max-w-md w-full space-y-8" aria-labelledby="register-heading">
+
+    <!-- Header -->
+    <header>
+      <h2 id="register-heading" class="mt-6 text-center text-3xl font-extrabold text-gray-900">
         Create your account
       </h2>
-    </div>
+    </header>
 
+    <!-- Registration Form -->
     <app-dynamic-object-form
       [fields]="registerFields"
       [config]="formConfig"
@@ -15,11 +19,13 @@
       (formCancel)="onFormCancel()">
     </app-dynamic-object-form>
 
+    <!-- Sign In Link -->
     <p class="mt-2 text-center text-sm text-gray-600">
       Already have an account?
       <a href="/auth/login" class="font-medium text-blue-600 hover:text-blue-500">
         Sign in here
       </a>
     </p>
-  </div>
-</div>
+
+  </section>
+</main>

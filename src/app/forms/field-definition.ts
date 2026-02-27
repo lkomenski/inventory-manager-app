@@ -1,3 +1,18 @@
+/**
+ * field-definition.ts
+ *
+ * Shared TypeScript interfaces for the dynamic form system.
+ *
+ * FieldDefinition describes a single form field — its type, validators, and
+ * error messages. Arrays of FieldDefinition are passed to DynamicObjectFormComponent
+ * to generate forms without repeating reactive-form boilerplate per page.
+ *
+ * FormConfig controls the form's mode (create / edit / view) and optional
+ * pre-population data used when editing an existing object.
+ *
+ * FormSubmitData is the plain object emitted on successful submission.
+ */
+
 import { ValidatorFn, AsyncValidatorFn } from '@angular/forms';
 
 /**

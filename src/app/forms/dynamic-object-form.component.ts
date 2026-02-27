@@ -1,3 +1,22 @@
+/**
+ * dynamic-object-form.component.ts
+ *
+ * A single reusable form component that drives every form in the app —
+ * login, register, create item, and edit item.
+ *
+ * Rather than building a separate FormGroup in each page component, callers
+ * pass a FieldDefinition[] array (from auth-form-config or inventory-form-config)
+ * and this component handles control creation, validation, error display,
+ * and submission. The parent only receives a clean FormSubmitData object
+ * via the (formSubmit) output after all validators pass.
+ *
+ * For inventory pages, enableCustomFields unlocks an additional section
+ * where users can add arbitrary key/value pairs to the object's data object.
+ * Field name suggestions are loaded live from the public API so common
+ * property names (year, capacity, CPU model, etc.) appear in a dropdown
+ * with auto-detected types.
+ */
+
 import { Component, Input, Output, EventEmitter, OnInit, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, ValidatorFn, AsyncValidatorFn } from '@angular/forms';
@@ -7,7 +26,8 @@ import { ObjectsService } from '../services/objects.service';
 import { FieldDefinition, FormConfig, FormSubmitData } from './field-definition';
 
 /**
- * Represents a custom field added by the user
+ * Represents a custom field added by the user at runtime.
+ * isCustomName distinguishes free-text keys from dropdown selections.
  */
 export interface CustomField {
   key: string;               // Field name
@@ -17,7 +37,8 @@ export interface CustomField {
 }
 
 /**
- * Field suggestions loaded from existing API data
+ * A field name + type hint pulled from existing API objects.
+ * Shown in the custom field dropdown so users can reuse real property names.
  */
 export interface FieldSuggestion {
   name: string;               // Field name (e.g., "CPU model", "year")
@@ -83,8 +104,9 @@ export class DynamicObjectFormComponent implements OnInit {
   }
   
   /**
-   * Build reactive form from field definitions
-   * Dynamically creates form controls with their validators
+   * Build the reactive FormGroup from the FieldDefinition array.
+   * Each field's validators and asyncValidators are applied here so
+   * neither the parent component nor the template needs to touch FormBuilder.
    */
   private buildFormFromFields(): void {
     const group: { [key: string]: any } = {};
@@ -121,8 +143,9 @@ export class DynamicObjectFormComponent implements OnInit {
   }
   
   /**
-   * Load field suggestions from existing API objects
-   * This creates a smart dropdown of commonly used field names
+   * Fetch all objects from the API and extract unique field names from their
+   * data objects. Used to populate the custom field name dropdown with
+   * real property names and auto-detected types (text vs. number).
    */
   private loadFieldSuggestionsFromAPI(): void {
     this.loadingSuggestions.set(true);
@@ -166,8 +189,8 @@ export class DynamicObjectFormComponent implements OnInit {
   }
 
   /**
-   * Load initial data when editing or pre-populating form
-   * Populates form controls with initialData values
+   * Patch form controls and restore custom fields when editing an existing object.
+   * Handles both flat structures (auth forms) and nested data objects (inventory items).
    */
   private loadInitialData(): void {
     if (this.config.initialData) {
@@ -214,16 +237,16 @@ export class DynamicObjectFormComponent implements OnInit {
     }
   }
 
-  /**
-   * Check if a form field has validation errors and has been touched
-   */
+  /** Returns true when a field has been interacted with and fails validation. */
   isFieldInvalid(fieldName: string): boolean {
     const field = this.dynamicForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
 
   /**
-   * Get user-friendly error message for a field
+   * Returns the first matching error message for a field.
+   * Checks the FieldDefinition's custom error map before falling back
+   * to generic messages for standard Angular validator errors.
    */
   getFieldError(fieldName: string): string | null {
     const field = this.dynamicForm.get(fieldName);

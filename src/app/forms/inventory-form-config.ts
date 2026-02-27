@@ -1,3 +1,13 @@
+/**
+ * inventory-form-config.ts
+ *
+ * Field definitions for the inventory object form (Create and Edit pages).
+ *
+ * INVENTORY_OBJECT_FIELDS covers the fixed fields — name, color, and price.
+ * Additional key/value pairs the user adds at runtime are handled separately
+ * by DynamicObjectFormComponent's custom fields system, not declared here.
+ */
+
 import { Validators } from '@angular/forms';
 import { FieldDefinition } from './field-definition';
 

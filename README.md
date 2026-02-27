@@ -1,196 +1,73 @@
 # Inventory Manager App
 
-A modern, full-featured inventory management web application built with Angular 21, Server-Side Rendering (SSR), and Tailwind CSS. This application demonstrates complete CRUD operations using the RESTful API from [restful-api.dev](https://restful-api.dev).
+A multi-page Angular inventory management app built with **Angular 21**, **Tailwind CSS**, and **Server-Side Rendering (SSR)**. Demonstrates full CRUD operations against a public REST API, reactive form validation, typed HTTP service architecture, and responsive UI design.
 
-## Project Overview
-
-This project was created as a final project demonstrating:
-- Full CRUD operations (Create, Read, Update, Delete) with a public REST API
-- Server-Side Rendering (SSR) with Angular Universal
-- Proxy configuration for CORS handling in development
-- Form validation with user-friendly error messages
-- Multi-page routing with Angular Router
-- Modern Angular standalone components (Angular 21)
-- Responsive design with Tailwind CSS
-- Content Security Policy (CSP) configuration
-- Loading states and error handling
-- TypeScript with strong typing
-- RESTful API integration
-
-## Features
-
-### Pages & Routes
-- **Home/Dashboard** (`/`) - Welcome page with quick stats and navigation
-- **Inventory List** (`/objects`) - View all items in a table with actions
-- **Item Details** (`/objects/:id`) - Detailed view of a single item
-- **Create Item** (`/objects/create`) - Form to add new items with validation
-- **Edit Item** (`/objects/:id/edit`) - Form to update existing items
-- **Account** (`/account`) - Simple login/account management demo
-- **404 Not Found** (wildcard) - Custom error page for invalid routes (returns proper 404 HTTP status)
-
-### Core Functionality
-- **List View**: Display all inventory items in a responsive table
-- **Filtered List**: Filter by specific object IDs using query parameters (e.g., `/objects?id=1&id=2&id=3`)
-- **Detail View**: View complete information about a single item
-- **Create**: Add new items with validated forms (name, color, price, and unlimited custom fields)
-- **Edit**: Update existing items (uses PATCH for partial updates, preserves all custom fields)
-- **Delete**: Remove items with confirmation modal
-- **Smart Field Suggestions**: Dropdown dynamically populated from all API field names with auto-type detection
-- **Dynamic Fields**: Add unlimited custom data properties with flexible types
-- **Loading States**: Visual feedback during API calls
-- **Error Handling**: Context-aware error messages (e.g., detecting reserved IDs)
-- **Responsive Design**: Mobile-friendly interface
-- **SEO Friendly**: Server-side rendering with proper meta tags and status codes
-
-### Form Validation
-- Name field: Required, minimum 3 characters
-- Color field: Optional, color picker with hex value
-- Price field: Optional, must be >= 0 if provided
-- Custom fields: Optional, select from dynamically loaded field names from API with auto-type detection, or add your own
-- Real-time validation feedback
-- Submit button disabled until form is valid
-
-## Technology Stack
-
-- **Framework**: Angular 21.1.0 with Server-Side Rendering (SSR)
-- **Server**: Express.js for SSR and CSP headers
-- **Language**: TypeScript 5.9
-- **Styling**: Tailwind CSS 4.1
-- **HTTP Client**: Angular HttpClient with proxy configuration
-- **Router**: Angular Router (client + server routes)
-- **Forms**: Reactive Forms with validation
-- **API**: RESTful API (https://api.restful-api.dev/objects)
-- **Build Tool**: Angular CLI
-- **State Management**: Angular Signals
+---
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed:
-- **Node.js** (v18 or higher)
-- **npm** (v11 or higher)
-- **Angular CLI** (v21 or higher)
+- **Node.js** v18+ (required)
+- **npm** v11+ (required)
+- **Angular CLI** (optional, for `ng` commands)
 
-## Installation & Setup
+---
 
-1. **Clone the repository**
-   \`\`\`bash
-   git clone <your-repository-url>
-   cd inventory-manager-app
-   \`\`\`
+## How to Run
 
-2. **Install dependencies**
-   \`\`\`bash
-   npm install
-   \`\`\`
+**Install dependencies:**
 
-3. **Configure environment** (Important!)
-   
-   The application requires environment configuration for API access. See [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md) for detailed instructions.
-   
-   Quick setup:
-   \`\`\`bash
-   # Copy the environment template file
-   cp src/environments/environment.ts src/environments/environment.local.ts
-   
-   # Edit src/environments/environment.local.ts and replace YOUR_API_KEY_HERE with your actual API key
-   \`\`\`
-   
-   **Note**: The `environment.local.ts` file is gitignored and should never be committed to version control.
-
-4. **Start the development server**
-   \`\`\`bash
-   npm start
-   # or
-   ng serve
-   \`\`\`
-
-5. **Open in browser**
-   Navigate to \`http://localhost:4200/\`
-
-The application will automatically reload when you make changes to the source code.
-
-## Project Structure
-
-```
-inventory-manager-app/
-├── src/
-│   ├── app/
-│   │   ├── pages/                       # Page components
-│   │   │   ├── account/                 # Login/Account page
-│   │   │   ├── home/                    # Dashboard/Home page
-│   │   │   ├── objects-list/            # List of all items
-│   │   │   ├── object-detail/           # Single item details
-│   │   │   ├── object-create/           # Create new item form
-│   │   │   └── object-edit/             # Edit item form
-│   │   ├── components/                  # Reusable components
-│   │   │   └── dynamic-object-form.component.ts  # Dynamic form component
-│   │   ├── models/
-│   │   │   └── object.model.ts          # TypeScript interfaces
-│   │   ├── services/
-│   │   │   └── objects.service.ts       # API service with HTTP methods
-│   │   ├── shared/                      # Shared components
-│   │   │   └── components/
-│   │   │       ├── navbar/              # Navigation component
-│   │   │       ├── footer/              # Footer component
-│   │   │       └── not-found/           # 404 error page
-│   │   ├── app.routes.ts                # Client-side routes
-│   │   ├── app.routes.server.ts         # Server-side routes (SSR)
-│   │   ├── app.config.ts                # App configuration
-│   │   ├── app.config.server.ts         # Server configuration
-│   │   ├── app.ts                       # Root component
-│   │   └── app.html                     # Root template
-│   ├── environments/                    # Environment configuration
-│   │   ├── environment.ts               # Development environment template
-│   │   └── environment.local.ts         # Local environment (gitignored)
-│   ├── server.ts                        # Express server for SSR & CSP
-│   ├── main.ts                          # Client bootstrap
-│   ├── main.server.ts                   # Server bootstrap
-│   ├── styles.css                       # Global styles with Tailwind
-│   └── index.html                       # Main HTML file
-├── proxy.conf.js                        # Proxy configuration for development
-├── angular.json                         # Angular CLI configuration
-├── tsconfig.json                        # TypeScript configuration
-├── ENVIRONMENT_SETUP.md                 # Environment configuration guide
-├── TESTING.md                           # Comprehensive testing guide with test cases
-└── package.json                         # Dependencies & scripts
+```bash
+npm install
 ```
 
-## API Integration
+**Configure environment** (required):
 
-This application integrates with the RESTful API at `https://api.restful-api.dev/objects`
+```bash
+cp src/environments/environment.ts src/environments/environment.local.ts
+```
 
-### Development Proxy Configuration
+Edit `environment.local.ts` and replace `YOUR_API_KEY_HERE` with your actual API key. See [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md) for full instructions and troubleshooting.
 
-To avoid CORS issues during development, the application uses a proxy configuration (`proxy.conf.js`) that forwards all requests from `/api/*` to `https://api.restful-api.dev/*`.
+**Start the development server:**
 
-**How it works:**
-- Frontend makes requests to `/api/objects/1` (same origin)
-- Proxy forwards to `https://api.restful-api.dev/objects/1`
-- Browser's CORS restrictions are bypassed
+```bash
+npm start
+```
 
-The proxy is automatically used when running `npm start` or `ng serve`.
+Open http://localhost:4200/
 
-### API Endpoints Used
+---
+
+## Features
+
+- Full CRUD on inventory objects — create, list, view, edit, and delete
+- Objects List with a table view and View / Edit / Delete actions per row
+- Object Detail page showing all fields, handles `null` data safely
+- Validated reactive forms with inline error messages and disabled submit until valid
+- Dynamic custom data fields — add unlimited key/value pairs to any object
+- Smart field name suggestions loaded from real API data with auto-type detection
+- Angular service layer with strongly-typed `HttpClient` calls
+- Loading indicators on all async operations
+- User-friendly error messages, including detection of reserved API IDs
+- Server-Side Rendering via Express with Content Security Policy headers
+- Responsive layout with Tailwind CSS
+
+---
+
+## Public API
+
+Base URL: https://api.restful-api.dev/objects
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
 | GET | `/objects` | Retrieve all objects |
-| GET | `/objects?id=x&id=y&id=z` | Retrieve specific objects by IDs (multiple) |
-| GET | `/objects/{id}` | Retrieve single object |
-| POST | `/objects` | Create new object |
-| PUT | `/objects/{id}` | Update object (full replacement) |
-| PATCH | `/objects/{id}` | Update object (partial update) |
-| DELETE | `/objects/{id}` | Delete object |
+| GET | `/objects/{id}` | Retrieve a single object |
+| POST | `/objects` | Create a new object |
+| PUT | `/objects/{id}` | Full update |
+| PATCH | `/objects/{id}` | Partial update |
+| DELETE | `/objects/{id}` | Delete an object |
 
-### Important Notes
-
-**Reserved Object IDs**: Object IDs 1-13 are reserved demo objects provided by the API and **cannot be edited or deleted**. When attempting to edit these objects, you'll see a helpful error message directing you to create a new object instead.
-
-To test editing functionality:
-1. Create a new object using the "Add New Item" form
-2. Use the generated ID to test edit and delete operations
-
-### Data Model
+**Data model:**
 
 ```typescript
 interface ApiObject {
@@ -199,197 +76,98 @@ interface ApiObject {
   data?: {
     color?: string;
     price?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   } | null;
 }
 ```
 
-## Server-Side Rendering (SSR)
-
-This application uses Angular Universal for Server-Side Rendering, providing:
-- Faster initial page load
-- Better SEO (search engines can crawl pre-rendered content)
-- Improved performance on low-powered devices
-- Social media preview support
-
-### Content Security Policy (CSP)
-
-The application implements Content Security Policy headers via the Express server (`src/server.ts`):
-- **Development mode**: Allows `unsafe-eval` and `unsafe-inline` for HMR and debugging
-- **Production mode**: Stricter CSP for enhanced security
-- **Worker support**: Allows web workers with `worker-src 'self' blob:`
-- **API connections**: Whitelists `https://api.restful-api.dev`
-
-The CSP configuration automatically adjusts based on the `NODE_ENV` environment variable.
-
-## Styling
-
-The application uses **Tailwind CSS** for styling with:
-- Responsive layouts (mobile-first design)
-- Modern gradients and shadows
-- Consistent color scheme
-- Hover states and transitions
-- Loading spinners
-- Modal dialogs
-- Form styling with validation states
-- SVG icons for visual elements
-
-## Testing
-
-Run unit tests with:
-\`\`\`bash
-npm test
-\`\`\`
-
-### Manual Testing & Debugging
-
-This application includes comprehensive debugging features and test cases. See [TESTING.md](TESTING.md) for:
-
-- **Console Logging**: Extensive logs with emoji indicators for easy tracking of all operations
-- **Breakpoint Locations**: Strategic debugging points marked in the code
-- **Test Cases**: Complete test scenarios for all features (list, create, edit, delete, validation, etc.)
-- **Browser DevTools Guide**: How to use Chrome/Firefox DevTools for debugging
-- **API Integration Tests**: Verify proxy and API communication
-
-**Quick Debugging Tips**:
-- Open browser console (F12) to see detailed operation logs
-- All API calls are logged with request/response data
-- Form submissions show payload details
-- Errors display in grouped console logs for easy debugging
-
-## Building for Production
-
-Create a production build:
-```bash
-npm run build
-# or
-ng build
-```
-
-The build artifacts will be stored in the `dist/` directory.
-
-## Troubleshooting
-
-### Environment Configuration Errors
-If you get import errors related to `environment.local`:
-1. Make sure `environment.local.ts` exists in `src/environments/`
-2. Copy from the template file if needed: `cp src/environments/environment.ts src/environments/environment.local.ts`
-3. Edit `environment.local.ts` and replace `YOUR_API_KEY_HERE` with your actual API key
-4. Verify it exports an `environment` object with `apiUrl` and `apiKey` properties (see [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md))
-
-### CORS Issues
-If you encounter CORS errors, ensure the development server is running from the project root directory (not the `src/` folder) so the proxy configuration loads correctly.
-
-```bash
-# Make sure you're in the project root
-cd inventory-manager-app
-npm start
-```
-
-### Can't Edit Objects
-Objects with IDs 1-13 are reserved by the API and cannot be edited. Create a new object to test edit functionality.
-
-### Git Errors with 'nul' File
-Windows reserves certain filenames (`nul`, `con`, `prn`, etc.). These are now automatically ignored in `.gitignore`.
-
-### Content Security Policy Violations
-CSP warnings in development mode are normal and expected (related to HMR and dev tools). They won't appear in production builds.
-
-## Usage Guide
-
-### Viewing Items
-1. Navigate to "Inventory" in the navigation bar
-2. Browse the list of items in the table
-3. Click "View" to see detailed information
-4. Click "Edit" to modify an item
-5. Click "Delete" to remove an item (with confirmation)
-
-### Filtering by Specific IDs
-You can view specific objects by adding query parameters to the URL:
-1. Navigate to `/objects?id=1&id=2&id=3` (replace with actual IDs)
-2. A blue banner will show "Filtered View" with the IDs
-3. Only the requested objects will be displayed
-4. Click "View All" to return to the full list
-
-**Examples**:
-- View single object: `/objects?id=5`
-- View multiple objects: `/objects?id=1&id=2&id=7&id=13`
-- This matches the API's query parameter functionality
-
-### Creating an Item
-1. Click "Add New Item" from the home page or navigation
-2. Fill in the form fields:
-   - **Name** (required, min 3 characters)
-   - **Color** (optional, use color picker or enter hex value)
-   - **Price** (optional, must be >= 0 if provided)
-   - **Additional Data Fields** (optional, click "Add Field" to add properties)
-3. For custom fields:
-   - **Select from dropdown**: Choose from common field names automatically loaded from existing API objects (year, capacity, CPU model, etc.) - type is auto-detected from actual API data
-   - **Custom field names**: Select "✏️ Custom field name..." to enter your own field name
-   - **Switch between modes**: Use the "📋 List" button to switch back to dropdown
-   - Enter the value for each field
-   - Remove fields you don't need with the trash icon
-4. Click "Create Item" when form is valid
-5. You'll be redirected to the item details page
-
-### Editing an Item
-1. Navigate to an item's detail page
-2. Click "Edit Object"
-3. Modify the fields as needed
-4. Click "Update Item" to save changes
-
-### Deleting an Item
-1. Click "Delete" on any item
-2. Confirm the deletion in the modal
-3. Item will be removed from the list
-
-## Key Features Demonstrated
-
-### Angular Best Practices
-- Standalone components (latest Angular approach)
-- Server-Side Rendering with Angular Universal
-- Signals for reactive state management
-- Reactive forms with validation
-- Route protection and navigation
-- Service-based architecture with feature modules
-- Strongly-typed TypeScript interfaces
-- HTTP client with comprehensive error handling
-- Development proxy for CORS handling
-- Lazy loading ready structure
-- Content Security Policy implementation
-- Proper HTTP status codes for SEO
-
-### User Experience
-- Loading indicators during API calls
-- Smart error messages with context-aware guidance
-- Detection of reserved/read-only objects with helpful instructions
-- Form validation with helpful messages
-- Dynamic custom fields with field name suggestions automatically loaded from API with auto-type detection
-- Confirmation modals for destructive actions
-- Responsive mobile-friendly design
-- Intuitive navigation
-- Visual feedback for user actions
-- Proper HTTP status codes (404 for not found pages)
-
-## Contributing
-
-This is an academic project, but suggestions are welcome!
-
-## License
-
-This project is for educational purposes.
-
-## Author
-
-Created for Angular Final Project - 2026
-
-## Acknowledgments
-
-- Angular team for the amazing framework
-- RESTful API Dev for providing the free API
-- Tailwind CSS for the utility-first CSS framework
-- Express.js for the SSR server
+> **Note:** Object IDs 1–13 are reserved demo objects provided by the API and cannot be edited or deleted. Create a new object to test edit and delete functionality.
 
 ---
 
-**Note**: This application uses a public API for demonstration purposes. Data may be modified or deleted by other users. Object IDs 1-13 are reserved demo objects and cannot be edited or deleted.
+## Pages and Routes
+
+### Home / Dashboard (`/`)
+Welcome page with navigation links and a live count of objects loaded from the API.
+
+### Objects List (`/objects`)
+Displays all inventory items in a responsive table. Each row includes **View**, **Edit**, and **Delete** actions. Supports filtered views via query parameters (e.g. `/objects?id=1&id=2`).
+
+### Object Details (`/objects/:id`)
+Shows a single object and all of its `data` fields. Handles `null` data gracefully and provides Edit and Delete shortcuts.
+
+### Create Object (`/objects/create`)
+Validated form for creating a new item. Requires a name (min 3 characters), accepts optional color and price fields, and supports unlimited additional custom key/value fields. Redirects to the detail page on success.
+
+### Edit Object (`/objects/:id/edit`)
+Pre-populated form for updating an existing item using PATCH. Preserves custom fields that exist on the object. Shows a clear error if the object is a reserved ID.
+
+### Account (`/account`)
+Simple login and account management area demonstrating a typical web app auth page.
+
+### Not Found (wildcard)
+Custom 404 page rendered for any unmatched route, with a link back to the home page.
+
+---
+
+## Testing
+
+Unit tests run with:
+
+```bash
+npm test
+```
+
+See [TESTING.md](TESTING.md) for the full test plan, manual test scenarios, browser DevTools debugging guide, and API integration verification steps.
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── pages/
+│   │   ├── home/                    # Dashboard/Home page
+│   │   ├── products/
+│   │   │   ├── list/                # Objects list table
+│   │   │   ├── detail/              # Single object view
+│   │   │   ├── create/              # Create form
+│   │   │   └── edit/                # Edit form
+│   │   ├── account/                 # Login/account page
+│   │   └── admin/                   # Admin area
+│   ├── shared/components/
+│   │   ├── navbar/                  # Global navigation
+│   │   ├── footer/                  # Global footer
+│   │   └── not-found/               # 404 page
+│   ├── forms/                       # Form config, field definitions, dynamic form component
+│   ├── services/                    # ObjectsService, AuthService
+│   ├── models/                      # TypeScript interfaces
+│   ├── guards/                      # Route guards
+│   ├── app.routes.ts                # Client-side routes
+│   └── app.routes.server.ts         # Server-side routes (SSR)
+├── environments/
+│   ├── environment.ts               # Template (committed)
+│   └── environment.local.ts         # Local config with API key (gitignored)
+├── server.ts                        # Express SSR server and CSP
+└── index.html                       # App shell
+```
+
+**Structure Benefits:** Clear separation by feature and layer, easy navigation, scalable, follows standard Angular project conventions
+
+---
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm start` | Start the development server |
+| `npm test` | Run unit tests (see [TESTING.md](TESTING.md)) |
+| `npm run build` | Production build |
+
+---
+
+## Additional Documentation
+
+- **[ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md)**: API key setup, environment file configuration, and troubleshooting steps
+- **[TESTING.md](TESTING.md)**: Manual test scenarios, debugging tips, and unit test guidance

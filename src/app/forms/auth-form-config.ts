@@ -1,3 +1,18 @@
+/**
+ * auth-form-config.ts
+ *
+ * Field definitions and validators for the login and registration forms.
+ *
+ * Centralizing these here means the form structure and validation rules
+ * (required, minLength, email format, password match) live in one place.
+ * The login and register components import the relevant constant and pass
+ * it to DynamicObjectFormComponent — no FormBuilder needed in those components.
+ *
+ * createPasswordMatchValidator() is an async validator attached to the
+ * passwordConfirmation field. It reads the sibling password field via
+ * control.parent so it works correctly inside the dynamic form.
+ */
+
 import { Validators, AbstractControl, AsyncValidatorFn, ValidationErrors } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { FieldDefinition } from './field-definition';

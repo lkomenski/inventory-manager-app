@@ -5,12 +5,12 @@ import { ObjectsService } from '../../../services/objects.service';
 import { ApiObject } from '../../../models/object.model';
 
 /**
- * Product Detail Component
- * 
- * Displays detailed information for a single inventory item including:
- * - All item properties (name, color, price, custom fields)
- * - Delete confirmation modal
- * - Loading and error states
+ * ProductDetailComponent
+ *
+ * Displays all stored fields for a single inventory item, resolved by
+ * the :id route parameter. Also owns the delete flow: a confirmation
+ * modal is shown before the DELETE request is sent, and the user is
+ * returned to the list on success.
  */
 @Component({
   selector: 'app-product-detail',
@@ -19,72 +19,72 @@ import { ApiObject } from '../../../models/object.model';
   templateUrl: './detail.component.html'
 })
 export class ProductDetailComponent implements OnInit {
+  /** The loaded inventory item; null until the fetch completes. */
   object = signal<ApiObject | null>(null);
+
+  /** True while the detail fetch is in flight. */
   loading = signal(false);
+
+  /** Holds an error message if any API call fails; null otherwise. */
   error = signal<string | null>(null);
-  showDeleteModal = signal(false);  
-  deleting = signal(false);  
+
+  /** Controls visibility of the delete confirmation modal. */
+  showDeleteModal = signal(false);
+
+  /** True while the DELETE request is in flight — disables modal buttons. */
+  deleting = signal(false);
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private objectsService: ObjectsService
-  ) {
-    // console.log('Product Detail Component initialized');
-  }
+  ) {}
 
+  /** Reads the :id param from the route and triggers the initial fetch. */
   ngOnInit(): void {
-    // console.log('Product Detail Component: ngOnInit called');
     const id = this.route.snapshot.paramMap.get('id');
-    // console.log('Product ID from route:', id);
     if (id) {
       this.loadProduct(id);
     } else {
-      // console.error('No product ID provided in route');
       this.error.set('No product ID provided');
     }
   }
 
   /**
-   * Load product data from API by ID
-   * Sets loading/error states appropriately
+   * Fetches a single inventory item by ID. Called on init and again
+   * if the user clicks "Try Again" after an error.
    */
   loadProduct(id?: string): void {
     const productId = id || this.route.snapshot.paramMap.get('id');
-    // console.log('Loading product with ID:', productId);
     if (!productId) return;
 
-    // DEBUGGING BREAKPOINT: Set a breakpoint here to debug product loading
     this.loading.set(true);
     this.error.set(null);
-    
+
     this.objectsService.getObject(productId).subscribe({
       next: (data) => {
-        // console.log('Product loaded successfully');
-        // console.log('Product data:', data);
         this.object.set(data);
         this.loading.set(false);
       },
       error: (err) => {
-        // console.error('Failed to load product:', err);
         this.error.set(err.message);
         this.loading.set(false);
       }
     });
   }
 
-  /** Extract all custom field keys from object.data */
+  /** Returns the keys of the item's data object, used to render custom fields. */
   getDataKeys(): string[] {
     const data = this.object()?.data;
     return data ? Object.keys(data) : [];
   }
 
-  /** Format object as pretty-printed JSON */
+  /** Serialises the full item to indented JSON for the raw-data section. */
   formatJson(obj: any): string {
     return JSON.stringify(obj, null, 2);
   }
-  
-  /** Format value for display, showing 'N/A' for empty values */
+
+  /** Returns a display-safe string, substituting 'N/A' for null/undefined/empty. */
   formatValue(value: any): string {
     if (value === null || value === undefined || value === '') {
       return 'N/A';
@@ -92,37 +92,32 @@ export class ProductDetailComponent implements OnInit {
     return String(value);
   }
 
-  /** Show delete confirmation modal */
+  /** Opens the delete confirmation modal. */
   confirmDelete(): void {
-    // console.log('Delete confirmation requested');
     this.showDeleteModal.set(true);
   }
 
-  /** Close delete confirmation modal */
+  /** Closes the delete confirmation modal without deleting. */
   cancelDelete(): void {
-    // console.log('Delete cancelled');
     this.showDeleteModal.set(false);
   }
 
   /**
-   * Delete the current product permanently
-   * Navigates back to list on success
+   * Sends the DELETE request for the current item.
+   * Navigates to the list on success; surfaces the error message on failure
+   * and closes the modal so the user can retry.
    */
   deleteProduct(): void {
     const obj = this.object();
-    // console.log('Deleting product:', obj?.id);
     if (!obj?.id) return;
 
-    // DEBUGGING BREAKPOINT: Set a breakpoint here to debug delete operation
     this.deleting.set(true);
-    
+
     this.objectsService.deleteObject(obj.id).subscribe({
       next: () => {
-        // console.log('Product deleted successfully, navigating to list');
         this.router.navigate(['/products']);
       },
       error: (err) => {
-        // console.error('Failed to delete product:', err);
         this.error.set(err.message);
         this.deleting.set(false);
         this.showDeleteModal.set(false);

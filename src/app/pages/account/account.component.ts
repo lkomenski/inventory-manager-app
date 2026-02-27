@@ -1,13 +1,26 @@
+/**
+ * account.component.ts
+ *
+ * Post-login dashboard page. Displays the current user's profile,
+ * a live session duration timer, recent activity, and quick navigation
+ * to inventory actions.
+ *
+ * Session state (email, login timestamp, rememberMe) is read from
+ * localStorage so the page survives a browser refresh. Activity log
+ * entries are also persisted there so other pages can append to them
+ * via the static AccountComponent.logActivity() helper.
+ */
+
 import { Component, signal, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
 
-/** Activity log entry tracking user actions */
+/** A single entry in the activity log shown on the dashboard. */
 interface ActivityLogEntry {
   action: string;      // Description of the action (e.g., "Logged in", "Created item")
-  itemName?: string;   // Name of item affected (if applicable)
-  timestamp: string;   // When the action occurred
+  itemName?: string;   // Name of the affected item, if applicable
+  timestamp: string;   // Human-readable date/time string
 }
 
 /**
@@ -34,13 +47,13 @@ export class AccountComponent implements OnInit, OnDestroy {
   private router = inject(Router);
 
   userEmail = signal('');
-  loginDate = signal('');  
-  loginTimestamp = signal<number>(0);  
-  sessionDuration = signal('');  
-  rememberMe = signal(false);  
-  activityLog = signal<ActivityLogEntry[]>([]);  
-  
-  private timerInterval?: number;  // SetInterval ID for session timer
+  loginDate = signal('');
+  loginTimestamp = signal<number>(0);
+  sessionDuration = signal('');
+  rememberMe = signal(false);
+  activityLog = signal<ActivityLogEntry[]>([]);
+
+  private timerInterval?: number;  // setInterval ID — cleared in ngOnDestroy
 
   constructor() {
     // Check localStorage for existing session
@@ -85,7 +98,7 @@ export class AccountComponent implements OnInit, OnDestroy {
     }
   }
   
-  /** Start interval timer that updates session duration every second */
+  /** Start interval timer that updates the displayed session duration every second. */
   private startSessionTimer(): void {
     this.updateSessionDuration();  // Initial update
     this.timerInterval = window.setInterval(() => {
@@ -116,7 +129,7 @@ export class AccountComponent implements OnInit, OnDestroy {
     }
   }
   
-  /** Load activity log from localStorage and keep only last 10 entries */
+  /** Load the activity log from localStorage, capping at the 10 most recent entries. */
   private loadActivityLog(): void {
     const stored = localStorage.getItem('activityLog');
     if (stored) {
@@ -168,7 +181,11 @@ export class AccountComponent implements OnInit, OnDestroy {
     localStorage.setItem('activityLog', JSON.stringify(newLog));
   }
   
-  // Public method that can be called from other components
+  /**
+   * Static helper so any page component can append an activity log entry
+   * without needing a reference to this component instance.
+   * Called from create, edit, and delete flows after a successful API operation.
+   */
   static logActivity(action: string, itemName?: string): void {
     const entry: ActivityLogEntry = {
       action,

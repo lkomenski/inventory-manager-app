@@ -5,11 +5,11 @@ import { AuthService } from '../services/auth-service';
 /**
  * admin.guard.ts
  *
- * CanActivate guard that protects admin-only routes.
- * Only users with role 'admin' can access these routes.
- * Others are redirected to the home page.
+ * CanActivate guard that restricts access to users with the 'admin' role.
+ * Reads the role claim decoded from the current JWT via AuthService.
+ * Non-admin users are redirected to the home page.
  *
- * Usage:
+ * Compose with authGuard so authentication is checked first:
  *   {
  *     path: 'admin',
  *     component: AdminComponent,
@@ -20,13 +20,11 @@ export const adminGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  const role = authService.getRole();
-
-  if (role === 'admin') {
-    return true; // Allow navigation
+  if (authService.getRole() === 'admin') {
+    return true;
   }
 
-  // Not an admin – redirect to home
+  // Insufficient role — redirect to home rather than exposing the admin route.
   router.navigate(['/']);
   return false;
 };
