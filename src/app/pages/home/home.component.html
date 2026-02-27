@@ -82,7 +82,7 @@
       <h2 id="quick-actions-heading" class="text-2xl font-semibold mb-6 text-gray-900">Quick Actions</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- View All Items -->
-        <a routerLink="/objects" 
+        <a routerLink="/products" 
            class="action-card group">
           <div class="flex items-start gap-4">
             <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
@@ -102,7 +102,8 @@
         </a>
 
         <!-- Add New Item -->
-        <a routerLink="/objects/create" 
+        @if (isAdmin()) {
+        <a routerLink="/products/create" 
            class="action-card group">
           <div class="flex items-start gap-4">
             <div class="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
@@ -120,8 +121,7 @@
             </div>
           </div>
         </a>
-
-        <!-- Account -->
+        }
         <a routerLink="/account" 
            class="action-card group">
           <div class="flex items-start gap-4">

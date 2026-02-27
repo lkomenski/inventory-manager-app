@@ -46,10 +46,18 @@ export class AccountComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  /** Decoded user from the JWT — provides email and role directly from the token. */
+  currentUser = this.authService.currentUser;
+
+  /** True when the logged-in user has the admin role. */
+  isAdmin = () => this.authService.getRole() === 'admin';
+
   userEmail = signal('');
   loginDate = signal('');
   loginTimestamp = signal<number>(0);
   sessionDuration = signal('');
+  /** Countdown string showing time remaining on the JWT (e.g. "7h 43m 12s"). */
+  tokenExpiresIn = signal('');
   rememberMe = signal(false);
   activityLog = signal<ActivityLogEntry[]>([]);
 
@@ -126,6 +134,26 @@ export class AccountComponent implements OnInit, OnDestroy {
       this.sessionDuration.set(`${minutes}m ${seconds % 60}s`);
     } else {
       this.sessionDuration.set(`${seconds}s`);
+    }
+
+    // Update the token expiry countdown
+    const expiry = this.authService.getTokenExpiry();
+    if (expiry) {
+      const remaining = expiry * 1000 - Date.now();
+      if (remaining <= 0) {
+        this.tokenExpiresIn.set('Expired');
+      } else {
+        const rs = Math.floor(remaining / 1000);
+        const rm = Math.floor(rs / 60);
+        const rh = Math.floor(rm / 60);
+        if (rh > 0) {
+          this.tokenExpiresIn.set(`${rh}h ${rm % 60}m ${rs % 60}s`);
+        } else if (rm > 0) {
+          this.tokenExpiresIn.set(`${rm}m ${rs % 60}s`);
+        } else {
+          this.tokenExpiresIn.set(`${rs}s`);
+        }
+      }
     }
   }
   

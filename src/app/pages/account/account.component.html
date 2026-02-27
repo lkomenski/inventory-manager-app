@@ -38,7 +38,7 @@
         </dl>
 
         <!-- Session Timer -->
-        <div class="mb-6 bg-purple-50 border border-purple-100 rounded-lg p-4">
+        <div class="mb-6 bg-purple-50 border border-purple-100 rounded-lg p-4 space-y-2">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <svg class="w-5 h-5 text-purple-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,8 +48,24 @@
             </div>
             <output aria-labelledby="session-label" class="text-lg font-semibold text-purple-700">{{ sessionDuration() }}</output>
           </div>
+          @if (tokenExpiresIn()) {
+            <div class="flex items-center justify-between border-t border-purple-100 pt-2">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-purple-500" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+                <span class="text-xs font-medium text-gray-600" id="expiry-label">Token Expires In</span>
+              </div>
+              <output aria-labelledby="expiry-label"
+                      [class]="tokenExpiresIn() === 'Expired' ? 'text-sm font-semibold text-red-600' :
+                               +tokenExpiresIn().split('m')[0] < 5 && !tokenExpiresIn().includes('h') ? 'text-sm font-semibold text-orange-500' :
+                               'text-sm font-semibold text-purple-600'">
+                {{ tokenExpiresIn() }}
+              </output>
+            </div>
+          }
           @if (rememberMe()) {
-            <p class="text-xs text-purple-600 mt-2">Session will persist for extended period</p>
+            <p class="text-xs text-purple-600">Session will persist for extended period</p>
           }
         </div>
 
@@ -59,10 +75,12 @@
              class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md transition-colors text-center font-medium">
             View My Inventory
           </a>
-          <a routerLink="/products/create"
-             class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
-            Add New Item
-          </a>
+          @if (isAdmin()) {
+            <a routerLink="/products/create"
+               class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
+              Add New Item
+            </a>
+          }
           <a routerLink="/"
              class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
             Go to Home
@@ -83,7 +101,9 @@
             </div>
             <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
               <dt class="text-gray-600 text-sm">Account Type</dt>
-              <dd class="font-medium text-gray-900 text-sm">Standard</dd>
+              <dd class="font-medium text-gray-900 text-sm">
+                {{ currentUser()?.role === 'admin' ? 'Administrator' : 'Standard' }}
+              </dd>
             </div>
           </dl>
         </div>

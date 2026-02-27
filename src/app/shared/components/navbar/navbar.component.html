@@ -44,12 +44,14 @@
              role="menuitem">
             Inventory
           </a>
-          <a routerLink="/products/create" 
-             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-             class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
-             role="menuitem">
-            Add Item
-          </a>
+          @if (userRole() === 'admin') {
+            <a routerLink="/products/create" 
+               routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+               class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
+               role="menuitem">
+              Add Item
+            </a>
+          }
           <a routerLink="/account" 
              routerLinkActive="bg-blue-50 text-blue-700 font-medium"
              class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
@@ -107,13 +109,15 @@
                role="menuitem">
               Inventory
             </a>
-            <a routerLink="/products/create" 
-               (click)="closeMobileMenu()"
-               routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-               class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
-               role="menuitem">
-              Add Item
-            </a>
+            @if (userRole() === 'admin') {
+              <a routerLink="/products/create" 
+                 (click)="closeMobileMenu()"
+                 routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+                 class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
+                 role="menuitem">
+                Add Item
+              </a>
+            }
             <a routerLink="/account" 
                (click)="closeMobileMenu()"
                routerLinkActive="bg-blue-50 text-blue-700 font-medium"

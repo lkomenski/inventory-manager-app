@@ -1,7 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ObjectsService } from '../../services/objects.service';
+import { AuthService } from '../../services/auth-service';
 
 /**
  * HomeComponent
@@ -20,6 +21,11 @@ import { ObjectsService } from '../../services/objects.service';
   templateUrl: './home.component.html'
 })
 export class HomeComponent implements OnInit {
+  private authService = inject(AuthService);
+
+  /** True when the current user has the admin role. */
+  isAdmin = () => this.authService.getRole() === 'admin';
+
   /** Running total of inventory items fetched from the API. */
   objectCount = signal(0);
 
