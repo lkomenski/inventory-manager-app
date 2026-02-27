@@ -1,229 +1,135 @@
 <main class="min-h-screen py-12 bg-gray-50">
   <div class="container mx-auto px-4">
-    <div class="max-w-md mx-auto">
-      <!-- Logo/Header -->
+    <div class="max-w-2xl mx-auto">
+      <!-- Header -->
       <header class="text-center mb-8">
-        <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm" aria-hidden="true">
+        <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
         </div>
-        <h1 class="text-4xl font-semibold text-gray-900 mb-2">My Account</h1>
-        <p class="text-gray-600">Manage your inventory account</p>
+        <h1 class="text-4xl font-semibold text-gray-900 mb-2">Dashboard</h1>
+        <p class="text-gray-600">Manage your inventory account and view activity</p>
       </header>
 
-      <!-- Account Status Card -->
-      @if (!isLoggedIn()) {
-        <!-- Login Form -->
-        <section class="bg-white border border-gray-200 rounded-lg shadow-sm p-8" aria-labelledby="login-heading">
-          <h2 id="login-heading" class="text-2xl font-semibold text-gray-900 mb-6">Login</h2>
-          
-          <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-            <!-- Email Field -->
-            <div class="mb-5">
-              <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
-                Email <span class="text-red-500">*</span>
-              </label>
-              <input 
-                id="email"
-                type="email" 
-                formControlName="email"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                [class.border-red-500]="isLoginFieldInvalid('email')"
-                placeholder="Enter your email">
-              
-              @if (isLoginFieldInvalid('email')) {
-                <p class="mt-2 text-red-600 text-sm">Valid email is required</p>
-              }
-            </div>
+      <!-- Dashboard Content -->
+      <section class="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+        <!-- Welcome Section -->
+        <div class="text-center mb-8">
+          <h2 class="text-2xl font-semibold text-gray-900 mb-1">Welcome back!</h2>
+          <p class="text-gray-600">{{ userEmail() }}</p>
+        </div>
 
-            <!-- Password Field -->
-            <div class="mb-6">
-              <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
-                Password <span class="text-red-500">*</span>
-              </label>
-              <div class="relative">
-                <input 
-                  id="password"
-                  [type]="showPassword() ? 'text' : 'password'"
-                  formControlName="password"
-                  class="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  [class.border-red-500]="isLoginFieldInvalid('password')"
-                  placeholder="Enter your password">
-                <button
-                  type="button"
-                  (click)="togglePasswordVisibility()"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                  [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
-                  @if (showPassword()) {
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
-                    </svg>
-                  } @else {
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                  }
-                </button>
-              </div>
-              
-              @if (isLoginFieldInvalid('password')) {
-                <p class="mt-2 text-red-600 text-sm">Password is required</p>
-              }
-            </div>
-
-            <!-- Remember Me Checkbox -->
-            <div class="mb-6">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  formControlName="rememberMe"
-                  class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
-                <span class="text-sm text-gray-700">
-                  Remember me for 30 days
-                </span>
-              </label>
-            </div>
-
-            <button 
-              type="submit"
-              [disabled]="!loginForm.valid"
-              class="w-full bg-blue-600 text-white px-6 py-2.5 rounded-md font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-blue-700">
-              Login
-            </button>
-          </form>
-
-          <div class="mt-6 text-sm text-gray-600 bg-blue-50 border border-blue-100 p-3 rounded-md" role="note">
-            <p>Demo credentials: any email and password</p>
+        <!-- Account Stats -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="bg-blue-50 border border-blue-100 rounded-lg p-5 text-center">
+            <div class="text-2xl font-semibold text-blue-700 mb-1">Active</div>
+            <div class="text-gray-600 text-sm">Status</div>
           </div>
-        </section>
-      } @else {
-        <!-- Account Dashboard -->
-        <section class="bg-white border border-gray-200 rounded-lg shadow-sm p-8" aria-labelledby="dashboard-heading">
-          <h2 id="dashboard-heading" class="sr-only">Account Dashboard</h2>
-          <div class="text-center mb-8">
-            <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          <div class="bg-green-50 border border-green-100 rounded-lg p-5 text-center">
+            <svg class="w-8 h-8 mx-auto text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <div class="text-gray-600 text-sm mt-1">Verified</div>
+          </div>
+        </div>
+
+        <!-- Session Timer -->
+        <div class="mb-6 bg-purple-50 border border-purple-100 rounded-lg p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
+              <span class="text-sm font-medium text-gray-700">Session Duration</span>
             </div>
-            <h2 class="text-2xl font-semibold text-gray-900 mb-1">Welcome back!</h2>
-            <p class="text-gray-600">{{ userEmail() }}</p>
+            <div class="text-lg font-semibold text-purple-700">{{ sessionDuration() }}</div>
           </div>
+          @if (rememberMe()) {
+            <p class="text-xs text-purple-600 mt-2">Session will persist for extended period</p>
+          }
+        </div>
 
-          <!-- Account Stats -->
-          <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="bg-blue-50 border border-blue-100 rounded-lg p-5 text-center">
-              <div class="text-2xl font-semibold text-blue-700 mb-1">Active</div>
-              <div class="text-gray-600 text-sm">Status</div>
+        <!-- Quick Actions -->
+        <div class="space-y-2 mb-6">
+          <a routerLink="/products" 
+             class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md transition-colors text-center font-medium">
+            View My Inventory
+          </a>
+          <a routerLink="/products/create" 
+             class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
+            Add New Item
+          </a>
+          <a routerLink="/" 
+             class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
+            Go to Home
+          </a>
+        </div>
+
+        <!-- Account Information -->
+        <div class="border-t border-gray-200 pt-6 mb-6">
+          <h3 class="font-semibold text-gray-900 mb-4">Account Information</h3>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
+              <span class="text-gray-600 text-sm">Email:</span>
+              <span class="font-medium text-gray-900 text-sm">{{ userEmail() }}</span>
             </div>
-            <div class="bg-green-50 border border-green-100 rounded-lg p-5 text-center">
-              <svg class="w-8 h-8 mx-auto text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-              </svg>
-              <div class="text-gray-600 text-sm mt-1">Verified</div>
+            <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
+              <span class="text-gray-600 text-sm">Member Since:</span>
+              <span class="font-medium text-gray-900 text-sm">{{ loginDate() }}</span>
             </div>
-          </div>
-
-          <!-- Session Timer -->
-          <div class="mb-6 bg-purple-50 border border-purple-100 rounded-lg p-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span class="text-sm font-medium text-gray-700">Session Duration</span>
-              </div>
-              <div class="text-lg font-semibold text-purple-700">{{ sessionDuration() }}</div>
-            </div>
-            @if (rememberMe()) {
-              <p class="text-xs text-purple-600 mt-2">🔒 Auto-login enabled for 30 days</p>
-            }
-          </div>
-
-          <!-- Account Actions -->
-          <div class="space-y-2 mb-6">
-            <a routerLink="/objects" 
-               class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md transition-colors text-center font-medium">
-              View My Inventory
-            </a>
-            <a routerLink="/objects/create" 
-               class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
-              Add New Item
-            </a>
-            <a routerLink="/" 
-               class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
-              Go to Dashboard
-            </a>
-          </div>
-
-          <!-- Account Info -->
-          <div class="border-t border-gray-200 pt-6 mb-6">
-            <h3 class="font-semibold text-gray-900 mb-4">Account Information</h3>
-            <div class="space-y-3">
-              <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-                <span class="text-gray-600 text-sm">Email:</span>
-                <span class="font-medium text-gray-900 text-sm">{{ userEmail() }}</span>
-              </div>
-              <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-                <span class="text-gray-600 text-sm">Member Since:</span>
-                <span class="font-medium text-gray-900 text-sm">{{ loginDate() }}</span>
-              </div>
-              <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-                <span class="text-gray-600 text-sm">Account Type:</span>
-                <span class="font-medium text-gray-900 text-sm">Standard</span>
-              </div>
+            <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
+              <span class="text-gray-600 text-sm">Account Type:</span>
+              <span class="font-medium text-gray-900 text-sm">Standard</span>
             </div>
           </div>
+        </div>
 
-          <!-- Activity Log -->
-          <div class="border-t border-gray-200 pt-6 mb-6">
-            <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-              </svg>
-              Recent Activity
-            </h3>
-            @if (activityLog().length > 0) {
-              <div class="space-y-2 max-h-64 overflow-y-auto">
-                @for (entry of activityLog(); track $index) {
-                  <div class="bg-gray-50 border border-gray-200 p-3 rounded-md hover:bg-gray-100 transition-colors">
-                    <div class="flex items-start gap-3">
-                      <span class="text-xl flex-shrink-0">{{ entry.icon }}</span>
-                      <div class="flex-grow min-w-0">
-                        <p class="text-sm font-medium text-gray-900">
-                          {{ entry.action }}
-                          @if (entry.itemName) {
-                            <span class="text-blue-600">"{{ entry.itemName }}"</span>
-                          }
-                        </p>
-                        <p class="text-xs text-gray-500 mt-0.5">{{ entry.timestamp }}</p>
-                      </div>
+        <!-- Activity Log -->
+        <div class="border-t border-gray-200 pt-6 mb-6">
+          <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+            </svg>
+            Recent Activity
+          </h3>
+          @if (activityLog().length > 0) {
+            <div class="space-y-2 max-h-64 overflow-y-auto">
+              @for (entry of activityLog(); track $index) {
+                <div class="bg-gray-50 border border-gray-200 p-3 rounded-md hover:bg-gray-100 transition-colors">
+                  <div class="flex items-start gap-3">
+                    <div class="flex-grow min-w-0">
+                      <p class="text-sm font-medium text-gray-900">
+                        {{ entry.action }}
+                        @if (entry.itemName) {
+                          <span class="text-blue-600">"{{ entry.itemName }}"</span>
+                        }
+                      </p>
+                      <p class="text-xs text-gray-500 mt-0.5">{{ entry.timestamp }}</p>
                     </div>
                   </div>
-                }
-              </div>
-            } @else {
-              <div class="bg-gray-50 border border-gray-200 p-4 rounded-md text-center">
-                <p class="text-sm text-gray-500">No recent activity</p>
-              </div>
-            }
-          </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="bg-gray-50 border border-gray-200 p-4 rounded-md text-center">
+              <p class="text-sm text-gray-500">No recent activity</p>
+            </div>
+          }
+        </div>
 
-          <!-- Logout Button -->
-          <button 
-            (click)="onLogout()"
-            class="w-full mt-6 bg-red-600 text-white px-6 py-2.5 rounded-md font-medium hover:bg-red-700 transition-colors">
-            Logout
-          </button>
-        </section>
-      }
+        <!-- Logout Button -->
+        <button 
+          (click)="onLogout()"
+          class="w-full mt-6 bg-red-600 text-white px-6 py-2.5 rounded-md font-medium hover:bg-red-700 transition-colors">
+          Logout
+        </button>
+      </section>
 
       <!-- Back to Home -->
       <div class="text-center mt-6">
         <a routerLink="/" class="text-blue-600 hover:text-blue-700 font-medium transition-colors">
-          ← Back to Home
+          Back to Home
         </a>
       </div>
     </div>

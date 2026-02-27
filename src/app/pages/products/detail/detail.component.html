@@ -29,7 +29,7 @@
           </div>
         </div>
         <div class="flex gap-3">
-          <button (click)="loadObject()" 
+          <button (click)="loadProduct()" 
                   class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors font-medium text-sm">
             Try Again
           </button>
@@ -116,9 +116,9 @@
 
           <!-- Action Buttons -->
           <div class="flex flex-col sm:flex-row gap-3">
-            <a [routerLink]="['/objects', object()!.id, 'edit']" 
+            <a [routerLink]="['/products', object()!.id, 'edit']" 
                class="flex-1 text-center bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium">
-              Edit Object
+              Edit Product
             </a>
             <button (click)="confirmDelete()" 
                     class="flex-1 bg-red-600 text-white px-6 py-2.5 rounded-md hover:bg-red-700 transition-colors font-medium"
@@ -148,7 +148,7 @@
                     [disabled]="deleting()">
               Cancel
             </button>
-            <button (click)="deleteObject()" 
+            <button (click)="deleteProduct()" 
                     class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors font-medium"
                     [disabled]="deleting()">
               {{ deleting() ? 'Deleting...' : 'Delete' }}

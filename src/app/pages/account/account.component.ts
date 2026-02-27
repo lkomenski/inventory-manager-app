@@ -1,56 +1,48 @@
-import { Component, signal, OnInit, OnDestroy, effect } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth-service';
 
 /** Activity log entry tracking user actions */
 interface ActivityLogEntry {
   action: string;      // Description of the action (e.g., "Logged in", "Created item")
   itemName?: string;   // Name of item affected (if applicable)
   timestamp: string;   // When the action occurred
-  icon: string;        // Emoji icon to display
 }
 
 /**
- * Account Component
+ * Dashboard Component
  * 
- * Demo account management page with features:
- * - Login/logout functionality
- * - Password visibility toggle
- * - "Remember me" option (extends session from 1 day to 30 days)
+ * Post-login dashboard page with features:
+ * - User profile display
  * - Real-time session duration timer
  * - Activity log tracking recent actions
+ * - Navigation to inventory management
+ * - Logout functionality
  * 
- * Note: This is a demo implementation using localStorage.
- * In production, use proper authentication with backend API.
+ * Note: This component requires the user to be authenticated.
+ * Use route guards to protect this page.
  */
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './account.component.html'
 })
 export class AccountComponent implements OnInit, OnDestroy {
-  loginForm: FormGroup;
-  isLoggedIn = signal(false);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   userEmail = signal('');
   loginDate = signal('');  
   loginTimestamp = signal<number>(0);  
   sessionDuration = signal('');  
-  showPassword = signal(false);  
   rememberMe = signal(false);  
   activityLog = signal<ActivityLogEntry[]>([]);  
   
   private timerInterval?: number;  // SetInterval ID for session timer
 
-  constructor(private fb: FormBuilder) {
-    // Initialize login form with validators
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]],
-      rememberMe: [false]
-    });
-
+  constructor() {
     // Check localStorage for existing session
     const savedEmail = localStorage.getItem('userEmail');
     const savedDate = localStorage.getItem('loginDate');
@@ -58,35 +50,21 @@ export class AccountComponent implements OnInit, OnDestroy {
     const savedRememberMe = localStorage.getItem('rememberMe');
     
     if (savedEmail) {
-      // Verify session hasn't expired
-      const isRemembered = savedRememberMe === 'true';
-      const sessionAge = Date.now() - parseInt(savedTimestamp || '0', 10);
-      const maxAge = isRemembered 
-        ? 30 * 24 * 60 * 60 * 1000  // 30 days if "Remember me" was checked
-        : 24 * 60 * 60 * 1000;       // 1 day for normal session
-      
-      if (sessionAge < maxAge) {
-        // Session still valid - restore login state
-        this.isLoggedIn.set(true);
-        this.userEmail.set(savedEmail);
-        this.loginDate.set(savedDate || new Date().toLocaleDateString());
-        this.loginTimestamp.set(parseInt(savedTimestamp || '0', 10));
-        this.rememberMe.set(isRemembered);
-      } else {
-        // Session expired - clear old data
-        this.clearSessionData();
-      }
+      // Restore session data
+      this.userEmail.set(savedEmail);
+      this.loginDate.set(savedDate || new Date().toLocaleDateString());
+      this.loginTimestamp.set(parseInt(savedTimestamp || '0', 10));
+      this.rememberMe.set(savedRememberMe === 'true');
     }
     
     // Load activity log from localStorage
     this.loadActivityLog();
   }
   
+  
   ngOnInit(): void {
-    // Start real-time session timer if user is logged in
-    if (this.isLoggedIn()) {
-      this.startSessionTimer();
-    }
+    // Start real-time session timer
+    this.startSessionTimer();
     
     // Listen for changes to activity log from other browser tabs/windows
     window.addEventListener('storage', this.handleStorageChange.bind(this));
@@ -151,86 +129,37 @@ export class AccountComponent implements OnInit, OnDestroy {
       }
     }
   }
-  
-  /** Toggle password visibility between hidden and visible */
-  togglePasswordVisibility(): void {
-    this.showPassword.set(!this.showPassword());
-  }
-
-  /** Check if a form field is invalid and has been touched by user */
-  isLoginFieldInvalid(fieldName: string): boolean {
-    const field = this.loginForm.get(fieldName);
-    return !!(field && field.invalid && (field.dirty || field.touched));
-  }
-
-  /** Handle login form submission */
-  onLogin(): void {
-    // Validate form before processing
-    if (this.loginForm.invalid) {
-      // Mark all fields as touched to show validation errors
-      Object.keys(this.loginForm.controls).forEach(key => {
-        this.loginForm.get(key)?.markAsTouched();
-      });
-      return;
-    }
-
-    const email = this.loginForm.value.email;
-    const rememberMeValue = this.loginForm.value.rememberMe || false;
-    const date = new Date().toLocaleDateString();
-    const timestamp = Date.now();
-    
-    // Save session data to localStorage
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('loginDate', date);
-    localStorage.setItem('loginTimestamp', timestamp.toString());
-    localStorage.setItem('rememberMe', rememberMeValue.toString());
-    
-    this.userEmail.set(email);
-    this.loginDate.set(date);
-    this.loginTimestamp.set(timestamp);
-    this.rememberMe.set(rememberMeValue);
-    this.isLoggedIn.set(true);
-    
-    // Add login to activity log
-    this.addActivityLogEntry('Logged in', undefined, '🔐');
-    
-    // Start session timer
-    this.startSessionTimer();
-    
-    // Reset form
-    this.loginForm.reset();
-    this.showPassword.set(false);
-  }
 
   onLogout(): void {
     // Add logout to activity log before clearing
-    this.addActivityLogEntry('Logged out', undefined, '🚪');
+    this.addActivityLogEntry('Logged out');
     
-    this.clearSessionData();
+    this.clearSession();
     
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
+
+    // Call auth service logout and redirect
+    this.authService.logout();
   }
   
-  private clearSessionData(): void {
+  private clearSession(): void {
     localStorage.removeItem('userEmail');
     localStorage.removeItem('loginDate');
     localStorage.removeItem('loginTimestamp');
     localStorage.removeItem('rememberMe');
-    this.isLoggedIn.set(false);
     this.userEmail.set('');
     this.loginDate.set('');
     this.sessionDuration.set('');
     this.rememberMe.set(false);
   }
   
-  private addActivityLogEntry(action: string, itemName?: string, icon: string = '📝'): void {
+  private addActivityLogEntry(action: string, itemName?: string): void {
     const entry: ActivityLogEntry = {
       action,
       itemName,
-      timestamp: new Date().toLocaleString(),
-      icon
+      timestamp: new Date().toLocaleString()
     };
     
     const currentLog = this.activityLog();
@@ -240,12 +169,11 @@ export class AccountComponent implements OnInit, OnDestroy {
   }
   
   // Public method that can be called from other components
-  static logActivity(action: string, itemName?: string, icon: string = '📝'): void {
+  static logActivity(action: string, itemName?: string): void {
     const entry: ActivityLogEntry = {
       action,
       itemName,
-      timestamp: new Date().toLocaleString(),
-      icon
+      timestamp: new Date().toLocaleString()
     };
     
     const stored = localStorage.getItem('activityLog');

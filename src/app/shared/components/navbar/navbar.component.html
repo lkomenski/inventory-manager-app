@@ -36,24 +36,53 @@
            role="menuitem">
           Home
         </a>
-        <a routerLink="/objects" 
-           routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-           class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
-           role="menuitem">
-          Inventory
-        </a>
-        <a routerLink="/objects/create" 
-           routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-           class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
-           role="menuitem">
-          Add Item
-        </a>
-        <a routerLink="/account" 
-           routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-           class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
-           role="menuitem">
-          Account
-        </a>
+        @if (isLoggedIn()) {
+          <a routerLink="/products" 
+             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+             class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
+             role="menuitem">
+            Inventory
+          </a>
+          <a routerLink="/products/create" 
+             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+             class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
+             role="menuitem">
+            Add Item
+          </a>
+          <a routerLink="/account" 
+             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+             class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
+             role="menuitem">
+            Account
+          </a>
+          @if (userRole() === 'admin') {
+            <a routerLink="/admin" 
+               routerLinkActive="bg-red-50 text-red-700 font-medium"
+               class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
+               role="menuitem">
+              Admin Panel
+            </a>
+          }
+          <button
+            (click)="logout()"
+            class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium ml-2"
+            role="menuitem">
+            Logout
+          </button>
+        } @else {
+          <a routerLink="/auth/login" 
+             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+             class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
+             role="menuitem">
+            Login
+          </a>
+          <a routerLink="/auth/register" 
+             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+             class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
+             role="menuitem">
+            Register
+          </a>
+        }
       </div>
     </div>
 
@@ -69,27 +98,59 @@
              role="menuitem">
             Home
           </a>
-          <a routerLink="/objects" 
-             (click)="closeMobileMenu()"
-             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-             class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
-             role="menuitem">
-            Inventory
-          </a>
-          <a routerLink="/objects/create" 
-             (click)="closeMobileMenu()"
-             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-             class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
-             role="menuitem">
-            Add Item
-          </a>
-          <a routerLink="/account" 
-             (click)="closeMobileMenu()"
-             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-             class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
-             role="menuitem">
-            Account
-          </a>
+          @if (isLoggedIn()) {
+            <a routerLink="/products" 
+               (click)="closeMobileMenu()"
+               routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+               class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
+               role="menuitem">
+              Inventory
+            </a>
+            <a routerLink="/products/create" 
+               (click)="closeMobileMenu()"
+               routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+               class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
+               role="menuitem">
+              Add Item
+            </a>
+            <a routerLink="/account" 
+               (click)="closeMobileMenu()"
+               routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+               class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
+               role="menuitem">
+              Account
+            </a>
+            @if (userRole() === 'admin') {
+              <a routerLink="/admin" 
+                 (click)="closeMobileMenu()"
+                 routerLinkActive="bg-red-50 text-red-700 font-medium"
+                 class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
+                 role="menuitem">
+                Admin Panel
+              </a>
+            }
+            <button
+              (click)="logout()"
+              class="w-full text-left px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium mt-2 border-t border-gray-200"
+              role="menuitem">
+              Logout
+            </button>
+          } @else {
+            <a routerLink="/auth/login" 
+               (click)="closeMobileMenu()"
+               routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+               class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
+               role="menuitem">
+              Login
+            </a>
+            <a routerLink="/auth/register" 
+               (click)="closeMobileMenu()"
+               routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+               class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
+               role="menuitem">
+              Register
+            </a>
+          }
         </nav>
       </div>
     }

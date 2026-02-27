@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
-import { ObjectsService } from '../../services/objects.service';
-import { ApiObject } from '../../models/object.model';
+import { ObjectsService } from '../../../services/objects.service';
+import { ApiObject } from '../../../models/object.model';
 
 /**
- * Objects List Component
+ * Product List Component
  * 
  * Displays a paginated, searchable, and sortable list of inventory items.
  * Features:
@@ -16,12 +16,12 @@ import { ApiObject } from '../../models/object.model';
  * - Support for filtering by specific IDs via query params
  */
 @Component({
-  selector: 'app-objects-list',
+  selector: 'app-product-list',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './objects-list.component.html'
+  templateUrl: './list.component.html'
 })
-export class ObjectsListComponent implements OnInit {
+export class ProductListComponent implements OnInit {
   objects: ApiObject[] = [];  
   query: string = '';  
   sortOrder: 'asc' | 'desc' | 'none' = 'none';  
@@ -38,7 +38,7 @@ export class ObjectsListComponent implements OnInit {
     public objectsService: ObjectsService,
     private route: ActivatedRoute
   ) {
-    // console.log('Objects List Component initialized');
+    // console.log('Product List Component initialized');
   }
 
   ngOnInit(): void {
@@ -131,14 +131,14 @@ export class ObjectsListComponent implements OnInit {
   /** Load all objects from the API */
   loadObjects(): void {
     this.objectsService.getObjects().subscribe({
-      next: (response) => {
+      next: (response: any) => {
         // console.log('Objects loaded successfully');
         // console.log('Response:', response);
         // console.log('Total objects:', response.length);
         this.objects = response as ApiObject[];
         this.objectsService.loading.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         // console.error('Failed to load objects:', err);
         this.objectsService.error.set('Failed to load objects');
         this.objectsService.loading.set(false);
@@ -149,7 +149,7 @@ export class ObjectsListComponent implements OnInit {
   /** Load specific objects by their IDs (used when URL has query params) */
   loadObjectsByIds(ids: string[]): void {
     this.objectsService.getObjectsByIds(ids).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         // console.log('Objects loaded successfully (filtered by IDs)');
         // console.log('Response:', response);
         // console.log('Total objects:', response.length);
@@ -157,7 +157,7 @@ export class ObjectsListComponent implements OnInit {
         this.objects = response as ApiObject[];
         this.objectsService.loading.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         // console.error('Failed to load objects by IDs:', err);
         this.objectsService.error.set('Failed to load objects');
         this.objectsService.loading.set(false);

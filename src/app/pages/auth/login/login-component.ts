@@ -1,40 +1,53 @@
-import { Component, signal } from "@angular/core";
-import {FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { AuthService } from "../../services/auth.service";
+import { Component, signal, inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { Router } from "@angular/router";
+import { AuthService } from "../../../services/auth-service";
+import { DynamicObjectFormComponent } from "../../../forms/dynamic-object-form.component";
+import { LOGIN_FIELDS } from "../../../forms/auth-form-config";
+import { FormSubmitData, FormConfig } from "../../../forms/field-definition";
 
 @Component({
   selector: "app-auth-login",
-  templateUrl: "./login.html"
+  standalone: true,
+  imports: [CommonModule, DynamicObjectFormComponent],
+  templateUrl: "./login-component.html"
 })
-export class LoginComponent {  
-    // same as register but with only email and password fields, and a login method instead of register
-    form: FormGroup;
+export class LoginComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-    private auth = inject(AuthService);
+  loginFields = LOGIN_FIELDS;
+  formConfig: FormConfig = { mode: 'create' };
+  submitting = signal(false);
+  serverError = signal<string | null>(null);
 
-    serverError = signal<string | null>(null);
-    constructor(private fb: FormBuilder) {
-        this.form = this.fb.group({
-            email: ['', [Validators.required, Validators.email]],
-            password: ['', [Validators.required, Validators.minLength(6)]],
-        });
-    }
-    onSubmit(){
-    if (this.form.invalid) {
-        this.form.markAllAsTouched();
-        console.log("Form is invalid", this.form.errors || 'see control errors');
-        return;
-    }
-
+  onFormSubmit(formData: FormSubmitData): void {
     this.serverError.set(null);
+    this.submitting.set(true);
 
     try {
-        this.authService.login(this.form?.get('email')?.value, this.form?.get('password')?.value).subscribe({
-        // redirect to dashboard
-        });
+      this.authService.login(
+        formData['email'] as string,
+        formData['password'] as string
+      );
+      
+      this.submitting.set(false);
+      // Redirect to account/dashboard after successful login
+      this.router.navigate(['/account']);
     } catch (err) {
-        console.error("Login error", err);
+      this.submitting.set(false);
+      console.error("Login error", err);
+      
+      if (err instanceof Error) {
+        this.serverError.set(err.message);
+      } else {
         this.serverError.set('An unexpected error occurred. Please try again later.');
+      }
     }
-    }
- }
+  }
+
+  onFormCancel(): void {
+    // Handle cancel - navigate back or go to home
+    this.router.navigate(['/']);
+  }
+}

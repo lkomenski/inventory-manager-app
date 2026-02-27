@@ -2,7 +2,7 @@
   <div class="container mx-auto px-4 py-8">
     <!-- Back Button -->
     <nav class="mb-6" aria-label="Breadcrumb">
-      <a [routerLink]="['/objects', objectId()]" 
+      <a [routerLink]="['/products', objectId()]" 
          class="text-blue-600 hover:text-blue-700 flex items-center gap-2">
         ← Back to Details
       </a>
@@ -46,10 +46,12 @@
       <section class="max-w-2xl bg-white rounded-lg shadow-lg p-8" aria-labelledby="edit-form-heading">
         <h2 id="edit-form-heading" class="sr-only">Edit Item Form</h2>
         <app-dynamic-object-form 
+          [fields]="inventoryFields"
           [config]="formConfig"
           [submitting]="submitting"
           [error]="error"
           [success]="success"
+          [enableCustomFields]="true"
           (formSubmit)="onFormSubmit($event)"
           (formCancel)="onFormCancel()">
         </app-dynamic-object-form>

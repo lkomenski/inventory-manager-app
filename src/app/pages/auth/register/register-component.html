@@ -1,53 +1,25 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-  <div>
-    <label>Email</label>
-    <input formControlName="email" />
-    @if (form.get('email')?.invalid && (form.get('email')?.touched || form.get('email')?.dirty)) {
-      <div class="error">
-        @if (form.get('email')?.errors?.['required']) {
-          <div>Email is required.</div>
-        }
-        
-        @if (form.get('email')?.errors?.['email']) {
-          <div>Enter a valid email address.</div>
-        }
-      </div>
-    }
-  </div>
-
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
     <div>
-        <label>Password</label>
-        <input formControlName="password" type="password" />
-        @if (form.get('password')?.invalid && (form.get('password')?.touched || form.get('password')?.dirty)) {
-        @if (form.get('password')?.errors?.['required']) {
-            <div class="error">Password is required.</div>
-            }
-    
-        @if (form.get('password')?.errors?.['minlength']) {
-            <div class="error">Password must be at least 6 characters.</div>
-            }
-        }
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        Create your account
+      </h2>
     </div>
 
-    
-    <div>
-        <label>Password Confirmation</label>
-        <input formControlName="passwordConfirmation" type="password" />
-        @if (form.get('passwordConfirmation')?.invalid && (form.get('passwordConfirmation')?.touched || form.get('passwordConfirmation')?.dirty)) {
-        @if (form.get('passwordConfirmation')?.errors?.['required']) {
-            <div class="error">Password confirmation is required.</div>
-            }
-    
-        @if (form.get('passwordConfirmation')?.errors?.['minlength']) {
-            <div class="error">Password confirmation must be at least 6 characters.</div>
-            }
+    <app-dynamic-object-form
+      [fields]="registerFields"
+      [config]="formConfig"
+      [submitting]="submitting"
+      [error]="serverError"
+      (formSubmit)="onFormSubmit($event)"
+      (formCancel)="onFormCancel()">
+    </app-dynamic-object-form>
 
-        @if (form.get('passwordConfirmation')?.errors?.['passwordMismatch']) {
-            <div class="error">Passwords do not match.</div>
-            }
-        }
-    </div>
-  <div style="margin-top:1rem;">
-    <button type="submit">Submit</button>
+    <p class="mt-2 text-center text-sm text-gray-600">
+      Already have an account?
+      <a href="/auth/login" class="font-medium text-blue-600 hover:text-blue-500">
+        Sign in here
+      </a>
+    </p>
   </div>
-</form>
+</div>

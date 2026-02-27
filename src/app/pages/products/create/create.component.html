@@ -18,10 +18,12 @@
     <section class="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-sm p-8" aria-labelledby="form-heading">
       <h2 id="form-heading" class="sr-only">Item Creation Form</h2>
       <app-dynamic-object-form 
+        [fields]="inventoryFields"
         [config]="formConfig"
         [submitting]="submitting"
         [error]="error"
         [success]="success"
+        [enableCustomFields]="true"
         (formSubmit)="onFormSubmit($event)"
         (formCancel)="onFormCancel()">
       </app-dynamic-object-form>

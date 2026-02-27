@@ -1,12 +1,11 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ObjectsService } from '../../services/objects.service';
-import { ApiObject } from '../../models/object.model';
-import { AccountComponent } from '../account/account.component';
+import { ObjectsService } from '../../../services/objects.service';
+import { ApiObject } from '../../../models/object.model';
 
 /**
- * Object Detail Component
+ * Product Detail Component
  * 
  * Displays detailed information for a single inventory item including:
  * - All item properties (name, color, price, custom fields)
@@ -14,12 +13,12 @@ import { AccountComponent } from '../account/account.component';
  * - Loading and error states
  */
 @Component({
-  selector: 'app-object-detail',
+  selector: 'app-product-detail',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  templateUrl: './object-detail.component.html'
+  templateUrl: './detail.component.html'
 })
-export class ObjectDetailComponent implements OnInit {
+export class ProductDetailComponent implements OnInit {
   object = signal<ApiObject | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
@@ -31,43 +30,43 @@ export class ObjectDetailComponent implements OnInit {
     private router: Router,
     private objectsService: ObjectsService
   ) {
-    // console.log('Object Detail Component initialized');
+    // console.log('Product Detail Component initialized');
   }
 
   ngOnInit(): void {
-    // console.log('Object Detail Component: ngOnInit called');
+    // console.log('Product Detail Component: ngOnInit called');
     const id = this.route.snapshot.paramMap.get('id');
-    // console.log('Object ID from route:', id);
+    // console.log('Product ID from route:', id);
     if (id) {
-      this.loadObject(id);
+      this.loadProduct(id);
     } else {
-      // console.error('No object ID provided in route');
-      this.error.set('No object ID provided');
+      // console.error('No product ID provided in route');
+      this.error.set('No product ID provided');
     }
   }
 
   /**
-   * Load object data from API by ID
+   * Load product data from API by ID
    * Sets loading/error states appropriately
    */
-  loadObject(id?: string): void {
-    const objectId = id || this.route.snapshot.paramMap.get('id');
-    // console.log('Loading object with ID:', objectId);
-    if (!objectId) return;
+  loadProduct(id?: string): void {
+    const productId = id || this.route.snapshot.paramMap.get('id');
+    // console.log('Loading product with ID:', productId);
+    if (!productId) return;
 
-    // DEBUGGING BREAKPOINT: Set a breakpoint here to debug object loading
+    // DEBUGGING BREAKPOINT: Set a breakpoint here to debug product loading
     this.loading.set(true);
     this.error.set(null);
     
-    this.objectsService.getObject(objectId).subscribe({
+    this.objectsService.getObject(productId).subscribe({
       next: (data) => {
-        // console.log('Object loaded successfully');
-        // console.log('Object data:', data);
+        // console.log('Product loaded successfully');
+        // console.log('Product data:', data);
         this.object.set(data);
         this.loading.set(false);
       },
       error: (err) => {
-        // console.error('Failed to load object:', err);
+        // console.error('Failed to load product:', err);
         this.error.set(err.message);
         this.loading.set(false);
       }
@@ -106,30 +105,24 @@ export class ObjectDetailComponent implements OnInit {
   }
 
   /**
-   * Delete the current object permanently
-   * Logs activity and navigates back to list on success
+   * Delete the current product permanently
+   * Navigates back to list on success
    */
-  deleteObject(): void {
+  deleteProduct(): void {
     const obj = this.object();
-    // console.log('Deleting object:', obj?.id);
+    // console.log('Deleting product:', obj?.id);
     if (!obj?.id) return;
 
     // DEBUGGING BREAKPOINT: Set a breakpoint here to debug delete operation
     this.deleting.set(true);
     
-    const itemName = obj.name; // Capture name before deletion
-    
     this.objectsService.deleteObject(obj.id).subscribe({
       next: () => {
-        // console.log('Object deleted successfully, navigating to list');
-        
-        // Log activity
-        AccountComponent.logActivity('Deleted item', itemName, '🗑️');
-        
-        this.router.navigate(['/objects']);
+        // console.log('Product deleted successfully, navigating to list');
+        this.router.navigate(['/products']);
       },
       error: (err) => {
-        // console.error('Failed to delete object:', err);
+        // console.error('Failed to delete product:', err);
         this.error.set(err.message);
         this.deleting.set(false);
         this.showDeleteModal.set(false);

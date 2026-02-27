@@ -13,7 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { Injectable } from '@angular/core';
-import { AuthResult, StoredUser, TokenPayload, UserRole } from '../models/user.model';
+import { AuthResult, StoredUser, TokenPayload, UserRole } from '../models/user-model';
 
 @Injectable({ providedIn: 'root' })
 export class MockAuthService {

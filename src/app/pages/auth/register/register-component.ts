@@ -1,58 +1,53 @@
-import { Component, signal } from "@angular/core";
-import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { Observable } from "rxjs";
-import { AuthService } from "../../services/auth.service";
+import { Component, signal, inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { Router } from "@angular/router";
+import { AuthService } from "../../../services/auth-service";
+import { DynamicObjectFormComponent } from "../../../forms/dynamic-object-form.component";
+import { REGISTER_FIELDS } from "../../../forms/auth-form-config";
+import { FormSubmitData, FormConfig } from "../../../forms/field-definition";
 
 @Component({
   selector: "app-auth-register",
-  templateUrl: "./register.html"
+  standalone: true,
+  imports: [CommonModule, DynamicObjectFormComponent],
+  templateUrl: "./register-component.html"
 })
 export class RegisterComponent {
-    form: FormGroup;
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-    private auth = inject(AuthService);
+  registerFields = REGISTER_FIELDS;
+  formConfig: FormConfig = { mode: 'create' };
+  submitting = signal(false);
+  serverError = signal<string | null>(null);
 
-    serverError = signal<string | null>(null);
-    constructor(private fb: FormBuilder) {
-        this.form = this.fb.group({
-            email: ['', [Validators.required, Validators.email]],
-            password: ['', [Validators.required, Validators.minLength(6)]],
-            passwordConfirmation: ['', [Validators.required, Validators.minLength(6), this.passwordMatchValidator()]],
-        });
-    }
-
-    passwordMatchValidator(): AsyncValidatorFn {
-        return (control: AbstractControl): Observable<ValidationErrors | null> => {
-            const password = this.form?.get('password')?.value;
-            const passwordConfirmation = this.form?.get('passwordConfirmation')?.value;
-            if (password && passwordConfirmation && password !== passwordConfirmation) {
-                return new Observable(observer => {
-                    observer.next({ passwordMismatch: true });
-                    observer.complete();
-                });
-            }
-            return new Observable(observer => {
-                observer.next(null);
-                observer.complete();
-            });
-        };
-    }
-onSubmit(){
-    if (this.form.invalid) {
-        this.form.markAllAsTouched();
-        console.log("Form is invalid", this.form.errors || 'see control errors');
-        return;
-    }
-
+  onFormSubmit(formData: FormSubmitData): void {
     this.serverError.set(null);
+    this.submitting.set(true);
 
     try {
-        this.authService.register(this.form?.get('email')?.value, this.form?.get('password')?.value).subscribe({
-        // redirect to dashboard
-        });
+      this.authService.register(
+        formData['email'] as string,
+        formData['password'] as string
+      );
+      
+      this.submitting.set(false);
+      // Redirect to account/dashboard after successful registration
+      this.router.navigate(['/account']);
     } catch (err) {
-        console.error("Registration error", err);
+      this.submitting.set(false);
+      console.error("Registration error", err);
+      
+      if (err instanceof Error) {
+        this.serverError.set(err.message);
+      } else {
         this.serverError.set('An unexpected error occurred. Please try again later.');
+      }
     }
-    }
+  }
+
+  onFormCancel(): void {
+    // Handle cancel - navigate to login or home
+    this.router.navigate(['/auth/login']);
+  }
 }
