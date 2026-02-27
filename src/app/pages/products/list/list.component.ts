@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ObjectsService } from '../../../services/objects.service';
 import { ApiObject } from '../../../models/object.model';
+import { AuthService } from '../../../services/auth-service';
 
 /**
  * ProductListComponent
@@ -24,6 +25,11 @@ import { ApiObject } from '../../../models/object.model';
   templateUrl: './list.component.html'
 })
 export class ProductListComponent implements OnInit {
+  private authService = inject(AuthService);
+
+  /** True when the current user has the admin role. Used to gate create/edit/delete UI. */
+  isAdmin = () => this.authService.getRole() === 'admin';
+
   /** Full array of items returned by the last API call. */
   objects: ApiObject[] = [];
 

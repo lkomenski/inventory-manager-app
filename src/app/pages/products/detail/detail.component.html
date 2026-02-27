@@ -116,16 +116,24 @@
           </section>
 
           <!-- Action Buttons -->
-          <footer class="flex flex-col sm:flex-row gap-3" aria-label="Item actions">
-            <a [routerLink]="['/products', object()!.id, 'edit']" 
-               class="flex-1 text-center bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium">
-              Edit Product
-            </a>
-            <button (click)="confirmDelete()" 
-                    class="flex-1 bg-red-600 text-white px-6 py-2.5 rounded-md hover:bg-red-700 transition-colors font-medium"
-                    [disabled]="deleting()">
-              {{ deleting() ? 'Deleting...' : 'Delete Object' }}
-            </button>
+          <footer class="flex flex-col gap-3" aria-label="Item actions">
+            @if (isAdmin()) {
+              <div class="flex flex-col sm:flex-row gap-3">
+                <a [routerLink]="['/products', object()!.id, 'edit']" 
+                   class="flex-1 text-center bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                  Edit Product
+                </a>
+                <button (click)="confirmDelete()" 
+                        class="flex-1 bg-red-600 text-white px-6 py-2.5 rounded-md hover:bg-red-700 transition-colors font-medium"
+                        [disabled]="deleting()">
+                  {{ deleting() ? 'Deleting...' : 'Delete Object' }}
+                </button>
+              </div>
+            } @else {
+              <p class="text-sm text-gray-500 italic" role="note">
+                Only administrators can edit or delete inventory items.
+              </p>
+            }
             <a routerLink="/products"
                class="flex-1 text-center bg-gray-100 text-gray-700 px-6 py-2.5 rounded-md hover:bg-gray-200 transition-colors font-medium">
               Back to List

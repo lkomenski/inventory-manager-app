@@ -90,7 +90,7 @@ export class AuthService {
     if (isPlatformBrowser(this.platform)) {
       localStorage.removeItem(TOKEN_KEY);
     }
-    this.router.navigate(['/login']);
+    this.router.navigate(['/auth/login']);
   }
 
   /**

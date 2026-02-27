@@ -16,7 +16,7 @@
 
 import { Component, signal, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { Router } from "@angular/router";
+import { Router, ActivatedRoute } from "@angular/router";
 import { AuthService } from "../../../services/auth-service";
 import { DynamicObjectFormComponent } from "../../../forms/dynamic-object-form.component";
 import { LOGIN_FIELDS } from "../../../forms/auth-form-config";
@@ -31,6 +31,7 @@ import { FormSubmitData, FormConfig } from "../../../forms/field-definition";
 export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   /**
    * Field definitions imported from auth-form-config.ts.
@@ -66,7 +67,9 @@ export class LoginComponent {
       );
 
       this.submitting.set(false);
-      this.router.navigate(['/account']);
+      // Redirect to the page the user was trying to reach, or fall back to /account
+      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/account';
+      this.router.navigateByUrl(returnUrl);
       console.log('Login successful');
     } catch (err) {
       this.submitting.set(false);

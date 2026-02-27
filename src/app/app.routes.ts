@@ -11,6 +11,7 @@ import { RegisterComponent } from './pages/auth/register/register-component';
 import { NotFoundComponent } from './shared/components/not-found/not-found.component';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
+import { noAuthGuard } from './guards/no-auth.guard';
 
 export const routes: Routes = [
   {
@@ -21,11 +22,13 @@ export const routes: Routes = [
   {
     path: 'auth/login',
     component: LoginComponent,
+    canActivate: [noAuthGuard],
     title: 'Login - Inventory Manager'
   },
   {
     path: 'auth/register',
     component: RegisterComponent,
+    canActivate: [noAuthGuard],
     title: 'Register - Inventory Manager'
   },
   {
@@ -37,7 +40,7 @@ export const routes: Routes = [
   {
     path: 'products/create',
     component: CreateProductComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard, adminGuard],
     title: 'Create Item - Inventory Manager'
   },
   {
@@ -49,7 +52,7 @@ export const routes: Routes = [
   {
     path: 'products/:id/edit',
     component: EditProductComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard, adminGuard],
     title: 'Edit Item - Inventory Manager'
   },
   {

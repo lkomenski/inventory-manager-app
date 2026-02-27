@@ -1,8 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ObjectsService } from '../../../services/objects.service';
 import { ApiObject } from '../../../models/object.model';
+import { AuthService } from '../../../services/auth-service';
 
 /**
  * ProductDetailComponent
@@ -19,6 +20,11 @@ import { ApiObject } from '../../../models/object.model';
   templateUrl: './detail.component.html'
 })
 export class ProductDetailComponent implements OnInit {
+  private authService = inject(AuthService);
+
+  /** True when the current user has the admin role. Used to gate edit/delete UI. */
+  isAdmin = () => this.authService.getRole() === 'admin';
+
   /** The loaded inventory item; null until the fetch completes. */
   object = signal<ApiObject | null>(null);
 
