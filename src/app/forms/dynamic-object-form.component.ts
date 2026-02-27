@@ -132,8 +132,9 @@ export class DynamicObjectFormComponent implements OnInit {
       
       // Create form control with validators
       const value = field.value ?? '';
+      const controlValue = field.disabled ? { value, disabled: true } : value;
       group[field.name] = [
-        value,
+        controlValue,
         validators.length > 0 ? validators : null,
         asyncValidators.length > 0 ? asyncValidators : null
       ];

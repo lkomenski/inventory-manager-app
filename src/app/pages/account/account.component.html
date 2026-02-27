@@ -1,6 +1,7 @@
 <main class="min-h-screen py-12 bg-gray-50">
   <div class="container mx-auto px-4">
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-md mx-auto">
+
       <!-- Header -->
       <header class="text-center mb-8">
         <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -8,150 +9,59 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
         </div>
-        <h1 class="text-4xl font-semibold text-gray-900 mb-2">Dashboard</h1>
-        <p class="text-gray-600">Manage your inventory account and view activity</p>
+        <h1 class="text-3xl font-semibold text-gray-900 mb-1">My Account</h1>
+        <p class="text-gray-500">{{ currentUser()?.email }}</p>
       </header>
 
-      <!-- Dashboard Content -->
-      <section aria-labelledby="dashboard-heading" class="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
-        <!-- Welcome Section -->
-        <div class="text-center mb-8">
-          <h2 id="dashboard-heading" class="text-2xl font-semibold text-gray-900 mb-1">Welcome back!</h2>
-          <p class="text-gray-600">{{ userEmail() }}</p>
-        </div>
+      <!-- Card -->
+      <section aria-labelledby="dashboard-heading" class="bg-white border border-gray-200 rounded-lg shadow-sm p-8 space-y-6">
+        <h2 id="dashboard-heading" class="text-xl font-semibold text-gray-900">Welcome back!</h2>
 
-        <!-- Account Stats -->
-        <dl aria-label="Account status" class="grid grid-cols-2 gap-4 mb-6">
-          <div class="bg-blue-50 border border-blue-100 rounded-lg p-5 text-center">
-            <dd class="text-2xl font-semibold text-blue-700 mb-1">Active</dd>
-            <dt class="text-gray-600 text-sm">Status</dt>
-          </div>
-          <div class="bg-green-50 border border-green-100 rounded-lg p-5 text-center">
-            <dd>
-              <svg class="w-8 h-8 mx-auto text-green-600" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-              </svg>
-              <span class="sr-only">Yes</span>
-            </dd>
-            <dt class="text-gray-600 text-sm mt-1">Verified</dt>
-          </div>
-        </dl>
-
-        <!-- Session Timer -->
-        <div class="mb-6 bg-purple-50 border border-purple-100 rounded-lg p-4 space-y-2">
-          <div class="flex items-center justify-between">
+        <!-- Token Expiry Countdown -->
+        @if (tokenExpiresIn()) {
+          <div class="bg-purple-50 border border-purple-100 rounded-lg p-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <svg class="w-5 h-5 text-purple-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              <span class="text-sm font-medium text-gray-700" id="session-label">Session Duration</span>
+              <span class="text-sm font-medium text-gray-700" id="expiry-label">Session expires in</span>
             </div>
-            <output aria-labelledby="session-label" class="text-lg font-semibold text-purple-700">{{ sessionDuration() }}</output>
+            <output aria-labelledby="expiry-label"
+                    [class]="tokenExpiresIn() === 'Expired' ? 'text-sm font-semibold text-red-600' :
+                             +tokenExpiresIn().split('m')[0] < 5 && !tokenExpiresIn().includes('h') ? 'text-sm font-semibold text-orange-500' :
+                             'text-sm font-semibold text-purple-700'">
+              {{ tokenExpiresIn() }}
+            </output>
           </div>
-          @if (tokenExpiresIn()) {
-            <div class="flex items-center justify-between border-t border-purple-100 pt-2">
-              <div class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-purple-500" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                </svg>
-                <span class="text-xs font-medium text-gray-600" id="expiry-label">Token Expires In</span>
-              </div>
-              <output aria-labelledby="expiry-label"
-                      [class]="tokenExpiresIn() === 'Expired' ? 'text-sm font-semibold text-red-600' :
-                               +tokenExpiresIn().split('m')[0] < 5 && !tokenExpiresIn().includes('h') ? 'text-sm font-semibold text-orange-500' :
-                               'text-sm font-semibold text-purple-600'">
-                {{ tokenExpiresIn() }}
-              </output>
-            </div>
-          }
-          @if (rememberMe()) {
-            <p class="text-xs text-purple-600">Session will persist for extended period</p>
-          }
-        </div>
+        }
 
         <!-- Quick Actions -->
-        <nav aria-label="Quick actions" class="space-y-2 mb-6">
+        <nav aria-label="Quick actions" class="space-y-2">
           <a routerLink="/products"
              class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md transition-colors text-center font-medium">
-            View My Inventory
+            View Inventory
           </a>
           @if (isAdmin()) {
             <a routerLink="/products/create"
                class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
               Add New Item
             </a>
+            <a routerLink="/admin"
+               class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
+              Admin Panel
+            </a>
           }
-          <a routerLink="/"
-             class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
-            Go to Home
-          </a>
         </nav>
-
-        <!-- Account Information -->
-        <div class="border-t border-gray-200 pt-6 mb-6">
-          <h3 class="font-semibold text-gray-900 mb-4" id="account-info-heading">Account Information</h3>
-          <dl aria-labelledby="account-info-heading" class="space-y-3">
-            <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-              <dt class="text-gray-600 text-sm">Email</dt>
-              <dd class="font-medium text-gray-900 text-sm">{{ userEmail() }}</dd>
-            </div>
-            <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-              <dt class="text-gray-600 text-sm">Member Since</dt>
-              <dd class="font-medium text-gray-900 text-sm">{{ loginDate() }}</dd>
-            </div>
-            <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-              <dt class="text-gray-600 text-sm">Account Type</dt>
-              <dd class="font-medium text-gray-900 text-sm">
-                {{ currentUser()?.role === 'admin' ? 'Administrator' : 'Standard' }}
-              </dd>
-            </div>
-          </dl>
-        </div>
-
-        <!-- Activity Log -->
-        <div class="border-t border-gray-200 pt-6 mb-6">
-          <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2" id="activity-heading">
-            <svg class="w-5 h-5 text-gray-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-            </svg>
-            Recent Activity
-          </h3>
-          @if (activityLog().length > 0) {
-            <ul aria-labelledby="activity-heading" class="space-y-2 max-h-64 overflow-y-auto">
-              @for (entry of activityLog(); track $index) {
-                <li class="bg-gray-50 border border-gray-200 p-3 rounded-md hover:bg-gray-100 transition-colors">
-                  <p class="text-sm font-medium text-gray-900">
-                    {{ entry.action }}
-                    @if (entry.itemName) {
-                      <span class="text-blue-600">"{{ entry.itemName }}"</span>
-                    }
-                  </p>
-                  <time class="text-xs text-gray-500 mt-0.5 block">{{ entry.timestamp }}</time>
-                </li>
-              }
-            </ul>
-          } @else {
-            <p class="bg-gray-50 border border-gray-200 p-4 rounded-md text-center text-sm text-gray-500">
-              No recent activity
-            </p>
-          }
-        </div>
 
         <!-- Logout -->
         <button
           (click)="onLogout()"
           type="button"
-          class="w-full mt-6 bg-red-600 text-white px-6 py-2.5 rounded-md font-medium hover:bg-red-700 transition-colors">
+          class="w-full bg-red-600 text-white px-6 py-2.5 rounded-md font-medium hover:bg-red-700 transition-colors">
           Logout
         </button>
       </section>
 
-      <!-- Back to Home -->
-      <div class="text-center mt-6">
-        <a routerLink="/" class="text-blue-600 hover:text-blue-700 font-medium transition-colors">
-          Back to Home
-        </a>
-      </div>
     </div>
   </div>
 </main>
