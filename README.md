@@ -51,6 +51,44 @@ Open http://localhost:4200/
 - User-friendly error messages, including detection of reserved API IDs
 - Server-Side Rendering via Express with Content Security Policy headers
 - Responsive layout with Tailwind CSS
+- JWT-based mock authentication with role-aware route guards (`authGuard`, `adminGuard`)
+- Role-protected Admin Panel visible only to users with the `admin` role
+
+---
+
+## Authentication & Authorization
+
+The app uses a **mock JWT authentication** system implemented entirely in the browser (no external auth server required). Tokens are stored in `localStorage` and decoded client-side to read the user's email and role.
+
+### Guards
+
+Two `CanActivate` route guards protect navigation:
+
+| Guard | File | Behavior |
+|---|---|---|
+| `authGuard` | `guards/auth.guard.ts` | Allows only authenticated users. Unauthenticated visitors are redirected to `/auth/login`, with the original destination preserved as a `returnUrl` query parameter. |
+| `adminGuard` | `guards/admin.guard.ts` | Allows only users whose JWT role claim is `'admin'`. Non-admin users are redirected to `/`. Always composed after `authGuard`. |
+
+### Protected Routes
+
+| Route | Guard(s) |
+|---|---|
+| `/products` | `authGuard` |
+| `/products/create` | `authGuard` |
+| `/products/:id` | `authGuard` |
+| `/products/:id/edit` | `authGuard` |
+| `/account` | `authGuard` |
+| `/admin` | `authGuard` + `adminGuard` |
+
+Public routes (`/`, `/auth/login`, `/auth/register`, and the `**` 404 catch-all) require no authentication.
+
+### Navbar Role Awareness
+
+The navbar also conditionally renders links based on auth state — the **Inventory**, **Add Item**, **Account**, and **Logout** links are hidden when logged out, and the **Admin Panel** link is hidden unless the current user's role is `'admin'`. This is a UI convenience only; the guards are the authoritative enforcement layer.
+
+### Logout
+
+`AuthService.logout()` clears the token from both memory and `localStorage`, then navigates to `/auth/login` (not the home page).
 
 ---
 
@@ -88,25 +126,31 @@ interface ApiObject {
 ## Pages and Routes
 
 ### Home / Dashboard (`/`)
-Welcome page with navigation links and a live count of objects loaded from the API.
+Welcome page with navigation links and a live count of objects loaded from the API. No authentication required.
 
-### Objects List (`/objects`)
-Displays all inventory items in a responsive table. Each row includes **View**, **Edit**, and **Delete** actions. Supports filtered views via query parameters (e.g. `/objects?id=1&id=2`).
+### Login (`/auth/login`) · Register (`/auth/register`)
+Credential forms backed by `MockAuthService`. On success a JWT is stored in `localStorage` and the user is redirected to their original destination (or home). No authentication required.
 
-### Object Details (`/objects/:id`)
-Shows a single object and all of its `data` fields. Handles `null` data gracefully and provides Edit and Delete shortcuts.
+### Inventory List (`/products`) · `authGuard`
+Displays all inventory items in a responsive table. Each row includes **View**, **Edit**, and **Delete** actions. Requires a valid session.
 
-### Create Object (`/objects/create`)
-Validated form for creating a new item. Requires a name (min 3 characters), accepts optional color and price fields, and supports unlimited additional custom key/value fields. Redirects to the detail page on success.
+### Item Detail (`/products/:id`) · `authGuard`
+Shows a single object and all of its `data` fields. Handles `null` data gracefully and provides Edit and Delete shortcuts. Requires a valid session.
 
-### Edit Object (`/objects/:id/edit`)
-Pre-populated form for updating an existing item using PATCH. Preserves custom fields that exist on the object. Shows a clear error if the object is a reserved ID.
+### Create Item (`/products/create`) · `authGuard`
+Validated form for creating a new item. Requires a name (min 3 characters), accepts optional color and price fields, and supports unlimited additional custom key/value fields. Redirects to the detail page on success. Requires a valid session.
 
-### Account (`/account`)
-Simple login and account management area demonstrating a typical web app auth page.
+### Edit Item (`/products/:id/edit`) · `authGuard`
+Pre-populated form for updating an existing item using PATCH. Preserves custom fields that exist on the object. Shows a clear error if the object is a reserved ID. Requires a valid session.
+
+### Account (`/account`) · `authGuard`
+Displays the current user's email, role, and account actions. Requires a valid session.
+
+### Admin Panel (`/admin`) · `authGuard` + `adminGuard`
+Admin-only dashboard showing system stats and quick-action links. Accessible only to users with the `admin` role; all others are redirected to home.
 
 ### Not Found (wildcard)
-Custom 404 page rendered for any unmatched route, with a link back to the home page.
+Custom 404 page rendered for any unmatched route, with links back to Home and the Inventory List. No authentication required.
 
 ---
 

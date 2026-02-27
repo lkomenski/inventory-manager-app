@@ -83,6 +83,9 @@ export class AuthService {
    * Clears the token from memory and localStorage, then redirects to /login.
    */
   logout(): void {
+    // DEBUGGING BREAKPOINT: Inspect this.token() and localStorage to confirm
+    // the session exists before it is cleared, then step over to verify both
+    // are null after the cleanup and that navigation to /auth/login fires.
     this.token.set(null);
     if (isPlatformBrowser(this.platform)) {
       localStorage.removeItem(TOKEN_KEY);

@@ -90,6 +90,8 @@ export class EditProductComponent implements OnInit {
         this.objectData.set(data);
         // Spread the existing config so all other options are preserved.
         this.formConfig = { ...this.formConfig, initialData: data };
+        // DEBUGGING BREAKPOINT: Inspect this.formConfig.initialData to confirm
+        // the form will be pre-populated with the correct existing field values.
         this.loading.set(false);
       },
       error: (err) => {
@@ -119,6 +121,8 @@ export class EditProductComponent implements OnInit {
       }
     };
 
+    // DEBUGGING BREAKPOINT: Inspect updatedObject and this.objectId() to confirm
+    // the correct ID is being targeted and all modified fields are included.
     this.objectsService.updateObject(this.objectId(), updatedObject).subscribe({
       next: () => {
         this.success.set(true);

@@ -63,6 +63,8 @@ export class ProductDetailComponent implements OnInit {
 
     this.objectsService.getObject(productId).subscribe({
       next: (data) => {
+        // DEBUGGING BREAKPOINT: Inspect data to verify the object's id, name,
+        // and data fields match what the API returned before writing to the signal.
         this.object.set(data);
         this.loading.set(false);
       },
@@ -115,6 +117,8 @@ export class ProductDetailComponent implements OnInit {
 
     this.objectsService.deleteObject(obj.id).subscribe({
       next: () => {
+        // DEBUGGING BREAKPOINT: Confirm we reach this callback — if navigation
+        // does not happen, check whether the service error signal was set instead.
         this.router.navigate(['/products']);
       },
       error: (err) => {

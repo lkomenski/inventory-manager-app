@@ -91,6 +91,8 @@ export class ProductListComponent implements OnInit {
       result = [...result].sort((a, b) => b.name.localeCompare(a.name));
     }
 
+    // DEBUGGING BREAKPOINT: Inspect result here to verify filter and sort
+    // are producing the expected subset before pagination slices it.
     return result;
   }
 
@@ -135,6 +137,8 @@ export class ProductListComponent implements OnInit {
   loadObjects(): void {
     this.objectsService.getObjects().subscribe({
       next: (response: any) => {
+        // DEBUGGING BREAKPOINT: Inspect this.objects after assignment to verify
+        // the shape of each ApiObject and the total count returned by the API.
         this.objects = response as ApiObject[];
         this.objectsService.loading.set(false);
       },

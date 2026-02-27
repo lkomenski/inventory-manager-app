@@ -74,8 +74,12 @@ export class CreateProductComponent {
       }
     };
 
+    // DEBUGGING BREAKPOINT: Inspect newObject to verify the name, color, price,
+    // and any custom fields are mapped correctly before the POST is sent.
     this.objectsService.createObject(newObject).subscribe({
       next: (created) => {
+        // DEBUGGING BREAKPOINT: Inspect created.id — this is the API-assigned ID
+        // used for the redirect. If navigation fails, verify this value is truthy.
         this.success.set(true);
         this.submitting.set(false);
 
