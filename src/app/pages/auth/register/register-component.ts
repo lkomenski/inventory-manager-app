@@ -1,58 +1,64 @@
-import { Component, signal } from "@angular/core";
-import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { Observable } from "rxjs";
-import { AuthService } from "../../services/auth.service";
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth-service';
+
+/** Group-level validator: ensures password and passwordConfirmation match. */
+function passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
+  const pw = group.get('password')?.value;
+  const confirm = group.get('passwordConfirmation')?.value;
+  return pw && confirm && pw !== confirm ? { passwordMismatch: true } : null;
+}
 
 @Component({
-  selector: "app-auth-register",
-  templateUrl: "./register.html"
+  selector: 'app-auth-register',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  templateUrl: './register-component.html'
 })
 export class RegisterComponent {
-    form: FormGroup;
+  private auth = inject(AuthService);
+  private router = inject(Router);
+  private fb = inject(FormBuilder);
 
-    private auth = inject(AuthService);
+  form: FormGroup = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    passwordConfirmation: ['', [Validators.required, Validators.minLength(6)]],
+  }, { validators: passwordMatchValidator });
 
-    serverError = signal<string | null>(null);
-    constructor(private fb: FormBuilder) {
-        this.form = this.fb.group({
-            email: ['', [Validators.required, Validators.email]],
-            password: ['', [Validators.required, Validators.minLength(6)]],
-            passwordConfirmation: ['', [Validators.required, Validators.minLength(6), this.passwordMatchValidator()]],
-        });
-    }
+  serverError = signal<string | null>(null);
+  showPassword = signal(false);
+  showConfirm = signal(false);
 
-    passwordMatchValidator(): AsyncValidatorFn {
-        return (control: AbstractControl): Observable<ValidationErrors | null> => {
-            const password = this.form?.get('password')?.value;
-            const passwordConfirmation = this.form?.get('passwordConfirmation')?.value;
-            if (password && passwordConfirmation && password !== passwordConfirmation) {
-                return new Observable(observer => {
-                    observer.next({ passwordMismatch: true });
-                    observer.complete();
-                });
-            }
-            return new Observable(observer => {
-                observer.next(null);
-                observer.complete();
-            });
-        };
-    }
-onSubmit(){
+  togglePassword(): void { this.showPassword.update(v => !v); }
+  toggleConfirm(): void { this.showConfirm.update(v => !v); }
+
+  isInvalid(field: string): boolean {
+    const c = this.form.get(field);
+    return !!(c && c.invalid && (c.dirty || c.touched));
+  }
+
+  /** Password mismatch is a group-level error, shown when confirmation is touched. */
+  get passwordMismatch(): boolean {
+    return !!(
+      this.form.errors?.['passwordMismatch'] &&
+      this.form.get('passwordConfirmation')?.touched
+    );
+  }
+
+  onSubmit(): void {
     if (this.form.invalid) {
-        this.form.markAllAsTouched();
-        console.log("Form is invalid", this.form.errors || 'see control errors');
-        return;
+      this.form.markAllAsTouched();
+      return;
     }
-
     this.serverError.set(null);
-
     try {
-        this.authService.register(this.form?.get('email')?.value, this.form?.get('password')?.value).subscribe({
-        // redirect to dashboard
-        });
-    } catch (err) {
-        console.error("Registration error", err);
-        this.serverError.set('An unexpected error occurred. Please try again later.');
+      this.auth.register(this.form.value.email, this.form.value.password);
+      this.router.navigate(['/']);
+    } catch (err: any) {
+      this.serverError.set(err.message || 'Registration failed. Please try again.');
     }
-    }
+  }
 }

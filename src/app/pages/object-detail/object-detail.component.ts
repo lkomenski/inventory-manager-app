@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ObjectsService } from '../../services/objects.service';
 import { ApiObject } from '../../models/object.model';
@@ -7,129 +8,135 @@ import { AccountComponent } from '../account/account.component';
 
 /**
  * Object Detail Component
- * 
+ *
  * Displays detailed information for a single inventory item including:
  * - All item properties (name, color, price, custom fields)
+ * - Quick Rename via PATCH (updates only the name, leaves data intact)
+ * - Full Edit via PUT (navigates to the edit form)
  * - Delete confirmation modal
  * - Loading and error states
  */
 @Component({
   selector: 'app-object-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './object-detail.component.html'
 })
 export class ObjectDetailComponent implements OnInit {
   object = signal<ApiObject | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
-  showDeleteModal = signal(false);  
-  deleting = signal(false);  
+  showDeleteModal = signal(false);
+  deleting = signal(false);
+
+  // PATCH – quick rename
+  renaming = signal(false);
+  renameValue = signal('');
+  renameError = signal<string | null>(null);
+  renameSuccess = signal(false);
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private objectsService: ObjectsService
-  ) {
-    // console.log('Object Detail Component initialized');
-  }
+  ) {}
 
   ngOnInit(): void {
-    // console.log('Object Detail Component: ngOnInit called');
     const id = this.route.snapshot.paramMap.get('id');
-    // console.log('Object ID from route:', id);
     if (id) {
       this.loadObject(id);
     } else {
-      // console.error('No object ID provided in route');
       this.error.set('No object ID provided');
     }
   }
 
-  /**
-   * Load object data from API by ID
-   * Sets loading/error states appropriately
-   */
   loadObject(id?: string): void {
-    const objectId = id || this.route.snapshot.paramMap.get('id');
-    // console.log('Loading object with ID:', objectId);
+    const objectId = id ?? this.route.snapshot.paramMap.get('id');
     if (!objectId) return;
 
-    // DEBUGGING BREAKPOINT: Set a breakpoint here to debug object loading
     this.loading.set(true);
     this.error.set(null);
-    
+
     this.objectsService.getObject(objectId).subscribe({
       next: (data) => {
-        // console.log('Object loaded successfully');
-        // console.log('Object data:', data);
         this.object.set(data);
+        this.renameValue.set(data.name);
         this.loading.set(false);
       },
       error: (err) => {
-        // console.error('Failed to load object:', err);
         this.error.set(err.message);
         this.loading.set(false);
       }
     });
   }
 
-  /** Extract all custom field keys from object.data */
+  // ── PATCH – quick rename ──────────────────────────────────────────────────
+
+  /**
+   * Sends PATCH /objects/{id} with only { name } in the body.
+   * The API merges this into the existing object — data fields are untouched.
+   */
+  patchName(): void {
+    const obj = this.object();
+    const newName = this.renameValue().trim();
+    if (!obj?.id || !newName || newName.length < 3) {
+      this.renameError.set('Name must be at least 3 characters.');
+      return;
+    }
+
+    this.renaming.set(true);
+    this.renameError.set(null);
+    this.renameSuccess.set(false);
+
+    this.objectsService.patchObject(obj.id, { name: newName }).subscribe({
+      next: (updated) => {
+        this.object.set(updated);
+        this.renaming.set(false);
+        this.renameSuccess.set(true);
+        AccountComponent.logActivity('Renamed item', updated.name, '✏️');
+        setTimeout(() => this.renameSuccess.set(false), 3000);
+      },
+      error: (err) => {
+        this.renameError.set(err.message);
+        this.renaming.set(false);
+      }
+    });
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
   getDataKeys(): string[] {
     const data = this.object()?.data;
     return data ? Object.keys(data) : [];
   }
 
-  /** Format object as pretty-printed JSON */
-  formatJson(obj: any): string {
+  formatJson(obj: object): string {
     return JSON.stringify(obj, null, 2);
   }
-  
-  /** Format value for display, showing 'N/A' for empty values */
-  formatValue(value: any): string {
-    if (value === null || value === undefined || value === '') {
-      return 'N/A';
-    }
+
+  formatValue(value: unknown): string {
+    if (value === null || value === undefined || value === '') return 'N/A';
     return String(value);
   }
 
-  /** Show delete confirmation modal */
-  confirmDelete(): void {
-    // console.log('Delete confirmation requested');
-    this.showDeleteModal.set(true);
-  }
+  // ── Delete ────────────────────────────────────────────────────────────────
 
-  /** Close delete confirmation modal */
-  cancelDelete(): void {
-    // console.log('Delete cancelled');
-    this.showDeleteModal.set(false);
-  }
+  confirmDelete(): void { this.showDeleteModal.set(true); }
+  cancelDelete(): void { this.showDeleteModal.set(false); }
 
-  /**
-   * Delete the current object permanently
-   * Logs activity and navigates back to list on success
-   */
   deleteObject(): void {
     const obj = this.object();
-    // console.log('Deleting object:', obj?.id);
     if (!obj?.id) return;
 
-    // DEBUGGING BREAKPOINT: Set a breakpoint here to debug delete operation
     this.deleting.set(true);
-    
-    const itemName = obj.name; // Capture name before deletion
-    
+    const itemName = obj.name;
+
     this.objectsService.deleteObject(obj.id).subscribe({
       next: () => {
-        // console.log('Object deleted successfully, navigating to list');
-        
-        // Log activity
         AccountComponent.logActivity('Deleted item', itemName, '🗑️');
-        
         this.router.navigate(['/objects']);
       },
       error: (err) => {
-        // console.error('Failed to delete object:', err);
         this.error.set(err.message);
         this.deleting.set(false);
         this.showDeleteModal.set(false);

@@ -17,8 +17,8 @@
 import { Injectable, PLATFORM_ID, inject, signal, computed } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
-import { MockAuthService } from './mock-auth.service';
-import { PublicUser, UserRole } from '../models/user.model';
+import { MockAuthService } from './mock-auth-service';
+import { PublicUser, UserRole } from '../models/user-model';
 
 // The key we'll use when reading/writing to localStorage
 const TOKEN_KEY = 'auth_token';

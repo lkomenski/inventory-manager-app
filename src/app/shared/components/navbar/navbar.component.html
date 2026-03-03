@@ -1,6 +1,7 @@
 <nav class="navbar sticky top-0 z-50" role="navigation" aria-label="Main navigation">
   <div class="container mx-auto px-4">
     <div class="flex justify-between items-center h-16">
+
       <!-- Logo/Brand -->
       <a routerLink="/" class="flex items-center gap-3 text-xl font-semibold group" aria-label="Inventory Manager Home">
         <div class="flex items-center justify-center w-9 h-9 bg-blue-600 rounded-lg group-hover:bg-blue-700 transition-colors" aria-hidden="true">
@@ -12,7 +13,7 @@
       </a>
 
       <!-- Mobile Menu Button -->
-      <button 
+      <button
         (click)="toggleMobileMenu()"
         class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none transition-colors"
         aria-label="Toggle mobile menu"
@@ -20,76 +21,118 @@
         aria-controls="mobile-menu">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           @if (!mobileMenuOpen()) {
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
           } @else {
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           }
         </svg>
       </button>
 
       <!-- Desktop Navigation -->
       <div class="hidden md:flex items-center gap-1" role="menubar">
-        <a routerLink="/" 
+        <a routerLink="/"
            routerLinkActive="bg-blue-50 text-blue-700 font-medium"
            [routerLinkActiveOptions]="{exact: true}"
            class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
-           role="menuitem">
-          Home
-        </a>
-        <a routerLink="/objects" 
+           role="menuitem">Home</a>
+
+        <a routerLink="/objects"
            routerLinkActive="bg-blue-50 text-blue-700 font-medium"
            class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
-           role="menuitem">
-          Inventory
-        </a>
-        <a routerLink="/objects/create" 
-           routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-           class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
-           role="menuitem">
-          Add Item
-        </a>
-        <a routerLink="/account" 
-           routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-           class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
-           role="menuitem">
-          Account
-        </a>
+           role="menuitem">Inventory</a>
+
+        @if (auth.isLoggedIn()) {
+          <a routerLink="/objects/create"
+             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+             class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
+             role="menuitem">Add Item</a>
+
+          @if (auth.getRole() === 'admin') {
+            <a routerLink="/admin"
+               routerLinkActive="bg-purple-50 text-purple-700 font-medium"
+               class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
+               role="menuitem">Admin</a>
+          }
+
+          <!-- User menu -->
+          <div class="flex items-center gap-2 ml-2 pl-2 border-l border-gray-200">
+            <a routerLink="/account"
+               routerLinkActive="bg-blue-50 text-blue-700"
+               class="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-3 py-2 rounded-md font-medium text-sm"
+               role="menuitem">
+              <span class="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold text-xs" aria-hidden="true">
+                {{ (auth.currentUser()?.email ?? '?')[0].toUpperCase() }}
+              </span>
+              <span class="max-w-32 truncate">{{ auth.currentUser()?.email }}</span>
+            </a>
+            <button
+              (click)="logout()"
+              class="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors px-3 py-2 rounded-md font-medium text-sm"
+              role="menuitem">
+              Sign out
+            </button>
+          </div>
+
+        } @else {
+          <a routerLink="/login"
+             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+             class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors px-4 py-2 rounded-md font-medium"
+             role="menuitem">Login</a>
+          <a routerLink="/register"
+             class="bg-blue-600 text-white hover:bg-blue-700 transition-colors px-4 py-2 rounded-md font-medium"
+             role="menuitem">Register</a>
+        }
       </div>
     </div>
 
     <!-- Mobile Navigation -->
     @if (mobileMenuOpen()) {
-      <div id="mobile-menu" class="md:hidden py-4 border-t border-gray-200" role="menu" aria-labelledby="mobile-menu-button">
-        <nav class="flex flex-col gap-1" role="menubar">
-          <a routerLink="/" 
+      <div id="mobile-menu" class="md:hidden py-4 border-t border-gray-200" role="menu">
+        <nav class="flex flex-col gap-1" aria-label="Mobile navigation">
+          <a routerLink="/"
              (click)="closeMobileMenu()"
              routerLinkActive="bg-blue-50 text-blue-700 font-medium"
              [routerLinkActiveOptions]="{exact: true}"
-             class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
-             role="menuitem">
-            Home
-          </a>
-          <a routerLink="/objects" 
+             class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium">Home</a>
+
+          <a routerLink="/objects"
              (click)="closeMobileMenu()"
              routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-             class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
-             role="menuitem">
-            Inventory
-          </a>
-          <a routerLink="/objects/create" 
-             (click)="closeMobileMenu()"
-             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-             class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
-             role="menuitem">
-            Add Item
-          </a>
-          <a routerLink="/account" 
-             (click)="closeMobileMenu()"
-             routerLinkActive="bg-blue-50 text-blue-700 font-medium"
-             class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium"
-             role="menuitem">
-            Account
-          </a>
+             class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium">Inventory</a>
+
+          @if (auth.isLoggedIn()) {
+            <a routerLink="/objects/create"
+               (click)="closeMobileMenu()"
+               routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+               class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium">Add Item</a>
+
+            @if (auth.getRole() === 'admin') {
+              <a routerLink="/admin"
+                 (click)="closeMobileMenu()"
+                 routerLinkActive="bg-purple-50 text-purple-700 font-medium"
+                 class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium">Admin</a>
+            }
+
+            <a routerLink="/account"
+               (click)="closeMobileMenu()"
+               routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+               class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium">My Account</a>
+
+            <button
+              (click)="logout()"
+              class="text-left px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-md transition-colors font-medium">
+              Sign out
+            </button>
+
+          } @else {
+            <a routerLink="/login"
+               (click)="closeMobileMenu()"
+               routerLinkActive="bg-blue-50 text-blue-700 font-medium"
+               class="px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-md transition-colors font-medium">Login</a>
+            <a routerLink="/register"
+               (click)="closeMobileMenu()"
+               class="px-4 py-2.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors font-medium">Register</a>
+          }
         </nav>
       </div>
     }

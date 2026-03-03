@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ObjectsService } from '../../services/objects.service';
 import { ApiObject, APIRequest } from '../../models/object.model';
-import { DynamicObjectFormComponent, FormSubmitData, FormConfig } from '../../components';
+import { DynamicObjectFormComponent, FormSubmitData, FormConfig } from '../../forms';
 
 @Component({
   selector: 'app-object-edit',

@@ -1,13 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../../services/auth-service';
 
-/**
- * Navigation Bar Component
- * 
- * Responsive navigation menu with mobile hamburger toggle.
- * Displays links to Home, Objects List, Create, and Account pages.
- */
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -15,15 +10,19 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   templateUrl: './navbar.component.html'
 })
 export class NavbarComponent {
-  mobileMenuOpen = signal(false);  // Controls mobile menu visibility
+  auth = inject(AuthService);
+  mobileMenuOpen = signal(false);
 
-  /** Toggle mobile menu open/closed */
   toggleMobileMenu(): void {
     this.mobileMenuOpen.update(value => !value);
   }
 
-  /** Close mobile menu (called when a link is clicked) */
   closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
+  }
+
+  logout(): void {
+    this.closeMobileMenu();
+    this.auth.logout();
   }
 }

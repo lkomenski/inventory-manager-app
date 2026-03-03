@@ -13,7 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { Injectable } from '@angular/core';
-import { AuthResult, StoredUser, TokenPayload, UserRole } from '../models/user.model';
+import { AuthResult, PublicUser, StoredUser, TokenPayload, UserRole } from '../models/user-model';
 
 @Injectable({ providedIn: 'root' })
 export class MockAuthService {
@@ -115,6 +115,16 @@ export class MockAuthService {
       // If anything goes wrong while parsing, treat the token as invalid
       return null;
     }
+  }
+
+  /**
+   * getUsers()
+   *
+   * Returns the full list of registered users with password hashes removed.
+   * Only intended for admin pages — don't expose this in regular components.
+   */
+  getUsers(): PublicUser[] {
+    return this.users.map(u => ({ id: u.id, email: u.email, role: u.role }));
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────
