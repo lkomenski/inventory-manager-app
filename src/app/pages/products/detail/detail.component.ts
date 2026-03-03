@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ObjectsService } from '../../../services/objects.service';
 import { ApiObject } from '../../../models/object.model';
@@ -16,7 +17,7 @@ import { AuthService } from '../../../services/auth-service';
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './detail.component.html'
 })
 export class ProductDetailComponent implements OnInit {
@@ -39,6 +40,12 @@ export class ProductDetailComponent implements OnInit {
 
   /** True while the DELETE request is in flight — disables modal buttons. */
   deleting = signal(false);
+
+  /** Signals for the Quick Rename (PATCH) feature. */
+  renameValue = signal('');
+  renaming = signal(false);
+  renameSuccess = signal(false);
+  renameError = signal<string | null>(null);
 
   constructor(
     private route: ActivatedRoute,
@@ -98,6 +105,30 @@ export class ProductDetailComponent implements OnInit {
       return 'N/A';
     }
     return String(value);
+  }
+
+  /** Sends a PATCH request updating only the item's name. */
+  patchName(): void {
+    const obj = this.object();
+    const newName = this.renameValue().trim();
+    if (!obj?.id || newName.length < 3) return;
+
+    this.renaming.set(true);
+    this.renameError.set(null);
+    this.renameSuccess.set(false);
+
+    this.objectsService.patchObject(obj.id, { name: newName }).subscribe({
+      next: (updated) => {
+        this.object.set(updated);
+        this.renameSuccess.set(true);
+        this.renameValue.set('');
+        this.renaming.set(false);
+      },
+      error: (err) => {
+        this.renameError.set(err.message || 'Rename failed. Please try again.');
+        this.renaming.set(false);
+      }
+    });
   }
 
   /** Opens the delete confirmation modal. */
