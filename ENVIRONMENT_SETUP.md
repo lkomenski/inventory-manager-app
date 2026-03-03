@@ -5,25 +5,22 @@ This project uses environment files to manage sensitive configuration like API k
 
 ## Quick Setup
 
-1. **Copy the environment template file:**
+1. **Copy the environment template:**
    ```bash
    cp src/environments/environment.ts src/environments/environment.local.ts
    ```
 
-2. **Update with your actual values:**
-   Edit `src/environments/environment.local.ts` and replace `YOUR_API_KEY_HERE` with your actual API key.
-
-3. **Verify gitignore:**
-   The file `environment.local.ts` is gitignored and will never be committed to version control.
+2. **Add your API key:**
+   Edit `src/environments/environment.local.ts` and replace `YOUR_API_KEY_HERE` with your actual key.
 
 ## File Structure
 
-- `environment.ts` - Template with placeholder values (committed to git) - users copy this to create their own config
-- `environment.local.ts` - Your actual configuration with real API key (gitignored - never committed)
+- `environment.ts` - Committed template with placeholder values; copy this to create your local config
+- `environment.local.ts` - Your local configuration with a real API key (gitignored)
 
 ## Current Configuration
 
-The application expects these environment variables:
+The app reads its configuration from the exported `environment` object. The required properties are:
 
 - `apiUrl` - Base URL for the API endpoints
 - `apiKey` - Your API key for authentication

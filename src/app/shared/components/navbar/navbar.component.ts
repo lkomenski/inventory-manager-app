@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../services/auth-service';
@@ -10,8 +10,12 @@ import { AuthService } from '../../../services/auth-service';
   templateUrl: './navbar.component.html'
 })
 export class NavbarComponent {
-  auth = inject(AuthService);
+  private authService = inject(AuthService);
+
   mobileMenuOpen = signal(false);
+
+  isLoggedIn = this.authService.isLoggedIn.bind(this.authService);
+  userRole = this.authService.getRole.bind(this.authService);
 
   toggleMobileMenu(): void {
     this.mobileMenuOpen.update(value => !value);
@@ -22,7 +26,7 @@ export class NavbarComponent {
   }
 
   logout(): void {
+    this.authService.logout();
     this.closeMobileMenu();
-    this.auth.logout();
   }
 }

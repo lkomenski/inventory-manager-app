@@ -1,16 +1,18 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ObjectsService } from '../../services/objects.service';
+import { AuthService } from '../../services/auth-service';
 
 /**
- * Home Page Component
- * 
- * Displays dashboard with inventory statistics including:
- * - Total item count
- * - API connection status
- * - Rate limit information 
- * - Last update timestamp
+ * HomeComponent
+ *
+ * Landing page dashboard. Fetches inventory statistics on init and
+ * displays them alongside quick-action navigation cards.
+ *
+ * objectsService is injected publicly so the template can read
+ * rate-limit signals (rateLimitRemaining, rateLimitTotal) directly
+ * without needing wrapper properties on this class.
  */
 @Component({
   selector: 'app-home',
@@ -19,22 +21,37 @@ import { ObjectsService } from '../../services/objects.service';
   templateUrl: './home.component.html'
 })
 export class HomeComponent implements OnInit {
-  // Dashboard statistics
+  private authService = inject(AuthService);
+
+  /** True when the current user has the admin role. */
+  isAdmin = () => this.authService.getRole() === 'admin';
+
+  /** Running total of inventory items fetched from the API. */
   objectCount = signal(0);
+
+  /** True while the stats fetch is in flight. */
   loading = signal(false);
+
+  /** Holds an error message if the stats fetch fails; null otherwise. */
   error = signal<string | null>(null);
+
+  /** Reflects whether the most recent API call succeeded. */
   apiConnected = signal(true);
+
+  /** Timestamp of the most recent successful fetch. */
   lastUpdated = signal<Date | null>(null);
 
   constructor(public objectsService: ObjectsService) {}
 
+  /** Triggers the initial stats load when the component mounts. */
   ngOnInit(): void {
     this.loadStats();
   }
 
   /**
-   * Load dashboard statistics from API
-   * Fetches all objects to count them and verify API connectivity
+   * Fetches all inventory objects to compute the item count and confirm
+   * API connectivity. On error, marks the API as disconnected and
+   * surfaces the message to the template via the error signal.
    */
   private loadStats(): void {
     this.loading.set(true);

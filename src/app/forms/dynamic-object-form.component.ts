@@ -1,22 +1,33 @@
+/**
+ * dynamic-object-form.component.ts
+ *
+ * A single reusable form component that drives every form in the app —
+ * login, register, create item, and edit item.
+ *
+ * Rather than building a separate FormGroup in each page component, callers
+ * pass a FieldDefinition[] array (from auth-form-config or inventory-form-config)
+ * and this component handles control creation, validation, error display,
+ * and submission. The parent only receives a clean FormSubmitData object
+ * via the (formSubmit) output after all validators pass.
+ *
+ * For inventory pages, enableCustomFields unlocks an additional section
+ * where users can add arbitrary key/value pairs to the object's data object.
+ * Field name suggestions are loaded live from the public API so common
+ * property names (year, capacity, CPU model, etc.) appear in a dropdown
+ * with auto-detected types.
+ */
+
 import { Component, Input, Output, EventEmitter, OnInit, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, ValidatorFn, AsyncValidatorFn } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { ApiObject } from '../models/object.model';
 import { ObjectsService } from '../services/objects.service';
+import { FieldDefinition, FormConfig, FormSubmitData } from './field-definition';
 
 /**
- * Data structure emitted when form is submitted
- */
-export interface FormSubmitData {
-  name: string;
-  data: {
-    [key: string]: string | number;
-  };
-}
-
-/**
- * Represents a custom field added by the user
+ * Represents a custom field added by the user at runtime.
+ * isCustomName distinguishes free-text keys from dropdown selections.
  */
 export interface CustomField {
   key: string;               // Field name
@@ -26,7 +37,8 @@ export interface CustomField {
 }
 
 /**
- * Field suggestions loaded from existing API data
+ * A field name + type hint pulled from existing API objects.
+ * Shown in the custom field dropdown so users can reuse real property names.
  */
 export interface FieldSuggestion {
   name: string;               // Field name (e.g., "CPU model", "year")
@@ -35,25 +47,15 @@ export interface FieldSuggestion {
 }
 
 /**
- * Configuration options for the form
- */
-export interface FormConfig {
-  mode: 'create' | 'edit';       // Determines form behavior and validation
-  objectId?: string;              // Required when mode is 'edit'
-  initialData?: Partial<ApiObject>;  // Pre-populate form with existing data
-  submitButtonText?: string;      // Custom button text (defaults based on mode)
-  cancelButtonText?: string;      // Custom cancel button text
-}
-
-/**
- * Dynamic Object Form Component
+ * Generic Dynamic Form Component
  * 
- * Reusable form component for creating and editing inventory objects.
+ * Reusable form component that adapts to any field configuration.
  * Features:
- * - Fixed fields: name (required), color, price
- * - Dynamic custom fields with smart suggestions from existing data
- * - Validates input and provides real-time feedback
- * - Works for both create and edit modes
+ * - Accepts field definitions to generate form controls
+ * - Supports text, email, password, number, color, textarea inputs
+ * - Built-in validation with custom error messages
+ * - Optional custom fields (for inventory items)
+ * - Works for create, edit, and view modes
  */
 @Component({
   selector: 'app-dynamic-object-form',
@@ -62,29 +64,26 @@ export interface FormConfig {
   templateUrl: './dynamic-object-form.component.html'
 })
 export class DynamicObjectFormComponent implements OnInit {
+  @Input() fields: FieldDefinition[] = [];  // Field definitions for generic forms
   @Input() config: FormConfig = { mode: 'create' };
-  @Input() submitting = signal(false);   // Parent controls submitting state
-  @Input() error = signal<string | null>(null);  // Error message from parent
-  @Input() success = signal(false);      // Success state from parent
+  @Input() submitting = signal(false);      // Parent controls submitting state
+  @Input() error = signal<string | null>(null);   // Error message from parent
+  @Input() success = signal(false);         // Success state from parent
+  @Input() enableCustomFields = false;      // Enable custom fields for inventory items
   
   @Output() formSubmit = new EventEmitter<FormSubmitData>();  // Emit validated form data
   @Output() formCancel = new EventEmitter<void>();            // Emit cancel action
 
-  objectForm: FormGroup;             // Reactive form for name, color, price
-  customFields: CustomField[] = [];  // Dynamic user-added fields
-  fieldSuggestions: FieldSuggestion[] = [];  // Suggestions loaded from existing objects
+  dynamicForm: FormGroup;            // Reactive form based on field definitions
+  customFields: CustomField[] = [];  // Dynamic user-added fields (for inventory)
+  fieldSuggestions: FieldSuggestion[] = [];  // Suggestions from existing objects
   loadingSuggestions = signal(false);
   
   constructor(
     private fb: FormBuilder,
     private objectsService: ObjectsService
   ) {
-    // Initialize form with fixed fields
-    this.objectForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
-      color: ['#000000'],  // Default to black
-      price: [0, [Validators.min(0)]]  // Must be non-negative
-    });
+    this.dynamicForm = this.fb.group({});
 
     // React to config changes (for edit mode)
     effect(() => {
@@ -95,13 +94,59 @@ export class DynamicObjectFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.buildFormFromFields();
     this.loadInitialData();
-    this.loadFieldSuggestionsFromAPI();
+    
+    // Load suggestions only if custom fields are enabled (inventory mode)
+    if (this.enableCustomFields) {
+      this.loadFieldSuggestionsFromAPI();
+    }
   }
   
   /**
-   * Load field suggestions from existing API objects
-   * This creates a smart dropdown of commonly used field names
+   * Build the reactive FormGroup from the FieldDefinition array.
+   * Each field's validators and asyncValidators are applied here so
+   * neither the parent component nor the template needs to touch FormBuilder.
+   */
+  private buildFormFromFields(): void {
+    const group: { [key: string]: any } = {};
+    
+    this.fields.forEach(field => {
+      const validators: ValidatorFn[] = [];
+      const asyncValidators: AsyncValidatorFn[] = [];
+      
+      // Add required validator if field is not optional
+      if (!field.optional) {
+        validators.push(Validators.required);
+      }
+      
+      // Add custom validators from field definition
+      if (field.validators) {
+        validators.push(...field.validators);
+      }
+      
+      // Add async validators
+      if (field.asyncValidators) {
+        asyncValidators.push(...field.asyncValidators);
+      }
+      
+      // Create form control with validators
+      const value = field.value ?? '';
+      const controlValue = field.disabled ? { value, disabled: true } : value;
+      group[field.name] = [
+        controlValue,
+        validators.length > 0 ? validators : null,
+        asyncValidators.length > 0 ? asyncValidators : null
+      ];
+    });
+    
+    this.dynamicForm = this.fb.group(group);
+  }
+  
+  /**
+   * Fetch all objects from the API and extract unique field names from their
+   * data objects. Used to populate the custom field name dropdown with
+   * real property names and auto-detected types (text vs. number).
    */
   private loadFieldSuggestionsFromAPI(): void {
     this.loadingSuggestions.set(true);
@@ -145,107 +190,130 @@ export class DynamicObjectFormComponent implements OnInit {
   }
 
   /**
-   * Load initial data when editing an existing object
-   * Populates fixed fields and recreates custom fields
+   * Patch form controls and restore custom fields when editing an existing object.
+   * Handles both flat structures (auth forms) and nested data objects (inventory items).
    */
   private loadInitialData(): void {
     if (this.config.initialData) {
-      const data = this.config.initialData;
+      const data: any = this.config.initialData;
       
-      // Populate fixed fields
-      this.objectForm.patchValue({
-        name: data.name || '',
-        color: (data.data?.['color'] as string) || '#000000',
-        price: (data.data?.['price'] as number) || 0
-      });
-      
-      // Load custom fields from existing data
-      if (data.data) {
-        this.customFields = [];
-        Object.keys(data.data).forEach(key => {
-          // Skip color and price since they have dedicated fields
-          if (key !== 'color' && key !== 'price') {
-            const value = data.data![key];
+      // For inventory objects with nested data structure
+      if ('data' in data && typeof data['data'] === 'object') {
+        // Populate main fields
+        const formData: { [key: string]: any } = {};
+        
+        // Populate from top-level properties
+        this.fields.forEach(field => {
+          if (field.name in data) {
+            formData[field.name] = data[field.name];
+          }
+        });
+        
+        this.dynamicForm.patchValue(formData);
+        
+        // Load custom fields from nested data object
+        if (this.enableCustomFields && data['data']) {
+          this.customFields = [];
+          Object.entries(data['data']).forEach(([key, value]: [string, any]) => {
+            // Skip if this field is already a main form field
+            if (this.fields.some(f => f.name === key)) {
+              return;
+            }
+            
             const fieldType = typeof value === 'number' ? 'number' : 'text';
             const isKnownField = this.fieldSuggestions.some(s => s.name === key);
             
             this.customFields.push({
-              key: key,
-              value: value,
+              key,
+              value: value as string | number,
               type: fieldType,
-              isCustomName: !isKnownField  // Mark if this field isn't in suggestions
+              isCustomName: !isKnownField
             });
-          }
-        });
+          });
+        }
+      } else {
+        // For simple data structures (like auth forms)
+        this.dynamicForm.patchValue(data);
       }
     }
   }
 
-  /**
-   * Check if a form field has validation errors and has been touched
-   */
+  /** Returns true when a field has been interacted with and fails validation. */
   isFieldInvalid(fieldName: string): boolean {
-    const field = this.objectForm.get(fieldName);
+    const field = this.dynamicForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
 
   /**
-   * Get user-friendly error message for a field
+   * Returns the first matching error message for a field.
+   * Checks the FieldDefinition's custom error map before falling back
+   * to generic messages for standard Angular validator errors.
    */
   getFieldError(fieldName: string): string | null {
-    const field = this.objectForm.get(fieldName);
+    const field = this.dynamicForm.get(fieldName);
     if (!field || !field.errors || !this.isFieldInvalid(fieldName)) {
       return null;
     }
 
-    switch (fieldName) {
-      case 'name':
-        if (field.errors['required']) return 'Name is required';
-        if (field.errors['minlength']) return 'Name must be at least 3 characters long';
-        break;
-      case 'price':
-        if (field.errors['min']) return 'Price must be greater than or equal to 0';
-        break;
+    // Get field definition for custom error messages
+    const fieldDef = this.fields.find(f => f.name === fieldName);
+    
+    // Check for custom error messages first
+    if (fieldDef?.errors) {
+      for (const [errorType, message] of Object.entries(fieldDef.errors)) {
+        if (field.errors[errorType]) {
+          return message;
+        }
+      }
     }
-    return null;
+
+    // Fallback to generic messages
+    if (field.errors['required']) return 'This field is required';
+    if (field.errors['email']) return 'Enter a valid email address';
+    if (field.errors['minlength']) {
+      const minLength = field.errors['minlength'].requiredLength;
+      return `Must be at least ${minLength} characters`;
+    }
+    if (field.errors['min']) {
+      const min = field.errors['min'].min;
+      return `Must be at least ${min}`;
+    }
+    if (field.errors['max']) {
+      const max = field.errors['max'].max;
+      return `Must not exceed ${max}`;
+    }
+    
+    return 'Invalid value';
   }
 
-  /**
-   * Handle form submission
-   * Validates and emits combined data from fixed and custom fields
-   */
   onSubmit(): void {
-    if (this.objectForm.invalid) {
+    if (this.dynamicForm.invalid) {
       // Mark all fields as touched to show validation messages
-      Object.keys(this.objectForm.controls).forEach(key => {
-        this.objectForm.get(key)?.markAsTouched();
+      Object.keys(this.dynamicForm.controls).forEach(key => {
+        this.dynamicForm.get(key)?.markAsTouched();
       });
       return;
     }
 
-    const formValue = this.objectForm.value;
-    const data: { [key: string]: string | number } = {};
+    const formData: FormSubmitData = { ...this.dynamicForm.value };
     
-    // Add standard fields if they have values
-    if (formValue.color) {
-      data['color'] = formValue.color;
+    // Add custom fields if enabled
+    if (this.enableCustomFields && this.customFields.length > 0) {
+      // Create nested data object for inventory items
+      const data: { [key: string]: string | number } = {};
+      
+      this.customFields.forEach(field => {
+        if (field.key && field.value !== null && field.value !== undefined && field.value !== '') {
+          data[field.key] = field.value;
+        }
+      });
+      
+      // Restructure to match inventory format
+      formData['data'] = data;
     }
-    if (formValue.price !== null && formValue.price !== undefined && formValue.price !== '') {
-      data['price'] = formValue.price;
-    }
-    
-    // Add custom fields (only if they have both key and value)
-    this.customFields.forEach(field => {
-      if (field.key && field.value !== null && field.value !== undefined && field.value !== '') {
-        data[field.key] = field.value;
-      }
-    });
     
     // Emit to parent component
-    this.formSubmit.emit({
-      name: formValue.name,
-      data: data
-    });
+    this.formSubmit.emit(formData);
   }
   
   /**
@@ -358,9 +426,9 @@ export class DynamicObjectFormComponent implements OnInit {
     }
     const isSubmitting = this.submitting();
     if (this.config.mode === 'edit') {
-      return isSubmitting ? 'Updating...' : 'Update Item';
+      return isSubmitting ? 'Updating...' : 'Update';
     }
-    return isSubmitting ? 'Creating...' : 'Create Item';
+    return isSubmitting ? 'Submitting...' : 'Submit';
   }
 
   /**
@@ -377,5 +445,9 @@ export class DynamicObjectFormComponent implements OnInit {
 
   get isCreateMode(): boolean {
     return this.config.mode === 'create';
+  }
+
+  get isViewMode(): boolean {
+    return this.config.mode === 'view';
   }
 }

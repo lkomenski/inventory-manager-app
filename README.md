@@ -1,215 +1,111 @@
 # Inventory Manager App
 
-A modern, full-featured inventory management web application built with Angular 21, Server-Side Rendering (SSR), and Tailwind CSS. This application demonstrates complete CRUD operations using the RESTful API from [restful-api.dev](https://restful-api.dev), along with mock JWT authentication and role-based access control.
+A multi-page Angular inventory management app built with **Angular 21**, **Tailwind CSS**, and **Server-Side Rendering (SSR)**. Demonstrates full CRUD operations against a public REST API, reactive form validation, typed HTTP service architecture, and responsive UI design.
 
-## Project Overview
-
-This project was created as a final project demonstrating:
-- Full CRUD operations (Create, Read, Update, Delete) with a public REST API
-- Mock JWT authentication with login, registration, and role-based access
-- Route guards protecting authenticated and admin-only pages
-- Server-Side Rendering (SSR) with Angular Universal
-- Proxy configuration for CORS handling in development
-- Form validation with user-friendly error messages
-- Multi-page routing with Angular Router
-- Modern Angular standalone components (Angular 21)
-- Responsive design with Tailwind CSS
-- Loading states and error handling
-- TypeScript with strong typing
-- RESTful API integration
-
-## Features
-
-### Pages & Routes
-
-| Route | Page | Guard |
-|-------|------|-------|
-| `/` | Home / Dashboard | — |
-| `/login` | Login | — |
-| `/register` | Register | — |
-| `/objects` | Inventory List | — |
-| `/objects/:id` | Item Detail | — |
-| `/objects/create` | Create Item | Auth required |
-| `/objects/:id/edit` | Edit Item | Auth required |
-| `/account` | My Account | Auth required |
-| `/admin` | Admin Panel | Admin role required |
-| `/**` | 404 Not Found | — |
-
-### Authentication & Authorization
-- **Login** – email + password form, validated; credentials checked against the mock auth store
-- **Register** – email + password + confirmation form with mismatch validation; new accounts get the `user` role
-- **Mock JWT** – on login/register, a mock JSON Web Token (header.payload.signature) is issued and stored in `localStorage` under `auth_token`; it expires after 8 hours
-- **AuthService** – single source of truth for session state; exposes `isLoggedIn()`, `getRole()`, `currentUser()` (Angular Signal), `login()`, `register()`, `logout()`
-- **MockAuthService** – simulates a backend; maintains an in-memory user store, hashes passwords (djb2), issues mock JWTs
-- **Route Guards** – `authGuard` redirects unauthenticated users to `/login`; `adminGuard` additionally requires the `admin` role
-- **Role-based UI** – navbar shows the Admin link only to users with the `admin` role; Create/Edit links hidden when logged out
-- **Pre-seeded admin account**: `admin@example.com` / `Admin1234!`
-
-### Core Inventory Functionality
-- **List View** – display all inventory items in a responsive table with search, sort (A–Z / Z–A), and pagination (5 per page)
-- **Filtered List** – filter by specific object IDs via query parameters (e.g. `/objects?id=1&id=2`)
-- **Detail View** – view complete information for a single item including all data fields
-- **Quick Rename (PATCH)** – update only the item name via `PATCH /objects/{id}`; all other data fields stay intact
-- **Create** – add new items with the shared validated form (POST)
-- **Edit** – update existing items in full via the same shared form (PUT)
-- **Delete** – remove items with a confirmation modal
-- **Smart Field Suggestions** – dropdown dynamically populated from all field names found in the live API, with auto-type detection
-- **Dynamic Custom Fields** – add unlimited key/value data properties with text or number types
-- **Activity Log** – the Account page tracks recent creates, edits, renames, and deletes via `localStorage`
-
-### Form Validation
-- Name: required, minimum 3 characters
-- Price: must be ≥ 0 if provided
-- Color: optional color picker (hex)
-- Email: required, valid email format
-- Password: required, minimum 6 characters
-- Password confirmation: must match password (group-level validator)
-- Real-time validation messages shown after the field is touched
-- Submit button disabled until the form is fully valid
-
-## Technology Stack
-
-- **Framework**: Angular 21.1.0 with Server-Side Rendering (SSR)
-- **Server**: Express.js for SSR and CSP headers
-- **Language**: TypeScript 5.9
-- **Styling**: Tailwind CSS 4.1 (only — no other CSS framework)
-- **HTTP Client**: Angular HttpClient with proxy configuration
-- **Router**: Angular Router with functional route guards
-- **Forms**: Reactive Forms with synchronous and group-level validators
-- **API**: RESTful API (https://api.restful-api.dev/objects)
-- **State Management**: Angular Signals
-- **Auth**: Mock JWT (in-memory, no real server)
+---
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed:
-- **Node.js** (v18 or higher)
-- **npm** (v11 or higher)
-- **Angular CLI** (v21 or higher)
+- **Node.js** v18+ (required)
+- **npm** v11+ (required)
+- **Angular CLI** (optional, for `ng` commands)
 
-## Installation & Setup
+---
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-repository-url>
-   cd inventory-manager-app
-   ```
+## How to Run
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+**Install dependencies:**
 
-3. **Configure environment** (Important!)
-
-   The application requires environment configuration for API access. See [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md) for detailed instructions.
-
-   Quick setup:
-   ```bash
-   # Copy the environment template file
-   cp src/environments/environment.ts src/environments/environment.local.ts
-
-   # Edit src/environments/environment.local.ts and replace YOUR_API_KEY_HERE with your actual API key
-   ```
-
-   **Note**: The `environment.local.ts` file is gitignored and should never be committed to version control.
-
-4. **Start the development server**
-   ```bash
-   npm start
-   # or
-   ng serve
-   ```
-
-5. **Open in browser**
-   Navigate to `http://localhost:4200/`
-
-The application will automatically reload when you make changes to the source code.
-
-## Project Structure
-
-```
-inventory-manager-app/
-├── src/
-│   ├── app/
-│   │   ├── guards/                          # Route guards
-│   │   │   ├── auth.guard.ts                # Requires login
-│   │   │   └── admin.guard.ts               # Requires admin role
-│   │   ├── pages/                           # Page components
-│   │   │   ├── auth/
-│   │   │   │   ├── login/                   # Login page (/login)
-│   │   │   │   └── register/               # Register page (/register)
-│   │   │   ├── admin/                       # Admin panel (/admin)
-│   │   │   ├── account/                     # Account dashboard (/account)
-│   │   │   ├── home/                        # Dashboard (/))
-│   │   │   ├── objects-list/                # List of all items (/objects)
-│   │   │   ├── object-detail/               # Single item detail (/objects/:id)
-│   │   │   ├── object-create/               # Create new item (/objects/create)
-│   │   │   └── object-edit/                 # Edit item (/objects/:id/edit)
-│   │   ├── forms/                           # Shared form components
-│   │   │   ├── dynamic-object-form.component.ts   # Reusable create/edit form
-│   │   │   ├── dynamic-object-form.component.html
-│   │   │   └── index.ts
-│   │   ├── models/
-│   │   │   ├── object.model.ts              # API object interfaces
-│   │   │   └── user-model.ts               # Auth user interfaces
-│   │   ├── services/
-│   │   │   ├── objects.service.ts           # Inventory API service
-│   │   │   ├── auth-service.ts              # Auth state & session
-│   │   │   └── mock-auth-service.ts         # Simulated auth backend
-│   │   ├── shared/                          # Shared components
-│   │   │   └── components/
-│   │   │       ├── navbar/                  # Navigation (auth-aware)
-│   │   │       ├── footer/                  # Footer
-│   │   │       └── not-found/               # 404 page
-│   │   ├── app.routes.ts                    # All client-side routes + guards
-│   │   ├── app.config.ts                    # App providers
-│   │   ├── app.ts                           # Root component
-│   │   └── app.html                         # Root template
-│   ├── environments/
-│   │   ├── environment.ts                   # Template (committed)
-│   │   └── environment.local.ts             # Your real config (gitignored)
-│   ├── server.ts                            # Express server (SSR + CSP)
-│   ├── main.ts                              # Client bootstrap
-│   ├── main.server.ts                       # Server bootstrap
-│   └── styles.css                           # Global styles + Tailwind
-├── README.md
-├── TESTING.md                               # Manual test cases
-├── ENVIRONMENT_SETUP.md                     # Environment config guide
-├── angular.json
-├── tsconfig.json
-└── package.json
+```bash
+npm install
 ```
 
-## API Integration
+**Configure environment** (required):
 
-This application integrates with the RESTful API at `https://api.restful-api.dev/objects`
+```bash
+cp src/environments/environment.ts src/environments/environment.local.ts
+```
 
-### Development Proxy Configuration
+Edit `environment.local.ts` and replace `YOUR_API_KEY_HERE` with your actual API key. See [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md) for full instructions and troubleshooting.
 
-To avoid CORS issues during development, the application uses a proxy configuration (`proxy.conf.js`) that forwards all requests from `/api/*` to `https://api.restful-api.dev/*`.
+**Start the development server:**
 
-The proxy is automatically used when running `npm start` or `ng serve`.
+```bash
+npm start
+```
 
-### API Endpoints Used
+Open http://localhost:4200/
 
-| Method | Endpoint | Purpose | Where Used |
-|--------|----------|---------|------------|
-| GET | `/objects` | Retrieve all objects | List page, Home stats, form field suggestions |
-| GET | `/objects?id=x&id=y` | Retrieve specific objects by IDs | Filtered list view |
-| GET | `/objects/{id}` | Retrieve single object | Detail page, Edit page pre-fill |
-| POST | `/objects` | Create new object | Create form |
-| PUT | `/objects/{id}` | Full replacement update | Edit form |
-| PATCH | `/objects/{id}` | Partial update (name only) | Quick Rename on Detail page |
-| DELETE | `/objects/{id}` | Delete object | Detail page delete modal |
+---
 
-### Important Notes
+## Features
 
-**Reserved Object IDs**: Object IDs 1–13 are reserved demo objects provided by the API and **cannot be edited or deleted**. The app detects this and shows a helpful error message.
+- Full CRUD on inventory objects — create, list, view, edit, and delete
+- Objects List with a table view and View / Edit / Delete actions per row
+- Object Detail page showing all fields, handles `null` data safely
+- Validated reactive forms with inline error messages and disabled submit until valid
+- Dynamic custom data fields — add unlimited key/value pairs to any object
+- Smart field name suggestions loaded from real API data with auto-type detection
+- Angular service layer with strongly-typed `HttpClient` calls
+- Loading indicators on all async operations
+- User-friendly error messages, including detection of reserved API IDs
+- Server-Side Rendering via Express with Content Security Policy headers
+- Responsive layout with Tailwind CSS
+- JWT-based mock authentication with role-aware route guards (`authGuard`, `adminGuard`)
+- Role-protected Admin Panel visible only to users with the `admin` role
 
-To test editing/deleting, create a new object first — it will get a unique ID that is fully writable.
+---
 
-### Data Model
+## Authentication & Authorization
+
+The app uses a **mock JWT authentication** system implemented entirely in the browser (no external auth server required). Tokens are stored in `localStorage` and decoded client-side to read the user's email and role.
+
+### Guards
+
+Two `CanActivate` route guards protect navigation:
+
+| Guard | File | Behavior |
+|---|---|---|
+| `authGuard` | `guards/auth.guard.ts` | Allows only authenticated users. Unauthenticated visitors are redirected to `/auth/login`, with the original destination preserved as a `returnUrl` query parameter. |
+| `adminGuard` | `guards/admin.guard.ts` | Allows only users whose JWT role claim is `'admin'`. Non-admin users are redirected to `/`. Always composed after `authGuard`. |
+
+### Protected Routes
+
+| Route | Guard(s) |
+|---|---|
+| `/products` | `authGuard` |
+| `/products/create` | `authGuard` |
+| `/products/:id` | `authGuard` |
+| `/products/:id/edit` | `authGuard` |
+| `/account` | `authGuard` |
+| `/admin` | `authGuard` + `adminGuard` |
+
+Public routes (`/`, `/auth/login`, `/auth/register`, and the `**` 404 catch-all) require no authentication.
+
+### Navbar Role Awareness
+
+The navbar also conditionally renders links based on auth state — the **Inventory**, **Add Item**, **Account**, and **Logout** links are hidden when logged out, and the **Admin Panel** link is hidden unless the current user's role is `'admin'`. This is a UI convenience only; the guards are the authoritative enforcement layer.
+
+### Logout
+
+`AuthService.logout()` clears the token from both memory and `localStorage`, then navigates to `/auth/login` (not the home page).
+
+---
+
+## Public API
+
+Base URL: https://api.restful-api.dev/objects
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET | `/objects` | Retrieve all objects |
+| GET | `/objects/{id}` | Retrieve a single object |
+| POST | `/objects` | Create a new object |
+| PUT | `/objects/{id}` | Full update |
+| PATCH | `/objects/{id}` | Partial update |
+| DELETE | `/objects/{id}` | Delete an object |
+
+**Data model:**
 
 ```typescript
 interface ApiObject {
@@ -218,7 +114,7 @@ interface ApiObject {
   data?: {
     color?: string;
     price?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   } | null;
 }
 ```
@@ -237,51 +133,99 @@ Authentication uses a **mock backend** running entirely inside Angular — no re
 - Admin: `admin@example.com` / `Admin1234!`
 - Any new account registered via `/register` gets the `user` role
 
-## Server-Side Rendering (SSR)
+> **Note:** Object IDs 1–13 are reserved demo objects provided by the API and cannot be edited or deleted. Create a new object to test edit and delete functionality.
 
-This application uses Angular Universal for Server-Side Rendering, providing faster initial page load, better SEO, and improved performance on low-powered devices.
+---
 
-### Content Security Policy (CSP)
+## Pages and Routes
 
-CSP headers are set via the Express server (`src/server.ts`). Development mode permits `unsafe-eval` and `unsafe-inline` for HMR; production mode applies stricter settings. The API origin `https://api.restful-api.dev` is explicitly whitelisted.
+### Home / Dashboard (`/`)
+Welcome page with navigation links and a live count of objects loaded from the API. No authentication required.
 
-## Building for Production
+### Login (`/auth/login`) · Register (`/auth/register`)
+Credential forms backed by `MockAuthService`. On success a JWT is stored in `localStorage` and the user is redirected to their original destination (or home). No authentication required.
 
-```bash
-npm run build
-# or
-ng build
-```
+### Inventory List (`/products`) · `authGuard`
+Displays all inventory items in a responsive table. Each row includes **View**, **Edit**, and **Delete** actions. Requires a valid session.
 
-Build artifacts are stored in the `dist/` directory.
+### Item Detail (`/products/:id`) · `authGuard`
+Shows a single object and all of its `data` fields. Handles `null` data gracefully and provides Edit and Delete shortcuts. Requires a valid session.
+
+### Create Item (`/products/create`) · `authGuard`
+Validated form for creating a new item. Requires a name (min 3 characters), accepts optional color and price fields, and supports unlimited additional custom key/value fields. Redirects to the detail page on success. Requires a valid session.
+
+### Edit Item (`/products/:id/edit`) · `authGuard`
+Pre-populated form for updating an existing item using PATCH. Preserves custom fields that exist on the object. Shows a clear error if the object is a reserved ID. Requires a valid session.
+
+### Account (`/account`) · `authGuard`
+Displays the current user's email, role, and account actions. Requires a valid session.
+
+### Admin Panel (`/admin`) · `authGuard` + `adminGuard`
+Admin-only dashboard showing system stats and quick-action links. Accessible only to users with the `admin` role; all others are redirected to home.
+
+### Not Found (wildcard)
+Custom 404 page rendered for any unmatched route, with links back to Home and the Inventory List. No authentication required.
+
+---
 
 ## Testing
 
-See [TESTING.md](TESTING.md) for complete manual test cases covering:
-- All 6 API endpoints (GET, POST, PUT, PATCH, DELETE)
-- Authentication flow (login, register, logout, guards, role-based UI)
-- Form validation
-- Error handling
+Unit tests run with:
 
-Run unit tests with:
 ```bash
 npm test
 ```
 
-## Troubleshooting
+See [TESTING.md](TESTING.md) for the full test plan, manual test scenarios, browser DevTools debugging guide, and API integration verification steps.
 
-**Environment configuration errors** — ensure `environment.local.ts` exists and exports `apiUrl` and `apiKey`. See [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md).
+---
 
-**CORS issues** — run `npm start` from the project root so the proxy configuration loads correctly.
+## Project Structure
 
-**Can't edit objects** — IDs 1–13 are reserved. Create a new object to test edit/delete.
+```
+src/
+├── app/
+│   ├── pages/
+│   │   ├── home/                    # Dashboard/Home page
+│   │   ├── products/
+│   │   │   ├── list/                # Objects list table
+│   │   │   ├── detail/              # Single object view
+│   │   │   ├── create/              # Create form
+│   │   │   └── edit/                # Edit form
+│   │   ├── account/                 # Login/account page
+│   │   └── admin/                   # Admin area
+│   ├── shared/components/
+│   │   ├── navbar/                  # Global navigation
+│   │   ├── footer/                  # Global footer
+│   │   └── not-found/               # 404 page
+│   ├── forms/                       # Form config, field definitions, dynamic form component
+│   ├── services/                    # ObjectsService, AuthService
+│   ├── models/                      # TypeScript interfaces
+│   ├── guards/                      # Route guards
+│   ├── app.routes.ts                # Client-side routes
+│   └── app.routes.server.ts         # Server-side routes (SSR)
+├── environments/
+│   ├── environment.ts               # Template (committed)
+│   └── environment.local.ts         # Local config with API key (gitignored)
+├── server.ts                        # Express SSR server and CSP
+└── index.html                       # App shell
+```
 
-**Token not persisting** — open DevTools → Application → Local Storage and check for the `auth_token` key.
+**Structure Benefits:** Clear separation by feature and layer, easy navigation, scalable, follows standard Angular project conventions
 
-## License
+---
 
-This project is for educational purposes.
+## Scripts
 
-## Author
+| Command | Description |
+|---------|-------------|
+| `npm start` | Start the development server |
+| `npm test` | Run unit tests (see [TESTING.md](TESTING.md)) |
+| `npm run build` | Production build |
 
-Created for Angular Final Project — 2026
+---
+
+## Additional Documentation
+
+- **[ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md)**: API key setup, environment file configuration, and troubleshooting steps
+- **[TESTING.md](TESTING.md)**: Manual test scenarios, debugging tips, and unit test guidance

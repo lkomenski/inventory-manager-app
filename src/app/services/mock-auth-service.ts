@@ -144,7 +144,7 @@ export class MockAuthService {
       id:    user.id,
       email: user.email,
       role:  user.role,
-      exp:   Math.floor(Date.now() / 1000) + 60 * 60 * 8, // expires in 8 hours
+      exp:   Math.floor(Date.now() / 1000) + 60 * 15, // expires in 15 minutes
     };
 
     return {

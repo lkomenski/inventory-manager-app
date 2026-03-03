@@ -48,9 +48,9 @@ export class ObjectsService {
     
     return this.http.get<ApiObject[]>(this.apiUrl, { headers: this.getHeaders(), observe: 'response' }).pipe(
       tap((response) => {
-        // console.log('GET /objects - Success! Retrieved', response.body?.length, 'objects');
-        // console.table(response.body);
-        
+        // DEBUGGING BREAKPOINT: Inspect response.body to verify the full objects array
+        // and response.headers to confirm rate-limit header values are being parsed.
+
         // Extract rate limit information from headers if available
         const remaining = response.headers.get('X-RateLimit-Remaining');
         const limit = response.headers.get('X-RateLimit-Limit');
@@ -118,9 +118,8 @@ export class ObjectsService {
     
     return this.http.post<ApiObject>(this.apiUrl, object, { headers: this.getHeaders() }).pipe(
       tap((createdObject) => {
-        // console.log('POST /objects - Success! Object created');
-        // console.log('Created object:', createdObject);
-        // console.log('New object ID:', createdObject.id);
+        // DEBUGGING BREAKPOINT: Inspect createdObject.id — the API-assigned ID
+        // is needed for the post-create redirect to the detail page.
         this.loading.set(false);
       }),
       catchError(this.handleError.bind(this)),
@@ -178,8 +177,8 @@ export class ObjectsService {
     
     return this.http.delete<DeleteResponse>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() }).pipe(
       tap((response) => {
-        // console.log('DELETE /objects/' + id + ' - Success! Object deleted');
-        // console.log('Delete response:', response);
+        // DEBUGGING BREAKPOINT: Inspect response.message to confirm the API
+        // acknowledged the deletion before the component navigates away.
         this.loading.set(false);
       }),
       catchError(this.handleError.bind(this)),
@@ -199,7 +198,9 @@ export class ObjectsService {
     //   message: error.message
     // });
     
-    // DEBUGGING BREAKPOINT: Set a breakpoint on the next line to inspect error details
+    // DEBUGGING BREAKPOINT: Inspect error.status, error.url, and error.error to
+    // determine whether the failure is a network issue, a 4xx/5xx API response,
+    // or a rate-limit rejection before the switch block maps it to a message.
     let errorMessage = 'An unknown error occurred';
     
     if (error.error instanceof ErrorEvent) {

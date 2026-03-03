@@ -4,100 +4,62 @@
 
       <!-- Header -->
       <header class="text-center mb-8">
-        <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-white text-3xl font-bold" aria-hidden="true">
-          {{ (auth.currentUser()?.email ?? '?')[0].toUpperCase() }}
+        <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
         </div>
-        <h1 class="text-4xl font-semibold text-gray-900 mb-1">My Account</h1>
-        <p class="text-gray-500">{{ auth.currentUser()?.email }}</p>
+        <h1 class="text-3xl font-semibold text-gray-900 mb-1">My Account</h1>
+        <p class="text-gray-500">{{ currentUser()?.email }}</p>
       </header>
 
-      <!-- Profile card -->
-      <section class="bg-white border border-gray-200 rounded-lg shadow-sm p-8 mb-6" aria-labelledby="profile-heading">
-        <h2 id="profile-heading" class="text-lg font-semibold text-gray-900 mb-5">Account Information</h2>
+      <!-- Card -->
+      <section aria-labelledby="dashboard-heading" class="bg-white border border-gray-200 rounded-lg shadow-sm p-8 space-y-6">
+        <h2 id="dashboard-heading" class="text-xl font-semibold text-gray-900">Welcome back!</h2>
 
-        <div class="space-y-3 mb-6">
-          <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-            <span class="text-gray-500 text-sm">Email</span>
-            <span class="font-medium text-gray-900 text-sm">{{ auth.currentUser()?.email }}</span>
+        <!-- Token Expiry Countdown -->
+        @if (tokenExpiresIn()) {
+          <div class="bg-purple-50 border border-purple-100 rounded-lg p-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-purple-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span class="text-sm font-medium text-gray-700" id="expiry-label">Session expires in</span>
+            </div>
+            <output aria-labelledby="expiry-label"
+                    [class]="tokenExpiresIn() === 'Expired' ? 'text-sm font-semibold text-red-600' :
+                             +tokenExpiresIn().split('m')[0] < 5 && !tokenExpiresIn().includes('h') ? 'text-sm font-semibold text-orange-500' :
+                             'text-sm font-semibold text-purple-700'">
+              {{ tokenExpiresIn() }}
+            </output>
           </div>
-          <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-            <span class="text-gray-500 text-sm">Role</span>
-            @if (auth.getRole() === 'admin') {
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">admin</span>
-            } @else {
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">user</span>
-            }
-          </div>
-          <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-            <span class="text-gray-500 text-sm">Session duration</span>
-            <span class="font-medium text-purple-700 text-sm font-mono">{{ sessionDuration() }}</span>
-          </div>
-          <div class="flex justify-between items-center bg-gray-50 border border-gray-200 p-3 rounded-md">
-            <span class="text-gray-500 text-sm">Status</span>
-            <span class="flex items-center gap-1.5 text-green-700 text-sm font-medium">
-              <span class="w-2 h-2 bg-green-500 rounded-full" aria-hidden="true"></span>Active
-            </span>
-          </div>
-        </div>
+        }
 
-        <!-- Quick links -->
-        <div class="space-y-2 mb-6">
-          <a routerLink="/objects"
+        <!-- Quick Actions -->
+        <nav aria-label="Quick actions" class="space-y-2">
+          <a routerLink="/products"
              class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md transition-colors text-center font-medium">
             View Inventory
           </a>
-          <a routerLink="/objects/create"
-             class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
-            Add New Item
-          </a>
-          @if (auth.getRole() === 'admin') {
+          @if (isAdmin()) {
+            <a routerLink="/products/create"
+               class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
+              Add New Item
+            </a>
             <a routerLink="/admin"
-               class="block w-full bg-purple-100 hover:bg-purple-200 text-purple-800 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
+               class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-md transition-colors text-center font-medium">
               Admin Panel
             </a>
           }
-        </div>
+        </nav>
 
+        <!-- Logout -->
         <button
-          (click)="logout()"
+          (click)="onLogout()"
+          type="button"
           class="w-full bg-red-600 text-white px-6 py-2.5 rounded-md font-medium hover:bg-red-700 transition-colors">
-          Sign Out
+          Logout
         </button>
-      </section>
-
-      <!-- Activity log -->
-      <section class="bg-white border border-gray-200 rounded-lg shadow-sm p-6" aria-labelledby="activity-heading">
-        <h2 id="activity-heading" class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-          </svg>
-          Recent Activity
-        </h2>
-
-        @if (activityLog().length > 0) {
-          <div class="space-y-2 max-h-64 overflow-y-auto">
-            @for (entry of activityLog(); track $index) {
-              <div class="bg-gray-50 border border-gray-200 p-3 rounded-md">
-                <div class="flex items-start gap-3">
-                  <span class="text-xl flex-shrink-0" aria-hidden="true">{{ entry.icon }}</span>
-                  <div class="min-w-0">
-                    <p class="text-sm font-medium text-gray-900">
-                      {{ entry.action }}
-                      @if (entry.itemName) {
-                        <span class="text-blue-600"> "{{ entry.itemName }}"</span>
-                      }
-                    </p>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ entry.timestamp }}</p>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-        } @else {
-          <div class="bg-gray-50 border border-gray-200 p-4 rounded-md text-center">
-            <p class="text-sm text-gray-500">No recent activity. Try creating or editing an item.</p>
-          </div>
-        }
       </section>
 
     </div>

@@ -3,24 +3,28 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth-service';
 
 /**
- * Protects routes that require the 'admin' role.
- * Redirects non-admins to the home page.
- * Redirects unauthenticated users to /login first.
+ * admin.guard.ts
+ *
+ * CanActivate guard that restricts access to users with the 'admin' role.
+ * Reads the role claim decoded from the current JWT via AuthService.
+ * Non-admin users are redirected to the home page.
+ *
+ * Compose with authGuard so authentication is checked first:
+ *   {
+ *     path: 'admin',
+ *     component: AdminComponent,
+ *     canActivate: [authGuard, adminGuard]
+ *   }
  */
 export const adminGuard: CanActivateFn = (route, state) => {
-  const auth = inject(AuthService);
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (!auth.isLoggedIn()) {
-    return router.createUrlTree(['/login'], {
-      queryParams: { returnUrl: state.url }
-    });
-  }
-
-  if (auth.getRole() === 'admin') {
+  if (authService.getRole() === 'admin') {
     return true;
   }
 
-  // Logged in but not an admin — send home
-  return router.createUrlTree(['/']);
+  // Insufficient role — redirect to home rather than exposing the admin route.
+  router.navigate(['/']);
+  return false;
 };

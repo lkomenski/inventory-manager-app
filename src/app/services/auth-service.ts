@@ -31,6 +31,17 @@ export class AuthService {
   private router   = inject(Router);
   private platform = inject(PLATFORM_ID); // tells us if we're in browser or SSR
 
+  /** setTimeout handle for auto-logout when the token expires. */
+  private expiryTimeout?: ReturnType<typeof setTimeout>;
+
+  constructor() {
+    // If a token was restored from localStorage on startup, schedule its
+    // auto-logout so the session still ends at the correct time even if
+    // the user never navigates (guards only fire on navigation).
+    const restored = this.token();
+    if (restored) this.scheduleAutoLogout(restored);
+  }
+
   // ── Reactive state (Angular Signals) ───────────────────────────────────────
   //
   // `signal` is Angular's reactive variable.  When its value changes, any
@@ -83,11 +94,16 @@ export class AuthService {
    * Clears the token from memory and localStorage, then redirects to /login.
    */
   logout(): void {
+    // Cancel any pending auto-logout timer first.
+    if (this.expiryTimeout) {
+      clearTimeout(this.expiryTimeout);
+      this.expiryTimeout = undefined;
+    }
     this.token.set(null);
     if (isPlatformBrowser(this.platform)) {
       localStorage.removeItem(TOKEN_KEY);
     }
-    this.router.navigate(['/login']);
+    this.router.navigate(['/auth/login']);
   }
 
   /**
@@ -120,6 +136,20 @@ export class AuthService {
     return this.currentUser()?.role ?? null;
   }
 
+  /**
+   * getTokenExpiry()
+   *
+   * Returns the Unix timestamp (seconds) at which the current token expires,
+   * or null when no valid token is present. Used by the account page to show
+   * a live "session expires in" countdown.
+   */
+  getTokenExpiry(): number | null {
+    const t = this.token();
+    if (!t) return null;
+    const payload = this.mockAuth.decodeToken(t);
+    return payload?.exp ?? null;
+  }
+
   // ── Private helpers ────────────────────────────────────────────────────────
 
   /** Save a new token both in the signal and in localStorage. */
@@ -127,6 +157,24 @@ export class AuthService {
     this.token.set(t);
     if (isPlatformBrowser(this.platform)) {
       localStorage.setItem(TOKEN_KEY, t);
+    }
+    this.scheduleAutoLogout(t);
+  }
+
+  /**
+   * scheduleAutoLogout()
+   *
+   * Sets a setTimeout that calls logout() exactly when the token expires.
+   * This ensures the session ends on time even if the user never navigates
+   * to another route (where a guard would normally catch the expiry).
+   */
+  private scheduleAutoLogout(t: string): void {
+    if (this.expiryTimeout) clearTimeout(this.expiryTimeout);
+    const payload = this.mockAuth.decodeToken(t);
+    if (!payload) return;
+    const msUntilExpiry = payload.exp * 1000 - Date.now();
+    if (msUntilExpiry > 0) {
+      this.expiryTimeout = setTimeout(() => this.logout(), msUntilExpiry);
     }
   }
 

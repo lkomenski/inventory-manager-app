@@ -1,39 +1,38 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth-service';
-import { MockAuthService } from '../../services/mock-auth-service';
-import { ObjectsService } from '../../services/objects.service';
-import { PublicUser } from '../../models/user-model';
+/**
+ * admin-component.ts
+ *
+ * Admin-only dashboard page, protected by both authGuard and adminGuard.
+ * Displays the current admin's account info and a summary of system stats.
+ *
+ * adminStats is a signal holding placeholder values that can be wired up
+ * to a real admin service in the future without changing the template.
+ */
+
+import { Component, signal, inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { RouterLink } from "@angular/router";
+import { AuthService } from "../../services/auth-service";
 
 @Component({
-  selector: 'app-admin',
+  selector: "app-admin",
   standalone: true,
   imports: [CommonModule, RouterLink],
-  templateUrl: './admin-component.html'
+  templateUrl: "./admin-component.html"
 })
-export class AdminComponent implements OnInit {
-  auth = inject(AuthService);
-  private mockAuth = inject(MockAuthService);
-  private objectsService = inject(ObjectsService);
+export class AdminComponent {
+  private authService = inject(AuthService);
 
-  users = signal<PublicUser[]>([]);
-  objectCount = signal(0);
-  loadingObjects = signal(false);
+  /** Decoded user info from the current JWT — contains email and role. */
+  currentUser = this.authService.currentUser;
 
-  ngOnInit(): void {
-    this.users.set(this.mockAuth.getUsers());
-    this.loadObjectCount();
-  }
-
-  private loadObjectCount(): void {
-    this.loadingObjects.set(true);
-    this.objectsService.getObjects().subscribe({
-      next: (objects) => {
-        this.objectCount.set(objects.length);
-        this.loadingObjects.set(false);
-      },
-      error: () => this.loadingObjects.set(false)
-    });
-  }
+  /**
+   * Placeholder system stats shown on the admin dashboard.
+   * Extend by injecting an AdminService and replacing these defaults
+   * with real API data.
+   */
+  adminStats = signal({
+    totalUsers: 2,               // admin + demo user
+    systemStatus: 'Operational',
+    lastBackup: new Date().toLocaleDateString()
+  });
 }

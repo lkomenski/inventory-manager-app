@@ -1,16 +1,17 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
-import { ObjectsListComponent } from './pages/objects-list/objects-list.component';
-import { ObjectDetailComponent } from './pages/object-detail/object-detail.component';
-import { CreateObjectComponent } from './pages/object-create/object-create.component';
-import { EditObjectComponent } from './pages/object-edit/object-edit.component';
+import { ProductListComponent } from './pages/products/list/list.component';
+import { ProductDetailComponent } from './pages/products/detail/detail.component';
+import { CreateProductComponent } from './pages/products/create/create.component';
+import { EditProductComponent } from './pages/products/edit/edit.component';
 import { AccountComponent } from './pages/account/account.component';
+import { AdminComponent } from './pages/admin/admin-component';
 import { LoginComponent } from './pages/auth/login/login-component';
 import { RegisterComponent } from './pages/auth/register/register-component';
-import { AdminComponent } from './pages/admin/admin-component';
 import { NotFoundComponent } from './shared/components/not-found/not-found.component';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
+import { noAuthGuard } from './guards/no-auth.guard';
 
 export const routes: Routes = [
   {
@@ -29,38 +30,52 @@ export const routes: Routes = [
     title: 'Register - Inventory Manager'
   },
   {
-    path: 'objects',
-    component: ObjectsListComponent,
+    path: 'auth/login',
+    component: LoginComponent,
+    canActivate: [noAuthGuard],
+    title: 'Login - Inventory Manager'
+  },
+  {
+    path: 'auth/register',
+    component: RegisterComponent,
+    canActivate: [noAuthGuard],
+    title: 'Register - Inventory Manager'
+  },
+  {
+    path: 'products',
+    component: ProductListComponent,
+    canActivate: [authGuard],
     title: 'Inventory List - Inventory Manager'
   },
   {
-    path: 'objects/create',
-    component: CreateObjectComponent,
-    title: 'Create Item - Inventory Manager',
-    canActivate: [authGuard]
+    path: 'products/create',
+    component: CreateProductComponent,
+    canActivate: [authGuard, adminGuard],
+    title: 'Create Item - Inventory Manager'
   },
   {
-    path: 'objects/:id',
-    component: ObjectDetailComponent,
+    path: 'products/:id',
+    component: ProductDetailComponent,
+    canActivate: [authGuard],
     title: 'Item Details - Inventory Manager'
   },
   {
-    path: 'objects/:id/edit',
-    component: EditObjectComponent,
-    title: 'Edit Item - Inventory Manager',
-    canActivate: [authGuard]
+    path: 'products/:id/edit',
+    component: EditProductComponent,
+    canActivate: [authGuard, adminGuard],
+    title: 'Edit Item - Inventory Manager'
   },
   {
     path: 'account',
     component: AccountComponent,
-    title: 'My Account - Inventory Manager',
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    title: 'My Account - Inventory Manager'
   },
   {
     path: 'admin',
     component: AdminComponent,
-    title: 'Admin - Inventory Manager',
-    canActivate: [adminGuard]
+    canActivate: [authGuard, adminGuard],
+    title: 'Admin Panel - Inventory Manager'
   },
   {
     path: '**',

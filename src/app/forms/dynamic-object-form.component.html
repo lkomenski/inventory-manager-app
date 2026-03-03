@@ -1,212 +1,217 @@
-<form [formGroup]="objectForm" (ngSubmit)="onSubmit()">
-  <!-- Name Field -->
-  <fieldset class="mb-6">
-    <legend class="sr-only">Item Name</legend>
-    <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
-      Item Name <span class="text-red-500">*</span>
-    </label>
-    <input 
-      id="name"
-      type="text" 
-      formControlName="name"
-      class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-      [class.border-red-500]="isFieldInvalid('name')"
-      placeholder="Enter item name">
-    
-    <!-- Validation Messages -->
-    @if (getFieldError('name')) {
-      <p class="mt-2 text-red-600 text-sm" role="alert" aria-live="polite">
-        {{ getFieldError('name') }}
-      </p>
-    }
-  </fieldset>
+<form [formGroup]="dynamicForm" (ngSubmit)="onSubmit()">
+  <!-- Dynamic Fields from Configuration -->
+  @for (field of fields; track field.name) {
+    @if (!field.hidden) {
+      <fieldset class="mb-6">
+        <legend class="sr-only">{{ field.label }}</legend>
+        <label [for]="field.name" class="block text-sm font-semibold text-gray-700 mb-2">
+          {{ field.label }}
+          @if (!field.optional) {
+            <span class="text-red-500">*</span>
+          } @else {
+            <span class="text-gray-500 text-xs font-normal">(optional)</span>
+          }
+        </label>
 
-  <!-- Color Field -->
-  <fieldset class="mb-6">
-    <legend class="sr-only">Item Color</legend>
-    <label for="color" class="block text-sm font-semibold text-gray-700 mb-2">
-      Color <span class="text-gray-500 text-xs font-normal">(optional)</span>
-    </label>
-    <div class="flex gap-3">
-      <input 
-        id="color"
-        type="color" 
-        formControlName="color"
-        class="h-11 w-20 border border-gray-300 rounded-md cursor-pointer"
-        [class.border-red-500]="isFieldInvalid('color')">
-      <input 
-        type="text" 
-        formControlName="color"
-        class="flex-1 px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-        [class.border-red-500]="isFieldInvalid('color')"
-        placeholder="#000000">
-    </div>
-    
-    @if (getFieldError('color')) {
-      <p class="mt-2 text-red-600 text-sm" role="alert" aria-live="polite">
-        {{ getFieldError('color') }}
-      </p>
-    }
-  </fieldset>
+        <!-- Text, Email, Password Inputs -->
+        @if (field.type === 'text' || field.type === 'email' || field.type === 'password') {
+          <input
+            [id]="field.name"
+            [type]="field.type"
+            [formControlName]="field.name"
+            [placeholder]="field.placeholder || ''"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            [class.border-red-500]="isFieldInvalid(field.name)">
+        }
 
-  <!-- Price Field -->
-  <fieldset class="mb-6">
-    <legend class="sr-only">Item Price</legend>
-    <label for="price" class="block text-sm font-semibold text-gray-700 mb-2">
-      Price <span class="text-gray-500 text-xs font-normal">(optional)</span>
-    </label>
-    <div class="relative">
-      <span class="absolute left-4 top-2.5 text-gray-600 font-medium">$</span>
-      <input 
-        id="price"
-        type="number" 
-        formControlName="price"
-        step="0.01"
-        min="0"
-        class="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-        [class.border-red-500]="isFieldInvalid('price')"
-        placeholder="0.00">
-    </div>
-    
-    @if (getFieldError('price')) {
-      <p class="mt-2 text-red-600 text-sm" role="alert" aria-live="polite">
-        {{ getFieldError('price') }}
-      </p>
-    }
-  </fieldset>
+        <!-- Number Input -->
+        @if (field.type === 'number') {
+          <input
+            [id]="field.name"
+            type="number"
+            [formControlName]="field.name"
+            [placeholder]="field.placeholder || '0'"
+            [min]="field.min === undefined ? null : field.min"
+            [max]="field.max === undefined ? null : field.max"
+            [step]="field.step || 1"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            [class.border-red-500]="isFieldInvalid(field.name)">
+        }
 
-  <!-- Custom Fields Section -->
-  <div class="mb-6 border-t border-gray-200 pt-6">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-sm font-semibold text-gray-700">
-        Additional Data Fields <span class="text-gray-500 text-xs font-normal">(optional)</span>
-      </h3>
-      <button 
-        type="button"
-        (click)="addCustomField()"
-        class="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors font-medium">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-        </svg>
-        Add Field
-      </button>
-    </div>
-    
-    @if (customFields.length === 0) {
-      <div class="text-center py-6 bg-gray-50 border border-gray-200 rounded-md">
-        <p class="text-gray-500 text-sm mb-2">No additional fields yet</p>
-        <p class="text-gray-400 text-xs">Click "Add Field" to select from common fields or add your own custom ones</p>
+        <!-- Color Input -->
+        @if (field.type === 'color') {
+          <div class="flex gap-3">
+            <input
+              [id]="field.name"
+              type="color"
+              [formControlName]="field.name"
+              class="h-11 w-20 border border-gray-300 rounded-md cursor-pointer"
+              [class.border-red-500]="isFieldInvalid(field.name)">
+            <input
+              type="text"
+              [formControlName]="field.name"
+              [placeholder]="field.placeholder || '#000000'"
+              class="flex-1 px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              [class.border-red-500]="isFieldInvalid(field.name)">
+          </div>
+        }
+
+        <!-- Textarea -->
+        @if (field.type === 'textarea') {
+          <textarea
+            [id]="field.name"
+            [formControlName]="field.name"
+            [placeholder]="field.placeholder || ''"
+            [rows]="field.rows || 3"
+            [cols]="field.cols || 50"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            [class.border-red-500]="isFieldInvalid(field.name)"></textarea>
+        }
+
+        <!-- Validation Messages -->
+        @if (getFieldError(field.name)) {
+          <p class="mt-2 text-red-600 text-sm" role="alert" aria-live="polite">
+            {{ getFieldError(field.name) }}
+          </p>
+        }
+      </fieldset>
+    }
+  }
+
+  <!-- Custom Fields Section (Optional - for inventory items) -->
+  @if (enableCustomFields) {
+    <div class="mb-6 border-t border-gray-200 pt-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-gray-700">
+          Additional Data Fields <span class="text-gray-500 text-xs font-normal">(optional)</span>
+        </h3>
+        <button
+          type="button"
+          (click)="addCustomField()"
+          class="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Add Field
+        </button>
       </div>
-    }
-    
-    @for (field of customFields; track trackByIndex($index)) {
-      <div class="mb-3 p-4 bg-gray-50 border border-gray-200 rounded-md">
-        <div class="flex gap-3 items-start">
-          <!-- Field Key -->
-          <div class="flex-1">
-            <label [for]="'field-key-' + $index" class="block text-xs font-medium text-gray-600 mb-1">
-              Field Name
-            </label>
-            @if (!field.isCustomName && field.key !== '_custom_') {
-              <!-- Dropdown for suggested fields -->
-              <select
-                [id]="'field-key-' + $index"
-                [value]="field.key"
-                (change)="onFieldNameChange($index, $any($event.target).value)"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                [class.border-red-500]="isFieldNameInvalid($index)">
-                <option value="">-- Select field --</option>
-                @for (suggestion of getAvailableSuggestions($index); track suggestion.name) {
-                  <option [value]="suggestion.name">
-                    {{ suggestion.name }} ({{ suggestion.type === 'number' ? 'Number' : 'Text' }})
-                  </option>
-                }
-                <option value="_custom_">✏️ Custom field name...</option>
-              </select>
-            } @else {
-              <!-- Text input for custom field names -->
-              <div class="flex gap-2">
-                <input 
+
+      @if (customFields.length === 0) {
+        <div class="text-center py-6 bg-gray-50 border border-gray-200 rounded-md">
+          <p class="text-gray-500 text-sm mb-2">No additional fields yet</p>
+          <p class="text-gray-400 text-xs">Click "Add Field" to select from common fields or add your own custom ones</p>
+        </div>
+      }
+
+      @for (field of customFields; track trackByIndex($index)) {
+        <div class="mb-3 p-4 bg-gray-50 border border-gray-200 rounded-md">
+          <div class="flex gap-3 items-start">
+            <!-- Field Key -->
+            <div class="flex-1">
+              <label [for]="'field-key-' + $index" class="block text-xs font-medium text-gray-600 mb-1">
+                Field Name
+              </label>
+              @if (!field.isCustomName && field.key !== '_custom_') {
+                <!-- Dropdown for suggested fields -->
+                <select
                   [id]="'field-key-' + $index"
-                  type="text" 
-                  [(ngModel)]="field.key"
+                  [value]="field.key"
+                  (change)="onFieldNameChange($index, $any($event.target).value)"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  [class.border-red-500]="isFieldNameInvalid($index)">
+                  <option value="">-- Select field --</option>
+                  @for (suggestion of getAvailableSuggestions($index); track suggestion.name) {
+                    <option [value]="suggestion.name">
+                      {{ suggestion.name }} ({{ suggestion.type === 'number' ? 'Number' : 'Text' }})
+                    </option>
+                  }
+                  <option value="_custom_">✏️ Custom field name...</option>
+                </select>
+              } @else {
+                <!-- Text input for custom field names -->
+                <div class="flex gap-2">
+                  <input
+                    [id]="'field-key-' + $index"
+                    type="text"
+                    [(ngModel)]="field.key"
+                    [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="onFieldNameChange($index, field.key)"
+                    class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    [class.border-red-500]="isFieldNameInvalid($index)"
+                    placeholder="Enter custom field name">
+                  <button
+                    type="button"
+                    (click)="field.isCustomName = false; field.key = ''"
+                    class="px-3 py-2 text-xs bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                    title="Switch to dropdown">
+                    📋 List
+                  </button>
+                </div>
+              }
+              @if (isFieldNameInvalid($index)) {
+                <p class="mt-1 text-red-600 text-xs">Field name is required</p>
+              }
+            </div>
+
+            <!-- Field Type -->
+            <div class="w-28">
+              <label [for]="'field-type-' + $index" class="block text-xs font-medium text-gray-600 mb-1">
+                Type
+              </label>
+              <select
+                [id]="'field-type-' + $index"
+                [(ngModel)]="field.type"
+                [ngModelOptions]="{standalone: true}"
+                (ngModelChange)="updateFieldType($index, field.type)"
+                [disabled]="!field.isCustomName && field.key && field.key !== '_custom_'"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                [title]="(!field.isCustomName && field.key && field.key !== '_custom_') ? 'Type auto-detected from field name' : ''">
+                <option value="text">Text</option>
+                <option value="number">Number</option>
+              </select>
+            </div>
+
+            <!-- Field Value -->
+            <div class="flex-1">
+              <label [for]="'field-value-' + $index" class="block text-xs font-medium text-gray-600 mb-1">
+                Value
+              </label>
+              @if (field.type === 'number') {
+                <input
+                  [id]="'field-value-' + $index"
+                  type="number"
+                  [(ngModel)]="field.value"
                   [ngModelOptions]="{standalone: true}"
-                  (ngModelChange)="onFieldNameChange($index, field.key)"
-                  class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  [class.border-red-500]="isFieldNameInvalid($index)"
-                  placeholder="Enter custom field name">
-                <button
-                  type="button"
-                  (click)="field.isCustomName = false; field.key = ''"
-                  class="px-3 py-2 text-xs bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-                  title="Switch to dropdown">
-                  📋 List
-                </button>
-              </div>
-            }
-            @if (isFieldNameInvalid($index)) {
-              <p class="mt-1 text-red-600 text-xs">Field name is required</p>
-            }
-          </div>
-          
-          <!-- Field Type -->
-          <div class="w-28">
-            <label [for]="'field-type-' + $index" class="block text-xs font-medium text-gray-600 mb-1">
-              Type
-            </label>
-            <select 
-              [id]="'field-type-' + $index"
-              [(ngModel)]="field.type"
-              [ngModelOptions]="{standalone: true}"
-              (ngModelChange)="updateFieldType($index, field.type)"
-              [disabled]="!field.isCustomName && field.key && field.key !== '_custom_'"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
-              [title]="(!field.isCustomName && field.key && field.key !== '_custom_') ? 'Type auto-detected from field name' : ''">
-              <option value="text">Text</option>
-              <option value="number">Number</option>
-            </select>
-          </div>
-          
-          <!-- Field Value -->
-          <div class="flex-1">
-            <label [for]="'field-value-' + $index" class="block text-xs font-medium text-gray-600 mb-1">
-              Value
-            </label>
-            @if (field.type === 'number') {
-              <input 
-                [id]="'field-value-' + $index"
-                type="number" 
-                [(ngModel)]="field.value"
-                [ngModelOptions]="{standalone: true}"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                placeholder="0">
-            } @else {
-              <input 
-                [id]="'field-value-' + $index"
-                type="text" 
-                [(ngModel)]="field.value"
-                [ngModelOptions]="{standalone: true}"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                placeholder="Enter value">
-            }
-          </div>
-          
-          <!-- Remove Button -->
-          <div class="pt-5">
-            <button 
-              type="button"
-              (click)="removeCustomField($index)"
-              class="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-              [attr.aria-label]="'Remove field ' + field.key">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-              </svg>
-            </button>
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  placeholder="0">
+              } @else {
+                <input
+                  [id]="'field-value-' + $index"
+                  type="text"
+                  [(ngModel)]="field.value"
+                  [ngModelOptions]="{standalone: true}"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  placeholder="Enter value">
+              }
+            </div>
+
+            <!-- Remove Button -->
+            <div class="pt-5">
+              <button
+                type="button"
+                (click)="removeCustomField($index)"
+                class="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                [attr.aria-label]="'Remove field ' + field.key">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    }
-  </div>
+      }
+    </div>
+  }
 
   <!-- Error Message -->
   @if (error()) {
@@ -222,9 +227,11 @@
     <div class="mb-6 bg-green-50 border border-green-200 rounded-md p-4" role="alert" aria-live="polite">
       <p class="text-green-700 text-sm">
         @if (isCreateMode) {
-          Item created successfully!
+          Created successfully!
+        } @else if (isEditMode) {
+          Updated successfully!
         } @else {
-          Item updated successfully!
+          Success!
         }
       </p>
     </div>
@@ -232,15 +239,17 @@
 
   <!-- Action Buttons -->
   <div class="flex flex-col sm:flex-row gap-3">
-    <button 
-      type="submit"
-      [disabled]="!objectForm.valid || submitting()"
-      class="flex-1 bg-blue-600 text-white px-6 py-2.5 rounded-md font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-blue-700"
-      [class.bg-green-600]="isEditMode"
-      [class.hover:bg-green-700]="isEditMode">
-      {{ submitButtonText }}
-    </button>
-    <button 
+    @if (!isViewMode) {
+      <button
+        type="submit"
+        [disabled]="!dynamicForm.valid || submitting()"
+        class="flex-1 bg-blue-600 text-white px-6 py-2.5 rounded-md font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-blue-700"
+        [class.bg-green-600]="isEditMode"
+        [class.hover:bg-green-700]="isEditMode">
+        {{ submitButtonText }}
+      </button>
+    }
+    <button
       type="button"
       (click)="onCancel()"
       class="flex-1 bg-gray-100 text-gray-700 px-6 py-2.5 rounded-md font-medium hover:bg-gray-200 transition-colors">
@@ -250,9 +259,9 @@
 
   <!-- Form Status Info -->
   <div class="mt-4 text-sm text-gray-600 text-center">
-    @if (!objectForm.valid) {
-      <p>Please fill in all required fields to {{ isCreateMode ? 'create' : 'update' }} the item</p>
-    } @else if (isEditMode && objectForm.dirty) {
+    @if (!dynamicForm.valid) {
+      <p>Please fill in all required fields</p>
+    } @else if (isEditMode && dynamicForm.dirty) {
       <p>You have unsaved changes</p>
     }
   </div>

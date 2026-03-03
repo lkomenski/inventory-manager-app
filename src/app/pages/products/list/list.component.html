@@ -6,20 +6,22 @@
         <h1 class="text-4xl font-semibold text-gray-900 mb-2">Inventory List</h1>
         <p class="text-gray-600">Click on any item to view details</p>
       </div>
-      <a routerLink="/objects/create" 
-         class="bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-sm flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-        </svg>
-        Add New Item
-      </a>
+      @if (isAdmin()) {
+        <a routerLink="/products/create"
+           class="bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-sm flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Add New Item
+        </a>
+      }
     </header>
 
     <!-- Filtered by IDs Notice -->
     @if (filteringByIds && filteredIds.length > 0) {
-      <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start justify-between">
+      <aside class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start justify-between" aria-label="Filtered view notice">
         <div class="flex items-start">
-          <svg class="w-5 h-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
           <div>
@@ -30,34 +32,37 @@
             </p>
           </div>
         </div>
-        <a routerLink="/objects" 
+        <a routerLink="/products"
            class="text-blue-600 hover:text-blue-800 font-medium text-sm whitespace-nowrap ml-4">
           View All
         </a>
-      </div>
+      </aside>
     }
 
     <!-- Search Box -->
     <div class="mb-6">
+      <label for="item-search" class="sr-only">Search items by name</label>
       <div class="relative">
         <input
-          type="text"
+          id="item-search"
+          type="search"
           [(ngModel)]="query"
           (ngModelChange)="onSearchChange()"
           placeholder="Search by name..."
           class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
         />
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" aria-hidden="true">
+          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
         </div>
         @if (query) {
           <button
             (click)="query = ''; onSearchChange()"
+            aria-label="Clear search"
             class="absolute inset-y-0 right-0 pr-3 flex items-center"
           >
-            <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           </button>
@@ -67,15 +72,16 @@
 
     <!-- Sorting Controls -->
     @if (!objectsService.loading() && !objectsService.error() && objects.length > 0) {
-      <div class="mb-4 flex flex-wrap items-center gap-3">
-        <span class="text-sm font-medium text-gray-700">Sort by name:</span>
+      <div class="mb-4 flex flex-wrap items-center gap-3" role="group" aria-label="Sort controls">
+        <span class="text-sm font-medium text-gray-700" id="sort-label">Sort by name:</span>
         <div class="flex gap-2">
           <button
             (click)="sortAZ()"
             [class]="sortOrder === 'asc' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-300'"
             class="px-4 py-2 rounded-md hover:bg-blue-700 hover:text-white transition-colors font-medium text-sm flex items-center gap-2"
+            [attr.aria-pressed]="sortOrder === 'asc'"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/>
             </svg>
             A → Z
@@ -84,8 +90,9 @@
             (click)="sortZA()"
             [class]="sortOrder === 'desc' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-300'"
             class="px-4 py-2 rounded-md hover:bg-blue-700 hover:text-white transition-colors font-medium text-sm flex items-center gap-2"
+            [attr.aria-pressed]="sortOrder === 'desc'"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"/>
             </svg>
             Z → A
@@ -104,15 +111,15 @@
 
     <!-- Loading State -->
     @if (objectsService.loading()) {
-      <div class="text-center py-20">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600"></div>
+      <div class="text-center py-20" role="status" aria-live="polite">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600" aria-hidden="true"></div>
         <p class="text-gray-600 mt-4 font-medium">Loading items...</p>
       </div>
     }
 
     <!-- Error State -->
     @if (objectsService.error()) {
-      <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-6" role="alert" aria-live="assertive">
         <div class="flex items-start">
           <svg class="w-6 h-6 text-red-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
@@ -131,13 +138,13 @@
 
     <!-- Empty State -->
     @if (!objectsService.loading() && !objectsService.error() && objects.length === 0) {
-      <section class="text-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm">
-        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <section class="text-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm" aria-labelledby="empty-heading">
+        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
         </svg>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-2">No Items Yet</h2>
+        <h2 id="empty-heading" class="text-2xl font-semibold text-gray-900 mb-2">No Items Yet</h2>
         <p class="text-gray-600 mb-6">Get started by adding your first item</p>
-        <a routerLink="/objects/create" 
+        <a routerLink="/products/create"
            class="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium">
           Add Your First Item
         </a>
@@ -146,11 +153,11 @@
 
     <!-- No Results State -->
     @if (!objectsService.loading() && !objectsService.error() && objects.length > 0 && filteredItems.length === 0) {
-      <section class="text-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm">
-        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <section class="text-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm" aria-labelledby="no-results-heading" aria-live="polite">
+        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-2">No Results Found</h2>
+        <h2 id="no-results-heading" class="text-2xl font-semibold text-gray-900 mb-2">No Results Found</h2>
         <p class="text-gray-600 mb-6">No items match your search for "<strong>{{ query }}</strong>"</p>
         <button (click)="query = ''; onSearchChange()" 
                 class="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium">
@@ -161,8 +168,8 @@
 
     <!-- Items List -->
     @if (!objectsService.loading() && !objectsService.error() && filteredItems.length > 0) {
-      <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div class="p-4 bg-gray-50 border-b border-gray-200">
+      <section class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden" aria-label="Inventory items">
+        <header class="p-4 bg-gray-50 border-b border-gray-200">
           <p class="text-sm text-gray-600">
             @if (query) {
               Showing {{ filteredItems.length }} of {{ objects.length }} items
@@ -174,17 +181,17 @@
               Page {{ page }} of {{ totalPages }}
             }
           </p>
-        </div>
+        </header>
         <ul class="divide-y divide-gray-200">
           @for (item of pagedItems; track item.id) {
             <li>
-              <a [routerLink]="['/objects', item.id]" 
+              <a [routerLink]="['/products', item.id]"
                  class="block px-6 py-4 hover:bg-gray-50 transition-colors group">
                 <div class="flex items-center justify-between">
                   <span class="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
                     {{ item.name }}
                   </span>
-                  <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/>
                   </svg>
                 </div>
@@ -195,39 +202,41 @@
         
         <!-- Pagination Controls -->
         @if (totalPages > 1) {
-          <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+          <nav class="p-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center" aria-label="Pagination">
             <button
               (click)="page = page - 1"
               [disabled]="page === 1"
               [class.opacity-50]="page === 1"
               [class.cursor-not-allowed]="page === 1"
+              aria-label="Previous page"
               class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:hover:bg-white"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
               </svg>
               Previous
             </button>
-            
-            <span class="text-sm text-gray-600 font-medium">
+
+            <span class="text-sm text-gray-600 font-medium" aria-live="polite" aria-atomic="true">
               Page {{ page }} of {{ totalPages }}
             </span>
-            
+
             <button
               (click)="page = page + 1"
               [disabled]="page >= (filteredItems.length / pageSize)"
               [class.opacity-50]="page >= (filteredItems.length / pageSize)"
               [class.cursor-not-allowed]="page >= (filteredItems.length / pageSize)"
+              aria-label="Next page"
               class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:hover:bg-white"
             >
               Next
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
               </svg>
             </button>
-          </div>
+          </nav>
         }
-      </div>
+      </section>
     }
   </div>
 </main>

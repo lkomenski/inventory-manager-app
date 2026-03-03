@@ -3,19 +3,30 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth-service';
 
 /**
- * Protects routes that require a logged-in user.
- * Redirects to /login with a returnUrl query param so the user
- * is sent back after a successful login.
+ * auth.guard.ts
+ *
+ * CanActivate guard that restricts access to authenticated users.
+ * Reads the current login state from AuthService and redirects
+ * unauthenticated visitors to /auth/login, preserving the intended
+ * destination in a returnUrl query parameter for post-login redirect.
+ *
+ * Usage:
+ *   {
+ *     path: 'account',
+ *     component: AccountComponent,
+ *     canActivate: [authGuard]
+ *   }
  */
 export const authGuard: CanActivateFn = (route, state) => {
-  const auth = inject(AuthService);
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (auth.isLoggedIn()) {
+  if (authService.isLoggedIn()) {
     return true;
   }
 
-  return router.createUrlTree(['/login'], {
-    queryParams: { returnUrl: state.url }
-  });
+  // Redirect to login and pass the original URL so the user can be sent
+  // back after a successful login.
+  router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
+  return false;
 };
