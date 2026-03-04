@@ -8,8 +8,15 @@
  * by DynamicObjectFormComponent's custom fields system, not declared here.
  */
 
-import { Validators } from '@angular/forms';
+import { AbstractControl, ValidationErrors, Validators } from '@angular/forms';
 import { FieldDefinition } from './field-definition';
+
+const priceValidator = (control: AbstractControl): ValidationErrors | null => {
+  const val = control.value;
+  if (val === null || val === undefined || val === '') return null;
+  const decimals = String(val).split('.')[1];
+  return decimals && decimals.length > 2 ? { invalidPrice: true } : null;
+};
 
 /**
  * Field configuration for inventory object form
@@ -46,8 +53,10 @@ export const INVENTORY_OBJECT_FIELDS: FieldDefinition[] = [
     min: 0,
     step: 0.01,
     optional: true,
+    validators: [priceValidator],
     errors: {
-      'min': 'Price must be greater than or equal to 0'
+      'min': 'Price cannot be negative',
+      'invalidPrice': 'Price can have at most 2 decimal places (e.g. 9.99)'
     }
   }
 ];

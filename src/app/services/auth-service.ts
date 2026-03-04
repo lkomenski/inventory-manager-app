@@ -34,12 +34,26 @@ export class AuthService {
   /** setTimeout handle for auto-logout when the token expires. */
   private expiryTimeout?: ReturnType<typeof setTimeout>;
 
+  /** Debounce timer for activity-based session refresh. */
+  private activityDebounce?: ReturnType<typeof setTimeout>;
+
   constructor() {
     // If a token was restored from localStorage on startup, schedule its
     // auto-logout so the session still ends at the correct time even if
     // the user never navigates (guards only fire on navigation).
     const restored = this.token();
     if (restored) this.scheduleAutoLogout(restored);
+
+    // Refresh the session on any user activity so the timer resets on
+    // interaction rather than from the moment of login.
+    if (isPlatformBrowser(this.platform)) {
+      const onActivity = () => {
+        clearTimeout(this.activityDebounce);
+        this.activityDebounce = setTimeout(() => this.refreshSession(), 500);
+      };
+      document.addEventListener('click', onActivity, { passive: true });
+      document.addEventListener('keydown', onActivity, { passive: true });
+    }
   }
 
   // ── Reactive state (Angular Signals) ───────────────────────────────────────
@@ -134,6 +148,20 @@ export class AuthService {
    */
   getRole(): UserRole | null {
     return this.currentUser()?.role ?? null;
+  }
+
+  /**
+   * refreshSession()
+   *
+   * Re-mints the token with a fresh 15-minute expiry and reschedules auto-logout.
+   * Call this on any user activity to implement inactivity-based expiry.
+   * No-ops when the user is not logged in or the current token is already expired.
+   */
+  refreshSession(): void {
+    const current = this.token();
+    if (!current) return;
+    const fresh = this.mockAuth.refreshToken(current);
+    if (fresh) this.saveToken(fresh);
   }
 
   /**

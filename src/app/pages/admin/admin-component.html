@@ -45,6 +45,24 @@
           </div>
         </dl>
 
+        <!-- Session Timer -->
+        @if (tokenExpiresIn()) {
+          <div class="bg-purple-50 border border-purple-100 rounded-lg p-4 flex items-center justify-between mb-6">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-purple-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span class="text-sm font-medium text-gray-700" id="expiry-label">Session expires in</span>
+            </div>
+            <output aria-labelledby="expiry-label"
+                    [class]="tokenExpiresIn() === 'Expired' ? 'text-sm font-semibold text-red-600' :
+                             +tokenExpiresIn().split('m')[0] < 5 && !tokenExpiresIn().includes('h') ? 'text-sm font-semibold text-orange-500' :
+                             'text-sm font-semibold text-purple-700'">
+              {{ tokenExpiresIn() }}
+            </output>
+          </div>
+        }
+
         <!-- Admin Actions -->
         <div class="border-t border-gray-200 pt-6">
           <h3 class="font-semibold text-gray-900 mb-4" id="admin-actions-heading">Admin Actions</h3>
@@ -59,14 +77,17 @@
             </a>
           </nav>
         </div>
-      </section>
 
-      <!-- Back Link -->
-      <div class="text-center">
-        <a routerLink="/account" class="text-blue-600 hover:text-blue-700 font-medium transition-colors">
-          Back to Dashboard
-        </a>
-      </div>
+        <!-- Logout -->
+        <div class="border-t border-gray-200 pt-6 mt-6">
+          <button
+            (click)="onLogout()"
+            type="button"
+            class="w-full bg-red-600 text-white px-6 py-2.5 rounded-md font-medium hover:bg-red-700 transition-colors">
+            Logout
+          </button>
+        </div>
+      </section>
     </div>
   </div>
 </main>

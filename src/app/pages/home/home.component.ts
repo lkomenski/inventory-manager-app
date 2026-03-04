@@ -43,6 +43,17 @@ export class HomeComponent implements OnInit {
 
   constructor(public objectsService: ObjectsService) {}
 
+  /** Returns a human-readable string for how long until the 24h call window resets. */
+  resetTimeRemaining(): string {
+    const ws = this.objectsService.callWindowStart();
+    if (!ws) return '';
+    const diff = (ws + 86_400_000) - Date.now();
+    if (diff <= 0) return 'soon';
+    const h = Math.floor(diff / 3_600_000);
+    const m = Math.floor((diff % 3_600_000) / 60_000);
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
+
   /** Triggers the initial stats load when the component mounts. */
   ngOnInit(): void {
     this.loadStats();

@@ -153,30 +153,29 @@ export class DynamicObjectFormComponent implements OnInit {
     
     this.objectsService.getObjects().subscribe({
       next: (objects) => {
-        const fieldMap = new Map<string, { type: 'text' | 'number', example: string | number }>();
-        
+        const seen = new Set<string>();
+        const suggestions: FieldSuggestion[] = [];
+
         // Extract all unique field names from all objects in the API
         objects.forEach(obj => {
           if (obj.data) {
             Object.entries(obj.data).forEach(([key, value]) => {
               // Skip color and price as they have dedicated fields
-              if (key === 'color' || key === 'price' || key === 'Color' || key === 'Price') {
-                return;
-              }
-              
-              // Only add the first occurrence of each field name
-              if (!fieldMap.has(key)) {
-                const type = typeof value === 'number' ? 'number' : 'text';
-                fieldMap.set(key, { type, example: value });
-              }
+              const lowerKey = key.toLowerCase();
+              if (lowerKey === 'color' || lowerKey === 'price') return;
+
+              // Deduplicate case-insensitively (keep first occurrence's casing)
+              if (seen.has(lowerKey)) return;
+              seen.add(lowerKey);
+
+              const type = typeof value === 'number' ? 'number' : 'text';
+              suggestions.push({ name: key, type, example: value });
             });
           }
         });
-        
-        // Convert map to array and sort alphabetically for dropdown
-        this.fieldSuggestions = Array.from(fieldMap.entries())
-          .map(([name, { type, example }]) => ({ name, type, example }))
-          .sort((a, b) => a.name.localeCompare(b.name));
+
+        // Sort alphabetically for dropdown
+        this.fieldSuggestions = suggestions.sort((a, b) => a.name.localeCompare(b.name));
         
         this.loadingSuggestions.set(false);
       },

@@ -118,6 +118,31 @@ export class MockAuthService {
   }
 
   /**
+   * refreshToken()
+   *
+   * Re-mints a JWT with a fresh 15-minute expiry for the same user.
+   * Returns null if the provided token is invalid or the user no longer exists.
+   * Used by AuthService to extend the session on activity.
+   *
+   * @param token  The current JWT string from localStorage.
+   */
+  refreshToken(token: string): string | null {
+    const payload = this.decodeToken(token);
+    if (!payload) return null;
+
+    // Re-mint directly from the existing payload — no user DB lookup needed.
+    // The in-memory user list resets on page refresh, so looking up by ID
+    // would always fail for restored sessions.
+    const newPayload: TokenPayload = {
+      id:    payload.id,
+      email: payload.email,
+      role:  payload.role,
+      exp:   Math.floor(Date.now() / 1000) + 60 * 15,
+    };
+    return this.createMockJWT(newPayload);
+  }
+
+  /**
    * getUsers()
    *
    * Returns the full list of registered users with password hashes removed.

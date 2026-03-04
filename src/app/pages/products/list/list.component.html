@@ -144,10 +144,12 @@
         </svg>
         <h2 id="empty-heading" class="text-2xl font-semibold text-gray-900 mb-2">No Items Yet</h2>
         <p class="text-gray-600 mb-6">Get started by adding your first item</p>
-        <a routerLink="/products/create"
-           class="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium">
-          Add Your First Item
-        </a>
+        @if (isAdmin()) {
+          <a routerLink="/products/create"
+             class="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition-colors font-medium">
+            Add Your First Item
+          </a>
+        }
       </section>
     }
 

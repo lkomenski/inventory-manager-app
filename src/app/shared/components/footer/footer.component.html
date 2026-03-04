@@ -29,11 +29,13 @@
                 Inventory List
               </a>
             </li>
-            <li>
-              <a routerLink="/objects/create" class="hover:text-white transition-colors">
-                Add New Item
-              </a>
-            </li>
+            @if (isAdmin()) {
+              <li>
+                <a routerLink="/products/create" class="hover:text-white transition-colors">
+                  Add New Item
+                </a>
+              </li>
+            }
             <li>
               <a routerLink="/account" class="hover:text-white transition-colors">
                 My Account

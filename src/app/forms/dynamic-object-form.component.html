@@ -44,7 +44,8 @@
             <input
               [id]="field.name"
               type="color"
-              [formControlName]="field.name"
+              [value]="dynamicForm.get(field.name)?.value || '#000000'"
+              (input)="dynamicForm.get(field.name)?.setValue($any($event.target).value)"
               class="h-11 w-20 border border-gray-300 rounded-md cursor-pointer"
               [class.border-red-500]="isFieldInvalid(field.name)">
             <input
@@ -158,17 +159,21 @@
               <label [for]="'field-type-' + $index" class="block text-xs font-medium text-gray-600 mb-1">
                 Type
               </label>
-              <select
-                [id]="'field-type-' + $index"
-                [(ngModel)]="field.type"
-                [ngModelOptions]="{standalone: true}"
-                (ngModelChange)="updateFieldType($index, field.type)"
-                [disabled]="!field.isCustomName && field.key && field.key !== '_custom_'"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
-                [title]="(!field.isCustomName && field.key && field.key !== '_custom_') ? 'Type auto-detected from field name' : ''">
-                <option value="text">Text</option>
-                <option value="number">Number</option>
-              </select>
+              @if (field.isCustomName) {
+                <select
+                  [id]="'field-type-' + $index"
+                  [(ngModel)]="field.type"
+                  [ngModelOptions]="{standalone: true}"
+                  (ngModelChange)="updateFieldType($index, field.type)"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                  <option value="text">Text</option>
+                  <option value="number">Number</option>
+                </select>
+              } @else {
+                <div class="w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-sm text-gray-600">
+                  {{ field.type === 'number' ? 'Number' : 'Text' }}
+                </div>
+              }
             </div>
 
             <!-- Field Value -->

@@ -37,28 +37,27 @@
             </dd>
           </div>
 
-          <!-- API Rate Limit -->
+          <!-- API Call Tracker -->
           <div class="bg-orange-50 border border-orange-100 rounded-lg p-6 text-center">
-            <dt class="text-sm text-gray-600 mb-1">API Status</dt>
-            <dd class="text-2xl font-semibold text-orange-700">
-              @if (objectsService.rateLimitRemaining() === 0) {
-                <span class="text-red-600">Limit Reached</span>
-              } @else if (objectsService.rateLimitRemaining() !== null && objectsService.rateLimitTotal() !== null) {
-                {{ objectsService.rateLimitRemaining() }}
-                <span class="text-base text-gray-600">/ {{ objectsService.rateLimitTotal() }}</span>
-              } @else if (objectsService.rateLimitRemaining() !== null) {
-                {{ objectsService.rateLimitRemaining() }}
-              } @else {
-                <span class="text-gray-600 text-lg">Active</span>
-              }
+            <dt class="text-sm text-gray-600 mb-1">API Calls Today</dt>
+            <dd class="text-2xl font-semibold mb-2"
+                [class]="objectsService.apiCallCount() >= objectsService.DAILY_LIMIT ? 'text-red-600' : 'text-orange-700'">
+              {{ objectsService.apiCallCount() }}
+              <span class="text-base text-gray-600">/ {{ objectsService.DAILY_LIMIT }}</span>
             </dd>
-            <div class="text-xs text-gray-500 mt-1">
-              @if (objectsService.rateLimitRemaining() === 0) {
-                Try again tomorrow
-              } @else if (objectsService.rateLimitRemaining() !== null) {
-                Requests remaining
+            <div class="w-full bg-gray-200 rounded-full h-1.5 mb-2">
+              <div class="h-1.5 rounded-full transition-all"
+                   [style.width.%]="(objectsService.apiCallCount() / objectsService.DAILY_LIMIT) * 100"
+                   [class]="objectsService.apiCallCount() >= 45 ? 'bg-red-500' : objectsService.apiCallCount() >= 35 ? 'bg-yellow-500' : 'bg-green-500'">
+              </div>
+            </div>
+            <div class="text-xs text-gray-500">
+              @if (objectsService.apiCallCount() >= objectsService.DAILY_LIMIT) {
+                Limit reached · resets in {{ resetTimeRemaining() }}
+              } @else if (objectsService.callWindowStart()) {
+                Resets in {{ resetTimeRemaining() }}
               } @else {
-                Limit varies by account
+                No calls made yet
               }
             </div>
           </div>

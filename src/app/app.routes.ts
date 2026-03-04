@@ -44,7 +44,6 @@ export const routes: Routes = [
   {
     path: 'products',
     component: ProductListComponent,
-    canActivate: [authGuard],
     title: 'Inventory List - Inventory Manager'
   },
   {
@@ -56,7 +55,6 @@ export const routes: Routes = [
   {
     path: 'products/:id',
     component: ProductDetailComponent,
-    canActivate: [authGuard],
     title: 'Item Details - Inventory Manager'
   },
   {

@@ -1,6 +1,6 @@
 import { Component, signal, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
 
 @Component({
@@ -11,6 +11,7 @@ import { AuthService } from '../../services/auth-service';
 })
 export class AccountComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   currentUser = this.authService.currentUser;
   isAdmin = () => this.authService.getRole() === 'admin';
@@ -19,6 +20,10 @@ export class AccountComponent implements OnInit, OnDestroy {
   private timerInterval?: number;
 
   ngOnInit(): void {
+    if (this.authService.getRole() === 'admin') {
+      this.router.navigate(['/admin']);
+      return;
+    }
     this.updateExpiry();
     this.timerInterval = window.setInterval(() => this.updateExpiry(), 1000);
   }

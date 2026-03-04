@@ -1,9 +1,11 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap, finalize, map } from 'rxjs/operators';
 import { ApiObject, DeleteResponse, APIRequest } from '../models/object.model';
 import { environment } from '../../environments/environment.local';
+import { AuthService } from './auth-service';
 
 /**
  * Objects Service
@@ -21,14 +23,60 @@ import { environment } from '../../environments/environment.local';
 export class ObjectsService {
   private readonly apiUrl = environment.apiUrl;
   private readonly apiKey = environment.apiKey;
-  
+  private readonly TRACKER_KEY = 'api_call_tracker';
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  readonly DAILY_LIMIT = 50;
+
   // Global state signals accessible by components
   public loading = signal(false);
   public error = signal<string | null>(null);
   public rateLimitRemaining = signal<number | null>(null);
   public rateLimitTotal = signal<number | null>(null);
+  public apiCallCount = signal(0);
+  public callWindowStart = signal<number | null>(null);
 
-  constructor(private readonly http: HttpClient) {}
+  private readonly authService = inject(AuthService);
+
+  constructor(private readonly http: HttpClient) {
+    this.loadCallCount();
+  }
+
+  private loadCallCount(): void {
+    if (!this.isBrowser) return;
+    try {
+      const raw = localStorage.getItem(this.TRACKER_KEY);
+      if (!raw) return;
+      const { count, windowStart } = JSON.parse(raw);
+      if (Date.now() - windowStart < 86_400_000) {
+        this.apiCallCount.set(count);
+        this.callWindowStart.set(windowStart);
+      } else {
+        localStorage.removeItem(this.TRACKER_KEY);
+      }
+    } catch {
+      localStorage.removeItem(this.TRACKER_KEY);
+    }
+  }
+
+  private trackCall(): void {
+    if (!this.isBrowser) return;
+    this.authService.refreshSession();
+    let count = 1;
+    let windowStart = Date.now();
+    try {
+      const raw = localStorage.getItem(this.TRACKER_KEY);
+      if (raw) {
+        const stored = JSON.parse(raw);
+        if (Date.now() - stored.windowStart < 86_400_000) {
+          count = stored.count + 1;
+          windowStart = stored.windowStart;
+        }
+      }
+    } catch {}
+    this.apiCallCount.set(count);
+    this.callWindowStart.set(windowStart);
+    localStorage.setItem(this.TRACKER_KEY, JSON.stringify({ count, windowStart }));
+  }
 
   /** Configure HTTP headers with API key authentication */
   private getHeaders(): HttpHeaders {
@@ -43,6 +91,7 @@ export class ObjectsService {
    */
   getObjects(): Observable<ApiObject[]> {
     // console.log('GET /objects - Fetching all objects');
+    this.trackCall();
     this.loading.set(true);
     this.error.set(null);
     
@@ -70,6 +119,7 @@ export class ObjectsService {
    */
   getObjectsByIds(ids: string[]): Observable<ApiObject[]> {
     // console.log('GET /objects (by IDs) - Fetching objects:', ids);
+    this.trackCall();
     this.loading.set(true);
     this.error.set(null);
     
@@ -93,6 +143,7 @@ export class ObjectsService {
    */
   getObject(id: string): Observable<ApiObject> {
     // console.log('GET /objects/' + id + ' - Fetching single object');
+    this.trackCall();
     this.loading.set(true);
     this.error.set(null);
     
@@ -113,6 +164,7 @@ export class ObjectsService {
   createObject(object: APIRequest): Observable<ApiObject> {
     // console.log('POST /objects - Creating new object');
     // console.log('Request payload:', object);
+    this.trackCall();
     this.loading.set(true);
     this.error.set(null);
     
@@ -133,6 +185,7 @@ export class ObjectsService {
   updateObject(id: string, object: APIRequest): Observable<ApiObject> {
     // console.log('PUT /objects/' + id + ' - Updating object (full replacement)');
     // console.log('Request payload:', object);
+    this.trackCall();
     this.loading.set(true);
     this.error.set(null);
     
@@ -153,6 +206,7 @@ export class ObjectsService {
   patchObject(id: string, partial: Partial<ApiObject>): Observable<ApiObject> {
     // console.log('PATCH /objects/' + id + ' - Updating object (partial)');
     // console.log('Request payload (partial):', partial);
+    this.trackCall();
     this.loading.set(true);
     this.error.set(null);
     
@@ -172,6 +226,7 @@ export class ObjectsService {
    */
   deleteObject(id: string): Observable<DeleteResponse> {
     // console.log('DELETE /objects/' + id + ' - Deleting object');
+    this.trackCall();
     this.loading.set(true);
     this.error.set(null);
     
