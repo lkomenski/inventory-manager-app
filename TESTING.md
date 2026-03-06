@@ -61,14 +61,9 @@ Key locations are marked with `// DEBUGGING BREAKPOINT` comments in the source. 
 
 ## API Integration Tests
 
-### 10. GET All Objects
-
-**Endpoint:** `GET /objects`
-**Steps:** Navigate to `http://localhost:4200/objects`
-
 ### 1. GET All Objects
-**Endpoint**: `GET /objects`  
-**Steps**: Navigate to http://localhost:4200/products  
+**Endpoint**: `GET /objects`
+**Steps**: Navigate to http://localhost:4200/products
 **Expected Output**:
 ```json
 [
@@ -80,7 +75,7 @@ Objects display in the table with ID, name, and View / Edit / Delete buttons.
 
 ---
 
-### 11. GET Single Object
+### 2. GET Single Object
 
 **Endpoint:** `GET /objects/{id}`
 **Steps:** Click **View** on any object in the list
@@ -97,16 +92,7 @@ Detail page shows the object name as the page heading, plus ID and all data fiel
 
 ---
 
-### 3. GET Objects by IDs (Query Parameters)
-**Endpoint**: `GET /objects?id=3&id=5&id=10`  
-**Steps**: Navigate to http://localhost:4200/products?id=3&id=5&id=10  
-**Expected Output**: Array containing only objects with IDs 3, 5, and 10  
-**Verification**: 
-- Blue "Filtered View" banner appears
-- Only requested objects display
-- "View All" link clears filter
-
-### 4. POST Create Object
+### 3. POST Create Object
 **Endpoint**: `POST /objects`  
 **Steps**: 
 1. Navigate to http://localhost:4200/products/create
@@ -125,11 +111,10 @@ Detail page shows the object name as the page heading, plus ID and all data fiel
 ```
 - Success message appears
 - Redirected to the new item's detail page after ~1 second
-- Activity log on the Account page shows "Created item"
 
 ---
 
-### 14. PUT — Full Update
+### 4. PUT — Full Update
 
 **Endpoint:** `PUT /objects/{id}`
 **Steps:**
@@ -141,11 +126,10 @@ Detail page shows the object name as the page heading, plus ID and all data fiel
 **Expected:**
 - The entire object is replaced with the new values
 - Redirected to the detail page showing the updated data
-- Activity log on the Account page shows the edit
 
 ---
 
-### 15. PATCH — Quick Rename (Partial Update)
+### 5. PATCH — Quick Rename (Partial Update)
 
 **Endpoint:** `PATCH /objects/{id}`
 **Steps:**
@@ -163,10 +147,25 @@ Detail page shows the object name as the page heading, plus ID and all data fiel
   "updatedAt": "..."
 }
 ```
-**Verification**: 
-- Confirmation modal appears
-- After deletion, redirects to list page
-- Object no longer appears in list
+**Verification**:
+- Name updates immediately on the detail page
+- All other fields (`data`, etc.) remain unchanged
+- Success message appears briefly
+
+### 6. DELETE — Delete Object
+
+**Endpoint:** `DELETE /objects/{id}`
+**Steps:**
+1. Open the detail page for an object you created (not IDs 1–13)
+2. Click **Delete**
+3. Confirm in the modal
+
+**Expected:**
+- Confirmation modal appears before deletion
+- Object is removed from the API
+- Redirected to the inventory list
+- Object no longer appears in the list
+- Attempting to delete a reserved object (IDs 1–13) shows a clear error message
 
 ---
 
@@ -180,10 +179,12 @@ Detail page shows the object name as the page heading, plus ID and all data fiel
 - Valid credentials store a JWT in `localStorage` and redirect to home
 - Register form at http://localhost:4200/auth/register creates a new account
 
-**Test**: Access a protected route while logged out (e.g. http://localhost:4200/products)  
+**Test**: Access a protected route while logged out (e.g. http://localhost:4200/account)
 **Expected**:
-- Redirected to `/auth/login?returnUrl=%2Fproducts`
+- Redirected to `/auth/login?returnUrl=%2Faccount`
 - After login, redirected back to the originally requested page
+
+**Note**: `/products` and `/products/:id` are public — no login required to browse the inventory.
 
 **Test**: Log in as a non-admin user and navigate to http://localhost:4200/admin  
 **Expected**:
@@ -197,12 +198,12 @@ Detail page shows the object name as the page heading, plus ID and all data fiel
 - Logout clears the session and redirects to `/auth/login`
 
 ### Home Page
-**Test**: Navigate to http://localhost:4200  
+**Test**: Navigate to http://localhost:4200
 **Expected**:
-- Overview section shows: Total Items, Last Updated timestamp, API Status, API connection status
-- API Status shows "Connected" (green) or "Disconnected" (red) based on connection
-- API Limit shows "Active" or rate limit info if available
-- Quick action cards for: View All Items, Add New Item, My Account, API Information
+- Overview section shows: Total Items, Last Updated timestamp, API Calls Today tracker, API connection status
+- API Calls Today shows count out of 50 with a color-coded progress bar (green → yellow at 35 → red at 45) and reset countdown
+- API connection shows "Connected" (green) or "Disconnected" (red)
+- Quick action cards for: View All Items, Add New Item (admin only), My Account, API Information
 
 ### List View Features
 **Test**: Navigate to http://localhost:4200/products  
@@ -254,7 +255,8 @@ Detail page shows the object name as the page heading, plus ID and all data fiel
 **Test**: Click through all navigation links  
 **Expected**:
 - Navbar links work for unauthenticated users: Home, Login, Register
-- Navbar links work for authenticated users: Home, Inventory, Add Item, Account, Logout
+- Navbar links work for authenticated non-admin users: Home, Inventory, Account, Logout
+- Navbar links work for authenticated admin users: Home, Inventory, Add Item, Admin Panel, Logout
 - Admin Panel link appears only when logged in as admin
 - Back buttons return to previous page
 - Logo/brand link returns to home
@@ -273,7 +275,7 @@ Detail page shows the object name as the page heading, plus ID and all data fiel
 ## Test Checklist
 
 ### Core Requirements
-- [ ] All 6 API endpoints work correctly (GET all, GET by ID, GET by IDs, POST, PUT, DELETE)
+- [ ] All API endpoints work correctly (GET all, GET by ID, POST, PUT, PATCH, DELETE)
 - [ ] API outputs match expected JSON structure from restful-api.dev
 - [ ] CRUD operations function properly
 - [ ] Navigation between pages works
@@ -293,7 +295,6 @@ Detail page shows the object name as the page heading, plus ID and all data fiel
 - [ ] Search/filter functionality
 - [ ] Sorting (A-Z, Z-A)
 - [ ] Pagination
-- [ ] Query parameter filtering
 - [ ] Form validation
 - [ ] Dynamic API status display
 - [ ] Rate limit handling

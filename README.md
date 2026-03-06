@@ -73,14 +73,12 @@ Two `CanActivate` route guards protect navigation:
 
 | Route | Guard(s) |
 |---|---|
-| `/products` | `authGuard` |
-| `/products/create` | `authGuard` |
-| `/products/:id` | `authGuard` |
-| `/products/:id/edit` | `authGuard` |
+| `/products/create` | `authGuard` + `adminGuard` |
+| `/products/:id/edit` | `authGuard` + `adminGuard` |
 | `/account` | `authGuard` |
 | `/admin` | `authGuard` + `adminGuard` |
 
-Public routes (`/`, `/auth/login`, `/auth/register`, and the `**` 404 catch-all) require no authentication.
+Public routes (`/`, `/products`, `/products/:id`, `/auth/login`, `/auth/register`, and the `**` 404 catch-all) require no authentication. Anyone can browse the inventory; only admins can create, edit, or delete items.
 
 ### Navbar Role Awareness
 
@@ -145,17 +143,17 @@ Welcome page with navigation links and a live count of objects loaded from the A
 ### Login (`/auth/login`) · Register (`/auth/register`)
 Credential forms backed by `MockAuthService`. On success a JWT is stored in `localStorage` and the user is redirected to their original destination (or home). No authentication required.
 
-### Inventory List (`/products`) · `authGuard`
-Displays all inventory items in a responsive table. Each row includes **View**, **Edit**, and **Delete** actions. Requires a valid session.
+### Inventory List (`/products`) · public
+Displays all inventory items in a responsive table. Anyone can browse. **Edit** and **Delete** actions are visible only to admins.
 
-### Item Detail (`/products/:id`) · `authGuard`
-Shows a single object and all of its `data` fields. Handles `null` data gracefully and provides Edit and Delete shortcuts. Requires a valid session.
+### Item Detail (`/products/:id`) · public
+Shows a single object and all of its `data` fields. Handles `null` data gracefully. Edit, Delete, and Quick Rename shortcuts are visible only to admins.
 
-### Create Item (`/products/create`) · `authGuard`
-Validated form for creating a new item. Requires a name (min 3 characters), accepts optional color and price fields, and supports unlimited additional custom key/value fields. Redirects to the detail page on success. Requires a valid session.
+### Create Item (`/products/create`) · `authGuard` + `adminGuard`
+Validated form for creating a new item. Requires a name (min 3 characters), accepts optional color and price fields, and supports unlimited additional custom key/value fields. Redirects to the detail page on success. Admin only.
 
-### Edit Item (`/products/:id/edit`) · `authGuard`
-Pre-populated form for updating an existing item using PATCH. Preserves custom fields that exist on the object. Shows a clear error if the object is a reserved ID. Requires a valid session.
+### Edit Item (`/products/:id/edit`) · `authGuard` + `adminGuard`
+Pre-populated form for updating an existing item using PUT (full replacement). Preserves custom fields that exist on the object. Shows a clear error if the object is a reserved ID. Admin only.
 
 ### Account (`/account`) · `authGuard`
 Displays the current user's email, role, and account actions. Requires a valid session.

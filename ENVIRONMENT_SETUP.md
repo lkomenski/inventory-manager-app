@@ -25,14 +25,6 @@ The app reads its configuration from the exported `environment` object. The requ
 - `apiUrl` - Base URL for the API endpoints
 - `apiKey` - Your API key for authentication
 
-## Production Deployment
-
-For production deployments:
-
-1. Update `environment.prod.ts` with production values
-2. Or use your CI/CD system to inject environment variables
-3. Never commit production secrets to version control
-
 ## Troubleshooting
 
 If you get import errors:
