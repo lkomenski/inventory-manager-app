@@ -71,14 +71,14 @@ Key locations are marked with `// DEBUGGING BREAKPOINT` comments in the source. 
   ...
 ]
 ```
-Objects display in the table with ID, name, and View / Edit / Delete buttons.
+Objects display in a list; click any item row to navigate to its detail page.
 
 ---
 
 ### 2. GET Single Object
 
 **Endpoint:** `GET /objects/{id}`
-**Steps:** Click **View** on any object in the list
+**Steps:** Click on any object in the list
 
 **Expected:**
 ```json
@@ -208,11 +208,11 @@ Detail page shows the object name as the page heading, plus ID and all data fiel
 ### List View Features
 **Test**: Navigate to http://localhost:4200/products  
 **Expected**:
-- All objects load and display in table
+- All objects load and display in a list
 - Search box filters objects by name (case-insensitive)
 - Sort A-Z / Z-A buttons reorder list
 - Pagination shows 5 items per page
-- View/Edit/Delete buttons work for each object
+- Clicking any item navigates to its detail page
 
 ### Detail View
 **Test**: View any object  
