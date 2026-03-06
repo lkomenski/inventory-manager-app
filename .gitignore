@@ -15,6 +15,9 @@ package-lock.json.backup
 lerna-debug.log
 .pnpm-debug.log
 
+# Claude Code
+.claude/
+
 # IDEs and editors
 .idea/
 .project
